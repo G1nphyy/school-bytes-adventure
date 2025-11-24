@@ -1,149 +1,90 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { Cog, CheckCircle2, XCircle } from "lucide-react";
 
-const codeQuestions = [
+const electricalQuestions = [
   {
     id: 1,
-    question: "Znajdź błąd w kodzie:",
-    code: `function suma(a, b) {
-  return a + b
-}
-console.log(suma(5, "3"));`,
-    options: [
-      "Brak średnika po return",
-      'Dodawanie liczby i stringa da "53"',
-      "Funkcja nie jest zadeklarowana poprawnie",
-      "Console.log powinien być przed funkcją",
-    ],
+    question: "Jakie napięcie jest w polskich gniazdkach domowych?",
+    options: ["110V", "230V", "400V", "12V"],
     correctAnswer: 1,
-    explanation: 'W JavaScript dodanie liczby (5) i stringa ("3") zwróci "53" zamiast 8.',
+    explanation: "W Polsce standardowe napięcie w gniazdkach domowych to 230V AC.",
     hints: [
-      "Zwróć uwagę na typy danych w parametrach funkcji",
-      "Co się stanie gdy dodasz liczbę do tekstu?",
-      "JavaScript konwertuje liczbę na string przy dodawaniu",
+      "To wartość powyżej 200V",
+      "W USA jest 110V, w Polsce więcej",
+      "230V to standard europejski",
     ],
   },
   {
     id: 2,
-    question: "Co wypisze ten kod?",
-    code: `let x = 10;
-if (x > 5) {
-  x = x * 2;
-}
-console.log(x);`,
-    options: ["5", "10", "20", "15"],
+    question: "Jakim kolorem oznacza się przewód ochronny (uziemienie)?",
+    options: ["Niebieski", "Brązowy", "Żółto-zielony", "Czarny"],
     correctAnswer: 2,
-    explanation: "x = 10, warunek 10 > 5 jest prawdziwy, więc x = 10 * 2 = 20",
+    explanation: "Przewód ochronny PE zawsze oznacza się kolorem żółto-zielonym.",
     hints: [
-      "Sprawdź czy warunek if jest prawdziwy",
-      "Jeśli 10 > 5, to co się dzieje z x?",
-      "x zostanie pomnożone przez 2",
+      "To charakterystyczna kombinacja dwóch kolorów",
+      "Jeden kolor to żółty",
+      "Żółto-zielony to uziemienie",
     ],
   },
   {
     id: 3,
-    question: "Która pętla jest poprawna?",
-    code: `// Która pętla wypisze liczby 0-4?`,
-    options: [
-      "for (let i = 0; i <= 4; i++)",
-      "for (let i = 0; i < 5; i++)",
-      "for (let i = 1; i <= 5; i++)",
-      "for (let i = 0; i < 4; i++)",
-    ],
+    question: "Co chroni instalację przed przeciążeniem?",
+    options: ["Wyłącznik różnicowo-prądowy", "Bezpiecznik/automat", "Przełącznik", "Gniazdo"],
     correctAnswer: 1,
-    explanation: "Pętla zaczyna od 0 i kończy przed 5, więc wypisze: 0, 1, 2, 3, 4",
+    explanation: "Bezpieczniki i automaty chronią instalację przed przeciążeniem i zwarciem.",
     hints: [
-      "Pętla powinna zacząć od 0",
-      "Używamy < zamiast <= gdy kończymy przed wartością",
-      "i < 5 oznacza: 0, 1, 2, 3, 4",
+      "To element zabezpieczający",
+      "Wyłącza się przy zbyt dużym prądzie",
+      "Bezpiecznik lub automat",
     ],
   },
   {
     id: 4,
-    question: "Jaki błąd jest w tym kodzie?",
-    code: `const arr = [1, 2, 3];
-arr.push(4);
-arr = [1, 2, 3, 4, 5];`,
-    options: [
-      "Nie można używać push na const",
-      "Nie można przypisać nowej wartości do const",
-      "Array nie ma metody push",
-      "Kod jest poprawny",
-    ],
-    correctAnswer: 1,
-    explanation: "Const pozwala modyfikować zawartość tablicy (push), ale nie pozwala na przypisanie nowej wartości.",
+    question: "Ile faz ma napięcie trójfazowe?",
+    options: ["1", "2", "3", "4"],
+    correctAnswer: 2,
+    explanation: "Napięcie trójfazowe składa się z 3 faz (L1, L2, L3) plus przewód neutralny.",
     hints: [
-      "const blokuje ponowne przypisanie zmiennej",
-      "push modyfikuje istniejącą tablicę",
-      "Przypisanie '=' tworzy nową referencję",
+      "Nazwa podpowiada liczbę",
+      "Więcej niż 2",
+      "Trójfazowe = 3 fazy",
     ],
   },
   {
     id: 5,
-    question: "Co zwróci ta funkcja?",
-    code: `function test() {
-  return
-    {
-      value: 42
-    }
-}
-console.log(test());`,
-    options: ["{ value: 42 }", "42", "undefined", "Error"],
-    correctAnswer: 2,
-    explanation: "JavaScript automatycznie wstawia średnik po 'return', więc funkcja zwraca undefined.",
+    question: "Co to jest wyłącznik różnicowo-prądowy (RCD)?",
+    options: [
+      "Chroni przed przepięciem",
+      "Wykrywa różnice prądów i chroni przed porażeniem",
+      "Zwiększa napięcie",
+      "Zmienia prąd z AC na DC",
+    ],
+    correctAnswer: 1,
+    explanation:
+      "RCD wykrywa różnicę między prądem wpływającym i wypływającym, chroniąc przed porażeniem.",
     hints: [
-      "Zwróć uwagę na formatowanie kodu",
-      "Return powinien być w tej samej linii co wartość",
-      "JavaScript dodaje średnik po 'return'",
+      "Chroni życie człowieka",
+      "Wykrywa upływ prądu",
+      "Chroni przed porażeniem prądem",
     ],
   },
   {
     id: 6,
-    question: "Jaki będzie wynik?",
-    code: `let a = [1, 2, 3];
-let b = a;
-b.push(4);
-console.log(a.length);`,
-    options: ["3", "4", "undefined", "Error"],
-    correctAnswer: 1,
-    explanation: "b jest referencją do tej samej tablicy co a, więc push(4) modyfikuje obie zmienne.",
+    question: "Jaki jest bezpieczny odstęp od linii wysokiego napięcia?",
+    options: ["30 cm", "1 metr", "Co najmniej 3 metry", "Nie ma znaczenia"],
+    correctAnswer: 2,
+    explanation: "Bezpieczny odstęp od linii wysokiego napięcia to minimum 3 metry.",
     hints: [
-      "Tablice są przekazywane przez referencję",
-      "b i a wskazują na tę samą tablicę",
-      "Zmiana b zmienia też a",
-    ],
-  },
-  {
-    id: 7,
-    question: "Co wypisze console.log?",
-    code: `console.log(typeof null);`,
-    options: ["null", "object", "undefined", "number"],
-    correctAnswer: 1,
-    explanation: "To znany bug w JavaScript - typeof null zwraca 'object'.",
-    hints: [
-      "To jeden z najbardziej znanych bugów JavaScript",
-      "null nie jest obiektem, ale...",
-      "typeof null zwraca 'object'",
-    ],
-  },
-  {
-    id: 8,
-    question: "Jaki będzie rezultat?",
-    code: `console.log(0.1 + 0.2 === 0.3);`,
-    options: ["true", "false", "undefined", "Error"],
-    correctAnswer: 1,
-    explanation: "Precyzja liczb zmiennoprzecinkowych sprawia że 0.1 + 0.2 = 0.30000000000000004",
-    hints: [
-      "Liczby zmiennoprzecinkowe mają problem z precyzją",
-      "0.1 + 0.2 nie jest dokładnie 0.3",
-      "Wynik to 0.30000000000000004",
+      "To więcej niż metr",
+      "Bezpieczeństwo wymaga dużej odległości",
+      "Co najmniej 3 metry",
     ],
   },
 ];
 
-const ProgrammerGame = () => {
+const ElektroenergetykGame = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
@@ -152,7 +93,7 @@ const ProgrammerGame = () => {
   const [hintLevel, setHintLevel] = useState(0);
   const [wrongAttempts, setWrongAttempts] = useState(0);
 
-  const question = codeQuestions[currentQuestion];
+  const question = electricalQuestions[currentQuestion];
 
   const handleAnswer = (answerIndex: number) => {
     setSelectedAnswer(answerIndex);
@@ -174,7 +115,7 @@ const ProgrammerGame = () => {
   };
 
   const handleNext = () => {
-    if (currentQuestion < codeQuestions.length - 1) {
+    if (currentQuestion < electricalQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
       setShowResult(false);
@@ -196,23 +137,23 @@ const ProgrammerGame = () => {
   };
 
   if (gameComplete) {
-    const percentage = (score / codeQuestions.length) * 100;
+    const percentage = (score / electricalQuestions.length) * 100;
     return (
       <Card className="bg-card border-4 border-border p-8 text-center">
         <div className="mb-6">
           <div className="text-6xl mb-4">
-            {percentage >= 70 ? "🏆" : percentage >= 50 ? "👍" : "📚"}
+            {percentage >= 70 ? "⚡" : percentage >= 50 ? "🔌" : "📚"}
           </div>
           <h2 className="text-2xl text-foreground mb-2">GRA UKOŃCZONA!</h2>
           <p className="text-lg text-primary mb-4">
-            Twój wynik: {score}/{codeQuestions.length}
+            Twój wynik: {score}/{electricalQuestions.length}
           </p>
           <p className="text-sm text-muted-foreground">
             {percentage >= 70
-              ? "Świetna robota! Masz talent do programowania!"
+              ? "Świetna znajomość elektroenergetyki!"
               : percentage >= 50
-              ? "Nieźle! Jeszcze trochę praktyki."
-              : "Nie martw się! Praktyka czyni mistrza."}
+              ? "Nieźle! Jeszcze trochę nauki."
+              : "Warto powtórzyć zasady BHP i elektryki!"}
           </p>
         </div>
         <Button
@@ -227,16 +168,25 @@ const ProgrammerGame = () => {
 
   return (
     <Card className="bg-card border-4 border-border p-6">
+      <div className="mb-6 text-center">
+        <Cog className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-pulse" />
+        <h2 className="text-lg text-foreground mb-2">ELEKTROENERGETYKA</h2>
+      </div>
+
       {/* Progress */}
       <div className="mb-6">
         <div className="flex justify-between text-xs text-muted-foreground mb-2">
-          <span>Pytanie {currentQuestion + 1}/{codeQuestions.length}</span>
+          <span>
+            Pytanie {currentQuestion + 1}/{electricalQuestions.length}
+          </span>
           <span>Wynik: {score}</span>
         </div>
         <div className="h-2 bg-muted border-2 border-border">
           <div
             className="h-full bg-primary transition-all duration-300"
-            style={{ width: `${((currentQuestion + 1) / codeQuestions.length) * 100}%` }}
+            style={{
+              width: `${((currentQuestion + 1) / electricalQuestions.length) * 100}%`,
+            }}
           />
         </div>
       </div>
@@ -244,9 +194,6 @@ const ProgrammerGame = () => {
       {/* Question */}
       <div className="mb-6">
         <h3 className="text-sm text-foreground mb-4">{question.question}</h3>
-        <div className="bg-muted p-4 border-2 border-border font-mono text-xs overflow-x-auto mb-4">
-          <pre className="text-accent">{question.code}</pre>
-        </div>
       </div>
 
       {/* Options */}
@@ -282,9 +229,9 @@ const ProgrammerGame = () => {
         })}
       </div>
 
-      {/* Hints System */}
+      {/* Hints */}
       {!showResult && wrongAttempts > 0 && hintLevel < question.hints.length && (
-        <div className="mb-6 animate-slide-in-up">
+        <div className="mb-6">
           <Button
             onClick={showHint}
             variant="outline"
@@ -296,7 +243,6 @@ const ProgrammerGame = () => {
         </div>
       )}
 
-      {/* Display Hints */}
       {hintLevel > 0 && !showResult && (
         <div className="mb-6 space-y-2">
           {question.hints.slice(0, hintLevel).map((hint, index) => (
@@ -312,7 +258,7 @@ const ProgrammerGame = () => {
         </div>
       )}
 
-      {/* Result & Explanation */}
+      {/* Result */}
       {showResult && (
         <div className="mb-6 animate-slide-in-up">
           <div
@@ -336,11 +282,11 @@ const ProgrammerGame = () => {
           onClick={handleNext}
           className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button"
         >
-          {currentQuestion < codeQuestions.length - 1 ? "NASTĘPNE PYTANIE →" : "ZOBACZ WYNIK"}
+          {currentQuestion < electricalQuestions.length - 1 ? "NASTĘPNE PYTANIE →" : "ZOBACZ WYNIK"}
         </Button>
       )}
     </Card>
   );
 };
 
-export default ProgrammerGame;
+export default ElektroenergetykGame;
