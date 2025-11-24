@@ -1,149 +1,99 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { Radio, CheckCircle2, XCircle } from "lucide-react";
 
-const codeQuestions = [
+const networkQuestions = [
   {
     id: 1,
-    question: "Znajdź błąd w kodzie:",
-    code: `function suma(a, b) {
-  return a + b
-}
-console.log(suma(5, "3"));`,
-    options: [
-      "Brak średnika po return",
-      'Dodawanie liczby i stringa da "53"',
-      "Funkcja nie jest zadeklarowana poprawnie",
-      "Console.log powinien być przed funkcją",
-    ],
+    question: "Który protokół służy do przesyłania stron internetowych?",
+    options: ["FTP", "HTTP", "SMTP", "SSH"],
     correctAnswer: 1,
-    explanation: 'W JavaScript dodanie liczby (5) i stringa ("3") zwróci "53" zamiast 8.',
+    explanation: "HTTP (HyperText Transfer Protocol) służy do przesyłania stron WWW.",
     hints: [
-      "Zwróć uwagę na typy danych w parametrach funkcji",
-      "Co się stanie gdy dodasz liczbę do tekstu?",
-      "JavaScript konwertuje liczbę na string przy dodawaniu",
+      "To protokół zaczynający się od 'H'",
+      "Widzisz go w pasku adresu przeglądarki",
+      "HTTP to protokół transferu hipertekstu",
     ],
   },
   {
     id: 2,
-    question: "Co wypisze ten kod?",
-    code: `let x = 10;
-if (x > 5) {
-  x = x * 2;
-}
-console.log(x);`,
-    options: ["5", "10", "20", "15"],
-    correctAnswer: 2,
-    explanation: "x = 10, warunek 10 > 5 jest prawdziwy, więc x = 10 * 2 = 20",
+    question: "Jaki jest standardowy port dla HTTPS?",
+    options: ["80", "443", "21", "22"],
+    correctAnswer: 1,
+    explanation: "Port 443 jest standardowym portem dla bezpiecznego protokołu HTTPS.",
     hints: [
-      "Sprawdź czy warunek if jest prawdziwy",
-      "Jeśli 10 > 5, to co się dzieje z x?",
-      "x zostanie pomnożone przez 2",
+      "Nie jest to port 80 (HTTP)",
+      "To port w zakresie 400-500",
+      "443 to port HTTPS",
     ],
   },
   {
     id: 3,
-    question: "Która pętla jest poprawna?",
-    code: `// Która pętla wypisze liczby 0-4?`,
+    question: "Co oznacza skrót LAN?",
     options: [
-      "for (let i = 0; i <= 4; i++)",
-      "for (let i = 0; i < 5; i++)",
-      "for (let i = 1; i <= 5; i++)",
-      "for (let i = 0; i < 4; i++)",
+      "Large Area Network",
+      "Local Area Network",
+      "Long Access Network",
+      "Limited Access Node",
     ],
     correctAnswer: 1,
-    explanation: "Pętla zaczyna od 0 i kończy przed 5, więc wypisze: 0, 1, 2, 3, 4",
+    explanation: "LAN to Local Area Network - lokalna sieć komputerowa.",
     hints: [
-      "Pętla powinna zacząć od 0",
-      "Używamy < zamiast <= gdy kończymy przed wartością",
-      "i < 5 oznacza: 0, 1, 2, 3, 4",
+      "Pierwsze słowo to 'Local'",
+      "Dotyczy sieci w ograniczonym obszarze",
+      "Local Area Network",
     ],
   },
   {
     id: 4,
-    question: "Jaki błąd jest w tym kodzie?",
-    code: `const arr = [1, 2, 3];
-arr.push(4);
-arr = [1, 2, 3, 4, 5];`,
-    options: [
-      "Nie można używać push na const",
-      "Nie można przypisać nowej wartości do const",
-      "Array nie ma metody push",
-      "Kod jest poprawny",
-    ],
+    question: "Który adres IP jest prywatny?",
+    options: ["8.8.8.8", "192.168.1.1", "1.1.1.1", "208.67.222.222"],
     correctAnswer: 1,
-    explanation: "Const pozwala modyfikować zawartość tablicy (push), ale nie pozwala na przypisanie nowej wartości.",
+    explanation: "192.168.x.x to zakres adresów IP przeznaczonych do użytku w sieciach prywatnych.",
     hints: [
-      "const blokuje ponowne przypisanie zmiennej",
-      "push modyfikuje istniejącą tablicę",
-      "Przypisanie '=' tworzy nową referencję",
+      "Adresy prywatne zaczynają się od 10, 172 lub 192",
+      "Używane w domowych routerach",
+      "192.168.1.1 to typowy adres routera",
     ],
   },
   {
     id: 5,
-    question: "Co zwróci ta funkcja?",
-    code: `function test() {
-  return
-    {
-      value: 42
-    }
-}
-console.log(test());`,
-    options: ["{ value: 42 }", "42", "undefined", "Error"],
-    correctAnswer: 2,
-    explanation: "JavaScript automatycznie wstawia średnik po 'return', więc funkcja zwraca undefined.",
+    question: "Co to jest DNS?",
+    options: [
+      "Data Network System",
+      "Domain Name System",
+      "Digital Network Service",
+      "Direct Name Server",
+    ],
+    correctAnswer: 1,
+    explanation: "DNS (Domain Name System) tłumaczy nazwy domen na adresy IP.",
     hints: [
-      "Zwróć uwagę na formatowanie kodu",
-      "Return powinien być w tej samej linii co wartość",
-      "JavaScript dodaje średnik po 'return'",
+      "Tłumaczy nazwy na adresy IP",
+      "Drugie słowo to 'Name'",
+      "Domain Name System",
     ],
   },
   {
     id: 6,
-    question: "Jaki będzie wynik?",
-    code: `let a = [1, 2, 3];
-let b = a;
-b.push(4);
-console.log(a.length);`,
-    options: ["3", "4", "undefined", "Error"],
-    correctAnswer: 1,
-    explanation: "b jest referencją do tej samej tablicy co a, więc push(4) modyfikuje obie zmienne.",
-    hints: [
-      "Tablice są przekazywane przez referencję",
-      "b i a wskazują na tę samą tablicę",
-      "Zmiana b zmienia też a",
+    question: "Która warstwa modelu OSI odpowiada za routing?",
+    options: [
+      "Warstwa łącza danych",
+      "Warstwa sieciowa",
+      "Warstwa transportowa",
+      "Warstwa fizyczna",
     ],
-  },
-  {
-    id: 7,
-    question: "Co wypisze console.log?",
-    code: `console.log(typeof null);`,
-    options: ["null", "object", "undefined", "number"],
     correctAnswer: 1,
-    explanation: "To znany bug w JavaScript - typeof null zwraca 'object'.",
+    explanation: "Warstwa sieciowa (Network Layer - warstwa 3) odpowiada za routing pakietów.",
     hints: [
-      "To jeden z najbardziej znanych bugów JavaScript",
-      "null nie jest obiektem, ale...",
-      "typeof null zwraca 'object'",
-    ],
-  },
-  {
-    id: 8,
-    question: "Jaki będzie rezultat?",
-    code: `console.log(0.1 + 0.2 === 0.3);`,
-    options: ["true", "false", "undefined", "Error"],
-    correctAnswer: 1,
-    explanation: "Precyzja liczb zmiennoprzecinkowych sprawia że 0.1 + 0.2 = 0.30000000000000004",
-    hints: [
-      "Liczby zmiennoprzecinkowe mają problem z precyzją",
-      "0.1 + 0.2 nie jest dokładnie 0.3",
-      "Wynik to 0.30000000000000004",
+      "To warstwa 3 modelu OSI",
+      "Routing działa na poziomie sieci",
+      "Warstwa sieciowa",
     ],
   },
 ];
 
-const ProgrammerGame = () => {
+const KomunikacjaGame = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
@@ -152,7 +102,7 @@ const ProgrammerGame = () => {
   const [hintLevel, setHintLevel] = useState(0);
   const [wrongAttempts, setWrongAttempts] = useState(0);
 
-  const question = codeQuestions[currentQuestion];
+  const question = networkQuestions[currentQuestion];
 
   const handleAnswer = (answerIndex: number) => {
     setSelectedAnswer(answerIndex);
@@ -174,7 +124,7 @@ const ProgrammerGame = () => {
   };
 
   const handleNext = () => {
-    if (currentQuestion < codeQuestions.length - 1) {
+    if (currentQuestion < networkQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
       setShowResult(false);
@@ -196,23 +146,23 @@ const ProgrammerGame = () => {
   };
 
   if (gameComplete) {
-    const percentage = (score / codeQuestions.length) * 100;
+    const percentage = (score / networkQuestions.length) * 100;
     return (
       <Card className="bg-card border-4 border-border p-8 text-center">
         <div className="mb-6">
           <div className="text-6xl mb-4">
-            {percentage >= 70 ? "🏆" : percentage >= 50 ? "👍" : "📚"}
+            {percentage >= 70 ? "🏆" : percentage >= 50 ? "📡" : "📚"}
           </div>
           <h2 className="text-2xl text-foreground mb-2">GRA UKOŃCZONA!</h2>
           <p className="text-lg text-primary mb-4">
-            Twój wynik: {score}/{codeQuestions.length}
+            Twój wynik: {score}/{networkQuestions.length}
           </p>
           <p className="text-sm text-muted-foreground">
             {percentage >= 70
-              ? "Świetna robota! Masz talent do programowania!"
+              ? "Doskonała znajomość sieci!"
               : percentage >= 50
-              ? "Nieźle! Jeszcze trochę praktyki."
-              : "Nie martw się! Praktyka czyni mistrza."}
+              ? "Dobra robota! Jeszcze trochę nauki."
+              : "Warto powtórzyć podstawy sieci!"}
           </p>
         </div>
         <Button
@@ -227,16 +177,25 @@ const ProgrammerGame = () => {
 
   return (
     <Card className="bg-card border-4 border-border p-6">
+      <div className="mb-6 text-center">
+        <Radio className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-pulse" />
+        <h2 className="text-lg text-foreground mb-2">SIECI KOMPUTEROWE</h2>
+      </div>
+
       {/* Progress */}
       <div className="mb-6">
         <div className="flex justify-between text-xs text-muted-foreground mb-2">
-          <span>Pytanie {currentQuestion + 1}/{codeQuestions.length}</span>
+          <span>
+            Pytanie {currentQuestion + 1}/{networkQuestions.length}
+          </span>
           <span>Wynik: {score}</span>
         </div>
         <div className="h-2 bg-muted border-2 border-border">
           <div
             className="h-full bg-primary transition-all duration-300"
-            style={{ width: `${((currentQuestion + 1) / codeQuestions.length) * 100}%` }}
+            style={{
+              width: `${((currentQuestion + 1) / networkQuestions.length) * 100}%`,
+            }}
           />
         </div>
       </div>
@@ -244,9 +203,6 @@ const ProgrammerGame = () => {
       {/* Question */}
       <div className="mb-6">
         <h3 className="text-sm text-foreground mb-4">{question.question}</h3>
-        <div className="bg-muted p-4 border-2 border-border font-mono text-xs overflow-x-auto mb-4">
-          <pre className="text-accent">{question.code}</pre>
-        </div>
       </div>
 
       {/* Options */}
@@ -282,9 +238,9 @@ const ProgrammerGame = () => {
         })}
       </div>
 
-      {/* Hints System */}
+      {/* Hints */}
       {!showResult && wrongAttempts > 0 && hintLevel < question.hints.length && (
-        <div className="mb-6 animate-slide-in-up">
+        <div className="mb-6">
           <Button
             onClick={showHint}
             variant="outline"
@@ -296,7 +252,6 @@ const ProgrammerGame = () => {
         </div>
       )}
 
-      {/* Display Hints */}
       {hintLevel > 0 && !showResult && (
         <div className="mb-6 space-y-2">
           {question.hints.slice(0, hintLevel).map((hint, index) => (
@@ -312,7 +267,7 @@ const ProgrammerGame = () => {
         </div>
       )}
 
-      {/* Result & Explanation */}
+      {/* Result */}
       {showResult && (
         <div className="mb-6 animate-slide-in-up">
           <div
@@ -336,11 +291,11 @@ const ProgrammerGame = () => {
           onClick={handleNext}
           className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button"
         >
-          {currentQuestion < codeQuestions.length - 1 ? "NASTĘPNE PYTANIE →" : "ZOBACZ WYNIK"}
+          {currentQuestion < networkQuestions.length - 1 ? "NASTĘPNE PYTANIE →" : "ZOBACZ WYNIK"}
         </Button>
       )}
     </Card>
   );
 };
 
-export default ProgrammerGame;
+export default KomunikacjaGame;

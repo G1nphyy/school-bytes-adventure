@@ -1,149 +1,113 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { Shield, CheckCircle2, XCircle } from "lucide-react";
 
-const codeQuestions = [
+const securityQuestions = [
   {
     id: 1,
-    question: "Znajdź błąd w kodzie:",
-    code: `function suma(a, b) {
-  return a + b
-}
-console.log(suma(5, "3"));`,
-    options: [
-      "Brak średnika po return",
-      'Dodawanie liczby i stringa da "53"',
-      "Funkcja nie jest zadeklarowana poprawnie",
-      "Console.log powinien być przed funkcją",
-    ],
-    correctAnswer: 1,
-    explanation: 'W JavaScript dodanie liczby (5) i stringa ("3") zwróci "53" zamiast 8.',
+    question: "Które hasło jest najbezpieczniejsze?",
+    options: ["password123", "P@ssw0rd!", "Tr3$#mK9@pL2", "qwerty"],
+    correctAnswer: 2,
+    explanation:
+      "Silne hasło zawiera wielkie i małe litery, cyfry, znaki specjalne i ma co najmniej 12 znaków.",
     hints: [
-      "Zwróć uwagę na typy danych w parametrach funkcji",
-      "Co się stanie gdy dodasz liczbę do tekstu?",
-      "JavaScript konwertuje liczbę na string przy dodawaniu",
+      "Najdłuższe hasło zwykle jest najbezpieczniejsze",
+      "Powinno zawierać wielkie litery, cyfry i znaki specjalne",
+      "Tr3$#mK9@pL2 ma wszystkie elementy bezpiecznego hasła",
     ],
   },
   {
     id: 2,
-    question: "Co wypisze ten kod?",
-    code: `let x = 10;
-if (x > 5) {
-  x = x * 2;
-}
-console.log(x);`,
-    options: ["5", "10", "20", "15"],
-    correctAnswer: 2,
-    explanation: "x = 10, warunek 10 > 5 jest prawdziwy, więc x = 10 * 2 = 20",
+    question: "Co to jest phishing?",
+    options: [
+      "Rodzaj wirusa komputerowego",
+      "Próba wyłudzenia danych przez podszywanie się",
+      "Typ zapory sieciowej",
+      "Metoda szyfrowania danych",
+    ],
+    correctAnswer: 1,
+    explanation:
+      "Phishing to próba wyłudzenia poufnych informacji poprzez podszywanie się pod zaufane źródło.",
     hints: [
-      "Sprawdź czy warunek if jest prawdziwy",
-      "Jeśli 10 > 5, to co się dzieje z x?",
-      "x zostanie pomnożone przez 2",
+      "Związane z podszywaniem się pod inne osoby",
+      "Często w formie fałszywych e-maili",
+      "Wyłudzanie danych przez podszywanie",
     ],
   },
   {
     id: 3,
-    question: "Która pętla jest poprawna?",
-    code: `// Która pętla wypisze liczby 0-4?`,
+    question: "Co oznacza 'https' w adresie strony?",
     options: [
-      "for (let i = 0; i <= 4; i++)",
-      "for (let i = 0; i < 5; i++)",
-      "for (let i = 1; i <= 5; i++)",
-      "for (let i = 0; i < 4; i++)",
+      "High Transfer Protocol System",
+      "Połączenie jest szyfrowane",
+      "Strona jest szybsza",
+      "Strona wymaga logowania",
     ],
     correctAnswer: 1,
-    explanation: "Pętla zaczyna od 0 i kończy przed 5, więc wypisze: 0, 1, 2, 3, 4",
+    explanation: "HTTPS oznacza, że połączenie jest szyfrowane i bezpieczne (HTTP + SSL/TLS).",
     hints: [
-      "Pętla powinna zacząć od 0",
-      "Używamy < zamiast <= gdy kończymy przed wartością",
-      "i < 5 oznacza: 0, 1, 2, 3, 4",
+      "'S' na końcu oznacza 'Secure'",
+      "Dotyczy szyfrowania połączenia",
+      "Połączenie jest szyfrowane",
     ],
   },
   {
     id: 4,
-    question: "Jaki błąd jest w tym kodzie?",
-    code: `const arr = [1, 2, 3];
-arr.push(4);
-arr = [1, 2, 3, 4, 5];`,
+    question: "Co to jest firewall?",
     options: [
-      "Nie można używać push na const",
-      "Nie można przypisać nowej wartości do const",
-      "Array nie ma metody push",
-      "Kod jest poprawny",
+      "Program do usuwania wirusów",
+      "Zapora sieciowa kontrolująca ruch",
+      "Narzędzie do tworzenia kopii zapasowych",
+      "System operacyjny",
     ],
     correctAnswer: 1,
-    explanation: "Const pozwala modyfikować zawartość tablicy (push), ale nie pozwala na przypisanie nowej wartości.",
+    explanation: "Firewall to zapora sieciowa, która kontroluje ruch sieciowy i chroni przed atakami.",
     hints: [
-      "const blokuje ponowne przypisanie zmiennej",
-      "push modyfikuje istniejącą tablicę",
-      "Przypisanie '=' tworzy nową referencję",
+      "Ma związek z siecią",
+      "Kontroluje przepływ danych",
+      "Zapora sieciowa",
     ],
   },
   {
     id: 5,
-    question: "Co zwróci ta funkcja?",
-    code: `function test() {
-  return
-    {
-      value: 42
-    }
-}
-console.log(test());`,
-    options: ["{ value: 42 }", "42", "undefined", "Error"],
+    question: "Jak często należy aktualizować oprogramowanie?",
+    options: [
+      "Raz w roku",
+      "Tylko gdy przestaje działać",
+      "Regularnie, gdy są dostępne aktualizacje",
+      "Nigdy, to zbędne",
+    ],
     correctAnswer: 2,
-    explanation: "JavaScript automatycznie wstawia średnik po 'return', więc funkcja zwraca undefined.",
+    explanation:
+      "Regularne aktualizacje są kluczowe dla bezpieczeństwa - łatają luki i dodają nowe zabezpieczenia.",
     hints: [
-      "Zwróć uwagę na formatowanie kodu",
-      "Return powinien być w tej samej linii co wartość",
-      "JavaScript dodaje średnik po 'return'",
+      "Bezpieczeństwo wymaga aktualnego oprogramowania",
+      "Aktualizacje zawierają poprawki bezpieczeństwa",
+      "Należy aktualizować regularnie",
     ],
   },
   {
     id: 6,
-    question: "Jaki będzie wynik?",
-    code: `let a = [1, 2, 3];
-let b = a;
-b.push(4);
-console.log(a.length);`,
-    options: ["3", "4", "undefined", "Error"],
-    correctAnswer: 1,
-    explanation: "b jest referencją do tej samej tablicy co a, więc push(4) modyfikuje obie zmienne.",
-    hints: [
-      "Tablice są przekazywane przez referencję",
-      "b i a wskazują na tę samą tablicę",
-      "Zmiana b zmienia też a",
+    question: "Co to jest malware?",
+    options: [
+      "Program do ochrony komputera",
+      "Złośliwe oprogramowanie",
+      "Typ przeglądarki internetowej",
+      "System plików",
     ],
-  },
-  {
-    id: 7,
-    question: "Co wypisze console.log?",
-    code: `console.log(typeof null);`,
-    options: ["null", "object", "undefined", "number"],
     correctAnswer: 1,
-    explanation: "To znany bug w JavaScript - typeof null zwraca 'object'.",
+    explanation:
+      "Malware to złośliwe oprogramowanie (malicious software) zaprojektowane do szkodzenia systemowi.",
     hints: [
-      "To jeden z najbardziej znanych bugów JavaScript",
-      "null nie jest obiektem, ale...",
-      "typeof null zwraca 'object'",
-    ],
-  },
-  {
-    id: 8,
-    question: "Jaki będzie rezultat?",
-    code: `console.log(0.1 + 0.2 === 0.3);`,
-    options: ["true", "false", "undefined", "Error"],
-    correctAnswer: 1,
-    explanation: "Precyzja liczb zmiennoprzecinkowych sprawia że 0.1 + 0.2 = 0.30000000000000004",
-    hints: [
-      "Liczby zmiennoprzecinkowe mają problem z precyzją",
-      "0.1 + 0.2 nie jest dokładnie 0.3",
-      "Wynik to 0.30000000000000004",
+      "'Mal-' oznacza 'zły' lub 'złośliwy'",
+      "To oprogramowanie, które szkodzi",
+      "Złośliwe oprogramowanie",
     ],
   },
 ];
 
-const ProgrammerGame = () => {
+const InformatykGame = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
@@ -152,7 +116,7 @@ const ProgrammerGame = () => {
   const [hintLevel, setHintLevel] = useState(0);
   const [wrongAttempts, setWrongAttempts] = useState(0);
 
-  const question = codeQuestions[currentQuestion];
+  const question = securityQuestions[currentQuestion];
 
   const handleAnswer = (answerIndex: number) => {
     setSelectedAnswer(answerIndex);
@@ -174,7 +138,7 @@ const ProgrammerGame = () => {
   };
 
   const handleNext = () => {
-    if (currentQuestion < codeQuestions.length - 1) {
+    if (currentQuestion < securityQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
       setShowResult(false);
@@ -196,23 +160,23 @@ const ProgrammerGame = () => {
   };
 
   if (gameComplete) {
-    const percentage = (score / codeQuestions.length) * 100;
+    const percentage = (score / securityQuestions.length) * 100;
     return (
       <Card className="bg-card border-4 border-border p-8 text-center">
         <div className="mb-6">
           <div className="text-6xl mb-4">
-            {percentage >= 70 ? "🏆" : percentage >= 50 ? "👍" : "📚"}
+            {percentage >= 70 ? "🛡️" : percentage >= 50 ? "🔐" : "📚"}
           </div>
           <h2 className="text-2xl text-foreground mb-2">GRA UKOŃCZONA!</h2>
           <p className="text-lg text-primary mb-4">
-            Twój wynik: {score}/{codeQuestions.length}
+            Twój wynik: {score}/{securityQuestions.length}
           </p>
           <p className="text-sm text-muted-foreground">
             {percentage >= 70
-              ? "Świetna robota! Masz talent do programowania!"
+              ? "Doskonała znajomość cyberbezpieczeństwa!"
               : percentage >= 50
-              ? "Nieźle! Jeszcze trochę praktyki."
-              : "Nie martw się! Praktyka czyni mistrza."}
+              ? "Dobra robota! Warto jeszcze poćwiczyć."
+              : "Bezpieczeństwo IT wymaga więcej wiedzy!"}
           </p>
         </div>
         <Button
@@ -227,16 +191,25 @@ const ProgrammerGame = () => {
 
   return (
     <Card className="bg-card border-4 border-border p-6">
+      <div className="mb-6 text-center">
+        <Shield className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-pulse" />
+        <h2 className="text-lg text-foreground mb-2">CYBERBEZPIECZEŃSTWO</h2>
+      </div>
+
       {/* Progress */}
       <div className="mb-6">
         <div className="flex justify-between text-xs text-muted-foreground mb-2">
-          <span>Pytanie {currentQuestion + 1}/{codeQuestions.length}</span>
+          <span>
+            Pytanie {currentQuestion + 1}/{securityQuestions.length}
+          </span>
           <span>Wynik: {score}</span>
         </div>
         <div className="h-2 bg-muted border-2 border-border">
           <div
             className="h-full bg-primary transition-all duration-300"
-            style={{ width: `${((currentQuestion + 1) / codeQuestions.length) * 100}%` }}
+            style={{
+              width: `${((currentQuestion + 1) / securityQuestions.length) * 100}%`,
+            }}
           />
         </div>
       </div>
@@ -244,9 +217,6 @@ const ProgrammerGame = () => {
       {/* Question */}
       <div className="mb-6">
         <h3 className="text-sm text-foreground mb-4">{question.question}</h3>
-        <div className="bg-muted p-4 border-2 border-border font-mono text-xs overflow-x-auto mb-4">
-          <pre className="text-accent">{question.code}</pre>
-        </div>
       </div>
 
       {/* Options */}
@@ -282,9 +252,9 @@ const ProgrammerGame = () => {
         })}
       </div>
 
-      {/* Hints System */}
+      {/* Hints */}
       {!showResult && wrongAttempts > 0 && hintLevel < question.hints.length && (
-        <div className="mb-6 animate-slide-in-up">
+        <div className="mb-6">
           <Button
             onClick={showHint}
             variant="outline"
@@ -296,7 +266,6 @@ const ProgrammerGame = () => {
         </div>
       )}
 
-      {/* Display Hints */}
       {hintLevel > 0 && !showResult && (
         <div className="mb-6 space-y-2">
           {question.hints.slice(0, hintLevel).map((hint, index) => (
@@ -312,7 +281,7 @@ const ProgrammerGame = () => {
         </div>
       )}
 
-      {/* Result & Explanation */}
+      {/* Result */}
       {showResult && (
         <div className="mb-6 animate-slide-in-up">
           <div
@@ -336,11 +305,11 @@ const ProgrammerGame = () => {
           onClick={handleNext}
           className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button"
         >
-          {currentQuestion < codeQuestions.length - 1 ? "NASTĘPNE PYTANIE →" : "ZOBACZ WYNIK"}
+          {currentQuestion < securityQuestions.length - 1 ? "NASTĘPNE PYTANIE →" : "ZOBACZ WYNIK"}
         </Button>
       )}
     </Card>
   );
 };
 
-export default ProgrammerGame;
+export default InformatykGame;

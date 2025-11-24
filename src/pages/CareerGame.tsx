@@ -3,6 +3,11 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import ProgrammerGame from "@/components/games/ProgrammerGame";
 import AutomatykGame from "@/components/games/AutomatykGame";
+import ElektronikGame from "@/components/games/ElektronikGame";
+import KomunikacjaGame from "@/components/games/KomunikacjaGame";
+import InformatykGame from "@/components/games/InformatykGame";
+import ElektroenergetykGame from "@/components/games/ElektroenergetykGame";
+import TransportGame from "@/components/games/TransportGame";
 
 const careerGames: Record<string, { name: string; component: React.ComponentType }> = {
   programista: {
@@ -13,26 +18,25 @@ const careerGames: Record<string, { name: string; component: React.ComponentType
     name: "Technik automatyk",
     component: AutomatykGame,
   },
-  // Placeholders for other careers
   elektronik: {
     name: "Technik elektronik",
-    component: () => <ComingSoon name="Technik elektronik" />,
+    component: ElektronikGame,
   },
   komunikacja: {
     name: "Technik komunikacji",
-    component: () => <ComingSoon name="Technik komunikacji" />,
+    component: KomunikacjaGame,
   },
   informatyk: {
     name: "Technik informatyk",
-    component: () => <ComingSoon name="Technik informatyk" />,
+    component: InformatykGame,
   },
   elektroenergetyk: {
     name: "Technik elektroenergetyk",
-    component: () => <ComingSoon name="Technik elektroenergetyk" />,
+    component: ElektroenergetykGame,
   },
   transport: {
     name: "Technik transportu",
-    component: () => <ComingSoon name="Technik transportu" />,
+    component: TransportGame,
   },
 };
 
