@@ -113,6 +113,9 @@ All colors MUST be HSL.
     box-shadow: var(--glow-shadow);
     animation: pulse-glow 2s ease-in-out infinite;
   }
+  .logo{
+    animation: rotates 3s linear infinite;
+  }
   
   .arcade-button {
     transition: var(--transition-pixel);
@@ -135,6 +138,14 @@ All colors MUST be HSL.
     }
     50% {
       box-shadow: 0 0 40px hsl(214 100% 50% / 0.8);
+    }
+  }
+  @keyframes rotates {
+    from {
+      transform: rotate(0deg);
+    }
+    to{
+      transform: rotate(360deg);
     }
   }
   

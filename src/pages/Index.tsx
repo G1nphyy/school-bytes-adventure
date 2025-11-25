@@ -10,6 +10,7 @@ import {
   Train,
   RouteIcon
 } from "lucide-react";
+import ZSK_LOGO from '@/assets/ZSK_logOO.png';
 
 const careers = [
   {
@@ -72,12 +73,12 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Header */}
         <div className="text-center mb-12 animate-slide-in-up">
-          <div className="inline-block mb-4 px-4 py-2 bg-primary/20 border-4 border-primary pixel-glow">
-            <RouteIcon className="w-8 h-8 text-primary inline-block animate-pixel-pulse" />
+          <div className="inline-block mb-4 bg-primary/20 border-4 border-[#1f1559] pixel-glow rounded-full">
+            <img className="logo w-32 h-32 text-primary inline-block animate-pixel-pulse" src={ZSK_LOGO}  alt="ZSK"/>
           </div>
           <h1 className="text-2xl md:text-4xl text-foreground mb-4 tracking-wider">
-            TECH SCHOOL
-            <span className="block text-primary mt-2">QUEST</span>
+            Zespół Szkół Komunikacji
+            <span className="block text-primary mt-2 text-lg md:text-xl">im. Hipolita Cegielskiego w Poznaniu</span>
           </h1>
           <p className="text-xs md:text-sm text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Poznaj kierunki zawodowe przez interaktywne mini-gry!
