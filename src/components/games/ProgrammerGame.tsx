@@ -1,346 +1,213 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { CheckCircle2, XCircle } from "lucide-react";
+// ProgrammerGame.tsx
+import React, { useState, useCallback } from 'react';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
-const codeQuestions = [
+/* 6 zadań – szkolne lore */
+const tasks = [
   {
     id: 1,
-    question: "Znajdź błąd w kodzie:",
-    code: `function suma(a, b) {
-  return a + b
-}
-console.log(suma(5, "3"));`,
-    options: [
-      "Brak średnika po return",
-      'Dodawanie liczby i stringa da "53"',
-      "Funkcja nie jest zadeklarowana poprawnie",
-      "Console.log powinien być przed funkcją",
-    ],
-    correctAnswer: 1,
-    explanation: 'W JavaScript dodanie liczby (5) i stringa ("3") zwróci "53" zamiast 8.',
-    hints: [
-      "Zwróć uwagę na typy danych w parametrach funkcji",
-      "Co się stanie gdy dodasz liczbę do tekstu?",
-      "JavaScript konwertuje liczbę na string przy dodawaniu",
-    ],
+    type: 'drag-code-blocks',
+    lore: 'Na lekcji informatyki układasz własną funkcję. Przeciągnij klocki, aby stworzyć kod zwracający sumę dwóch liczb.',
+    question: 'Ułóż klocki tak, aby powstała funkcja sumująca dwa argumenty',
+    pool: ['return a + b;', 'function suma(a, b)', '{', '}'],
+    correct: ['function suma(a, b)','{', 'return a + b;', '}'],
+    hints: ['Zacznij od słowa kluczowego function', 'Nazwa funkcji to „suma”', 'Na końcu musi być zamykający nawias klamrowy'],
   },
   {
     id: 2,
-    question: "Co wypisze ten kod?",
-    code: `let x = 10;
-if (x > 5) {
-  x = x * 2;
-}
-console.log(x);`,
-    options: ["5", "10", "20", "15"],
-    correctAnswer: 2,
-    explanation: "x = 10, warunek 10 > 5 jest prawdziwy, więc x = 10 * 2 = 20",
-    hints: [
-      "Sprawdź czy warunek if jest prawdziwy",
-      "Jeśli 10 > 5, to co się dzieje z x?",
-      "x zostanie pomnożone przez 2",
-    ],
+    type: 'pseudo-select',
+    lore: 'Na sprawdzianie z algorytmów musisz wybrać właściwy pseudokod pętli.',
+    question: 'Wybierz pseudokod wypisujący liczby 1‑5',
+    options: ['Dla i od 1 do 5 wykonaj: wypisz i', 'Dla i od 0 do 4 wykonaj: wypisz i', 'Dla i od 1 do 10 wykonaj: wypisz i'],
+    correct: 0,
+    hints: ['Pętla musi zaczynać się od 1', 'Kończyć się na 5', 'To dokładnie 5 powtórzeń'],
   },
   {
     id: 3,
-    question: "Która pętla jest poprawna?",
-    code: `// Która pętla wypisze liczby 0-4?`,
-    options: [
-      "for (let i = 0; i <= 4; i++)",
-      "for (let i = 0; i < 5; i++)",
-      "for (let i = 1; i <= 5; i++)",
-      "for (let i = 0; i < 4; i++)",
-    ],
-    correctAnswer: 1,
-    explanation: "Pętla zaczyna od 0 i kończy przed 5, więc wypisze: 0, 1, 2, 3, 4",
-    hints: [
-      "Pętla powinna zacząć od 0",
-      "Używamy < zamiast <= gdy kończymy przed wartością",
-      "i < 5 oznacza: 0, 1, 2, 3, 4",
-    ],
+    type: 'choice',
+    lore: 'Na lekcji JavaScript nauczyciel pyta o typ danych.',
+    question: 'Co zwróci typeof null ?',
+    options: ['null', 'object', 'undefined', 'string'],
+    correct: 1,
+    hints: ['To pułapka egzaminacyjna', 'Wynik to „object”', 'Taka specyfika JS'],
   },
   {
     id: 4,
-    question: "Jaki błąd jest w tym kodzie?",
-    code: `const arr = [1, 2, 3];
-arr.push(4);
-arr = [1, 2, 3, 4, 5];`,
-    options: [
-      "Nie można używać push na const",
-      "Nie można przypisać nowej wartości do const",
-      "Array nie ma metody push",
-      "Kod jest poprawny",
-    ],
-    correctAnswer: 1,
-    explanation: "Const pozwala modyfikować zawartość tablicy (push), ale nie pozwala na przypisanie nowej wartości.",
-    hints: [
-      "const blokuje ponowne przypisanie zmiennej",
-      "push modyfikuje istniejącą tablicę",
-      "Przypisanie '=' tworzy nową referencję",
-    ],
+    type: 'fill-missing',
+    lore: 'Masz niedokończony skrypt – brakuje fragmentu warunku.',
+    question: 'Uzupełnij kod, aby funkcja zwracała true tylko dla liczb parzystych',
+    codeTemplate: 'function isEven(num) {\n  return /* MISSING */;\n}',
+    answers: ['num % 2 === 0', 'num / 2', 'num == 2'],
+    correct: 'num % 2 === 0',
+    hints: ['% to reszta z dzielenia', 'Parzysta = reszta 0', 'Porównujemy do 0'],
   },
   {
     id: 5,
-    question: "Co zwróci ta funkcja?",
-    code: `function test() {
-  return
-    {
-      value: 42
-    }
-}
-console.log(test());`,
-    options: ["{ value: 42 }", "42", "undefined", "Error"],
-    correctAnswer: 2,
-    explanation: "JavaScript automatycznie wstawia średnik po 'return', więc funkcja zwraca undefined.",
-    hints: [
-      "Zwróć uwagę na formatowanie kodu",
-      "Return powinien być w tej samej linii co wartość",
-      "JavaScript dodaje średnik po 'return'",
-    ],
+    type: 'order',
+    lore: 'Sortowanie bąbelkowe – układasz kroki w prawidłowej kolejności.',
+    question: 'Ułóż kroki algorytmu sortowania bąbelkowego',
+    steps: ['Porównaj sąsiednie elementy', 'Powtarzaj aż lista będzie posortowana', 'Jeśli elementy są w złej kolejności – zamień je', 'Przejdź po liście od początku do końca'],
+    correctOrder: [1, 3, 0, 2],
+    hints: ['Najpierw ogólna idea', 'Potem przejście', 'Porównanie', 'Ewentualna zamiana'],
   },
   {
     id: 6,
-    question: "Jaki będzie wynik?",
-    code: `let a = [1, 2, 3];
-let b = a;
-b.push(4);
-console.log(a.length);`,
-    options: ["3", "4", "undefined", "Error"],
-    correctAnswer: 1,
-    explanation: "b jest referencją do tej samej tablicy co a, więc push(4) modyfikuje obie zmienne.",
-    hints: [
-      "Tablice są przekazywane przez referencję",
-      "b i a wskazują na tę samą tablicę",
-      "Zmiana b zmienia też a",
-    ],
-  },
-  {
-    id: 7,
-    question: "Co wypisze console.log?",
-    code: `console.log(typeof null);`,
-    options: ["null", "object", "undefined", "number"],
-    correctAnswer: 1,
-    explanation: "To znany bug w JavaScript - typeof null zwraca 'object'.",
-    hints: [
-      "To jeden z najbardziej znanych bugów JavaScript",
-      "null nie jest obiektem, ale...",
-      "typeof null zwraca 'object'",
-    ],
-  },
-  {
-    id: 8,
-    question: "Jaki będzie rezultat?",
-    code: `console.log(0.1 + 0.2 === 0.3);`,
-    options: ["true", "false", "undefined", "Error"],
-    correctAnswer: 1,
-    explanation: "Precyzja liczb zmiennoprzecinkowych sprawia że 0.1 + 0.2 = 0.30000000000000004",
-    hints: [
-      "Liczby zmiennoprzecinkowe mają problem z precyzją",
-      "0.1 + 0.2 nie jest dokładnie 0.3",
-      "Wynik to 0.30000000000000004",
-    ],
+    type: 'drag-pseudocode-blocks',
+    lore: 'Ostatnie zadanie – tworzysz algorytm znajdowania maksimum z tablicy.',
+    question: 'Przeciągnij klocki, aby powstał algorytm max z tablicy',
+    pool: ['ustaw max na pierwszy element', 'dla każdego elementu w tablicy', 'jeśli element > max, ustaw max = element', 'zwróć max'],
+    correct: ['ustaw max na pierwszy element', 'dla każdego elementu w tablicy', 'jeśli element > max, ustaw max = element', 'zwróć max'],
+    hints: ['Najpierw musisz mieć wartość startową', 'Potem przejrzyj wszystkie', 'Porównuj i ewentualnie zamień', 'Zwróć wynik'],
   },
 ];
 
-const ProgrammerGame = () => {
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [showResult, setShowResult] = useState(false);
-  const [score, setScore] = useState(0);
-  const [gameComplete, setGameComplete] = useState(false);
-  const [hintLevel, setHintLevel] = useState(0);
-  const [wrongAttempts, setWrongAttempts] = useState(0);
-
-  const question = codeQuestions[currentQuestion];
-
-  const handleAnswer = (answerIndex: number) => {
-    setSelectedAnswer(answerIndex);
-    setShowResult(true);
-
-    if (answerIndex === question.correctAnswer) {
-      setScore(score + 1);
-      setHintLevel(0);
-      setWrongAttempts(0);
-    } else {
-      setWrongAttempts(wrongAttempts + 1);
-    }
-  };
-
-  const showHint = () => {
-    if (hintLevel < question.hints.length) {
-      setHintLevel(hintLevel + 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentQuestion < codeQuestions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-      setSelectedAnswer(null);
-      setShowResult(false);
-      setHintLevel(0);
-      setWrongAttempts(0);
-    } else {
-      setGameComplete(true);
-    }
-  };
-
-  const handleRestart = () => {
-    setCurrentQuestion(0);
-    setSelectedAnswer(null);
-    setShowResult(false);
-    setScore(0);
-    setGameComplete(false);
-    setHintLevel(0);
-    setWrongAttempts(0);
-  };
-
-  if (gameComplete) {
-    const percentage = (score / codeQuestions.length) * 100;
-    return (
-      <Card className="bg-card border-4 border-border p-8 text-center">
-        <div className="mb-6">
-          <div className="text-6xl mb-4">
-            {percentage >= 70 ? "🏆" : percentage >= 50 ? "👍" : "📚"}
-          </div>
-          <h2 className="text-2xl text-foreground mb-2">GRA UKOŃCZONA!</h2>
-          <p className="text-lg text-primary mb-4">
-            Twój wynik: {score}/{codeQuestions.length}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {percentage >= 70
-              ? "Świetna robota! Masz talent do programowania!"
-              : percentage >= 50
-              ? "Nieźle! Jeszcze trochę praktyki."
-              : "Nie martw się! Praktyka czyni mistrza."}
-          </p>
-        </div>
-        <Button
-          onClick={handleRestart}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 arcade-button"
-        >
-          ZAGRAJ PONOWNIE
-        </Button>
-      </Card>
-    );
+/* utils */
+const ItemTypes = { BLOCK: 'block' };
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
   }
+  return a;
+}
+
+/* klocek */
+function Block({ text, index, moveBlock, parent }: { text: string; index: number; moveBlock: (d: number, h: number) => void; parent: string }) {
+  const [{ isDragging }, drag] = useDrag({
+    type: ItemTypes.BLOCK,
+    item: { text, index, parent },
+    collect: (m) => ({ isDragging: !!m.isDragging() }),
+  });
+
+  const [, drop] = useDrop({
+    accept: ItemTypes.BLOCK,
+    hover(item: any) {
+      if (item.parent === parent && item.index !== index) {
+        moveBlock(item.index, index);
+        item.index = index;
+      }
+    },
+  });
 
   return (
-    <Card className="h-screen w-[35%] fixed left-0 top-0 border-r bg-card text-card-foreground flex flex-col p-6 overflow-y-auto">
-      {/* Progress */}
-      <div className="mb-6">
-        <div className="flex justify-between text-xs text-muted-foreground mb-2">
-          <span>Pytanie {currentQuestion + 1}/{codeQuestions.length}</span>
-          <span>Wynik: {score}</span>
-        </div>
-        <div className="h-2 bg-muted border-2 border-border">
-          <div
-            className="h-full bg-primary transition-all duration-300"
-            style={{ width: `${((currentQuestion + 1) / codeQuestions.length) * 100}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Question */}
-      <div className="mb-6">
-        <h3 className="text-sm text-foreground mb-4">{question.question}</h3>
-        <div className="bg-muted p-4 border-2 border-border font-mono text-xs overflow-x-auto mb-4">
-          <pre className="text-accent">{question.code}</pre>
-        </div>
-      </div>
-
-      {/* Options */}
-      <div className="space-y-3 mb-6">
-        {question.options.map((option, index) => {
-          const isSelected = selectedAnswer === index;
-          const isCorrect = index === question.correctAnswer;
-          const showCorrect = showResult && isCorrect;
-          const showWrong = showResult && isSelected && !isCorrect;
-
-          return (
-            <button
-              key={index}
-              onClick={() => !showResult && handleAnswer(index)}
-              disabled={showResult}
-              className={`w-full p-4 text-left text-xs border-2 transition-all arcade-button ${
-                showCorrect
-                  ? "border-accent bg-accent/20 text-accent"
-                  : showWrong
-                  ? "border-destructive bg-destructive/20 text-destructive"
-                  : isSelected
-                  ? "border-primary bg-primary/20 text-primary"
-                  : "border-border bg-background text-foreground hover:border-primary"
-              } ${showResult ? "cursor-not-allowed" : "cursor-pointer"}`}
-            >
-              <div className="flex items-center justify-between">
-                <span>{option}</span>
-                {showCorrect && <CheckCircle2 className="w-5 h-5" />}
-                {showWrong && <XCircle className="w-5 h-5" />}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Hints System */}
-      {!showResult && wrongAttempts > 0 && hintLevel < question.hints.length && (
-        <div className="mb-6 animate-slide-in-up">
-          <Button
-            onClick={showHint}
-            variant="outline"
-            size="sm"
-            className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20"
-          >
-            💡 POKAŻ PODPOWIEDŹ ({hintLevel + 1}/{question.hints.length})
-          </Button>
-        </div>
-      )}
-
-      {/* Display Hints */}
-      {hintLevel > 0 && !showResult && (
-        <div className="mb-6 space-y-2">
-          {question.hints.slice(0, hintLevel).map((hint, index) => (
-            <div
-              key={index}
-              className="p-3 border-2 border-secondary bg-secondary/20 text-secondary animate-slide-in-up"
-            >
-              <p className="text-xs">
-                <span className="font-bold">Podpowiedź {index + 1}:</span> {hint}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Result & Explanation */}
-      {showResult && (
-        <div className="mb-6 animate-slide-in-up">
-          <div
-            className={`p-4 border-2 ${
-              selectedAnswer === question.correctAnswer
-                ? "border-accent bg-accent/20 text-accent"
-                : "border-destructive bg-destructive/20 text-destructive"
-            }`}
-          >
-            <p className="text-xs mb-2 font-bold">
-              {selectedAnswer === question.correctAnswer ? "✓ PRAWIDŁOWO!" : "✗ NIEPRAWIDŁOWO"}
-            </p>
-            <p className="text-xs leading-relaxed">{question.explanation}</p>
-          </div>
-        </div>
-      )}
-
-      {/* Next Button */}
-      {showResult && (
-        <Button
-          onClick={handleNext}
-          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button"
-        >
-          {currentQuestion < codeQuestions.length - 1 ? "NASTĘPNE PYTANIE →" : "ZOBACZ WYNIK"}
-        </Button>
-      )}
-    </Card>
+    <div ref={(node) => drag(drop(node))} className="px-3 py-2 m-1 border rounded cursor-move bg-white shadow text-black" style={{ opacity: isDragging ? 0.4 : 1 }}>
+      {text}
+    </div>
   );
-};
+}
 
-export default ProgrammerGame;
+/* komponent z klockami */
+function DragBlocksTask({ task, onResult }: { task: any; onResult: (ok: boolean) => void }) {
+  const [pool, setPool] = useState(() => shuffle([...task.pool]));
+  const [user, setUser] = useState<string[]>([]);
+
+  const [, dropToUser] = useDrop({ accept: ItemTypes.BLOCK, drop(item: any) { if (item.parent === 'pool' && !user.includes(item.text)) { setUser((u) => [...u, item.text]); setPool((p) => p.filter((t) => t !== item.text)); } } });
+  const [, dropToPool] = useDrop({ accept: ItemTypes.BLOCK, drop(item: any) { if (item.parent === 'user') { setPool((p) => [...p, item.text]); setUser((u) => u.filter((t) => t !== item.text)); } } });
+
+  const ok = JSON.stringify(user) === JSON.stringify(task.correct);
+  React.useEffect(() => { if (user.length === task.correct.length) onResult(ok); }, [user, ok, task.correct, onResult]);
+
+  return (
+    <div className="space-y-4">
+      <div className="text-xs text-muted-foreground">Przeciągnij klocki poniżej, aby ułożyć kod:</div>
+      <div ref={dropToPool} className="min-h-[60px] p-2 border-2 border-dashed rounded bg-gray-50 flex flex-wrap">
+        {pool.map((t, i) => <Block key={i} text={t} index={i} moveBlock={(a, b) => { const dragBlock = pool[a]; const newPool = [...pool]; newPool.splice(a, 1); newPool.splice(b, 0, dragBlock); setPool(newPool); }} parent="pool" />)}
+      </div>
+      <div ref={dropToUser} className="min-h-[60px] p-2 border-2 border-dashed rounded bg-green-50 flex flex-wrap">
+        {user.map((t, i) => <Block key={i} text={t} index={i} moveBlock={(a, b) => { const dragBlock = user[a]; const newUser = [...user]; newUser.splice(a, 1); newUser.splice(b, 0, dragBlock); setUser(newUser); }} parent="user" />)}
+      </div>
+      {user.length === task.correct.length && (
+        <p className="text-sm">{ok ? <span className="text-green-600 font-semibold">✅ Dobrze! Możesz iść dalej.</span> : <span className="text-red-600 font-semibold">❌ Źle – spróbuj ponownie!</span>}</p>
+      )}
+    </div>
+  );
+}
+
+/* główny komponent */
+export default function ProgrammerGame() {
+  const [index, setIndex] = useState(0);
+  const [selected, setSelected] = useState<any>(null);
+  const [ordered, setOrdered] = useState<number[]>([]);
+  const [showResult, setShowResult] = useState(false);
+  const [hintLevel, setHintLevel] = useState(0);
+  const [taskOk, setTaskOk] = useState(false);
+
+  const task = tasks[index];
+
+  const checkAnswer = () => {
+    let ok = false;
+    if (task.type === 'drag-code-blocks' || task.type === 'drag-pseudocode-blocks') ok = taskOk;
+    else if (task.type === 'order') ok = JSON.stringify(ordered) === JSON.stringify(task.correctOrder);
+    else ok = selected === task.correct;
+    setShowResult(true);
+    if (!ok) setTimeout(() => setShowResult(false), 1200);
+  };
+
+  const next = () => {
+    if (index < tasks.length - 1) { setIndex(index + 1); setSelected(null); setOrdered([]); setHintLevel(0); setShowResult(false); setTaskOk(false); }
+  };
+
+  /* ----------- RENDER ----------- */
+  return (
+    <DndProvider backend={HTML5Backend}> {}
+      <Card className="p-6 border-4 border-border space-y-4 max-w-3xl mx-auto">
+        <h2 className="text-xl font-bold text-primary">Zadanie {index + 1}/6</h2>
+        <p className="text-sm italic text-muted-foreground">{task.lore}</p>
+        <h3 className="font-semibold">{task.question}</h3>
+
+        {/* zad 1 i 6 (zrobiłem co mogłem) */}
+        {(task.type === 'drag-code-blocks' || task.type === 'drag-pseudocode-blocks') && (
+          <DragBlocksTask task={task} onResult={setTaskOk} />
+        )}
+
+        {/* zad2 (takie basic) */}
+        {task.type === 'pseudo-select' && (
+          <div className="space-y-2">
+            {task.options.map((o, i) => <button key={i} onClick={() => setSelected(i)} className={`p-2 w-full border text-left text-xs rounded ${selected === i ? 'bg-primary/20 border-primary' : 'bg-background border-border'}`}>{o}</button>)}
+            {showResult && <p className="text-sm">{selected === task.correct ? '🎉 Brawo!' : '❌ Zła odpowiedź'}</p>}
+          </div>
+        )}
+
+        {/* zad3 (zdecydowanie do wymiany) */}
+        {task.type === 'choice' && (
+          <div className="space-y-2">
+            {task.options.map((o, i) => <button key={i} onClick={() => setSelected(i)} className={`p-2 w-full border text-left text-xs rounded ${selected === i ? 'bg-primary/20 border-primary' : 'bg-background border-border'}`}>{o}</button>)}
+            {showResult && <p className="text-sm">{selected === task.correct ? '🌟 Dobrze!' : '❌ Niepoprawnie'}</p>}
+          </div>
+        )}
+
+        {/* zad4 (też bym wymienił idk) */}
+        {task.type === 'fill-missing' && (
+          <div>
+            <pre className="p-3 bg-muted border-2 border-border text-xs mb-2 rounded">{task.codeTemplate}</pre>
+            <div className="flex gap-2 flex-wrap">{task.answers.map((a) => <button key={a} onClick={() => setSelected(a)} className={`px-3 py-2 border rounded text-xs ${selected === a ? 'bg-primary/20 border-primary' : 'bg-background border-border'}`}>{a}</button>)}</div>
+            {showResult && <p className="mt-3 text-sm">{selected === task.correct ? '✔️ Poprawnie' : '❌ Błędnie'}</p>}
+          </div>
+        )}
+
+        {/* zad5 (to akurat fajne zadanie) */}
+        {task.type === 'order' && (
+          <div>
+            <p className="text-xs mb-2">Kliknij kroki w odpowiedniej kolejności:</p>
+            <div className="flex flex-col gap-2">{task.steps.map((step, i) => <button key={i} onClick={() => setOrdered((prev) => (prev.includes(i) ? prev : [...prev, i]))} className={`p-2 border text-xs text-left rounded ${ordered.includes(i) ? 'bg-primary/20 border-primary' : 'bg-background border-border'}`}>{step}</button>)}</div>
+            {showResult && <p className="mt-3 text-sm">{JSON.stringify(ordered) === JSON.stringify(task.correctOrder) ? '🏆 Idealna kolejność!' : '❌ Kolejność niepoprawna'}</p>}
+          </div>
+        )}
+
+        {/* Podpowiedzi */}
+        {!showResult && hintLevel < task.hints.length && <Button size="sm" variant="outline" className="w-full" onClick={() => setHintLevel(hintLevel + 1)}>💡 Podpowiedź ({hintLevel}/{task.hints.length})</Button>}
+        {hintLevel > 0 && !showResult && <div className="space-y-1">{task.hints.slice(0, hintLevel).map((h, i) => <p key={i} className="text-xs bg-secondary/20 p-2 border border-secondary rounded">👉 {h}</p>)}</div>}
+
+        {/*Przyciski*/}
+        <div className="flex gap-2 mt-4">
+          {!showResult && <Button className="w-full" onClick={checkAnswer}>SPRAWDŹ</Button>}
+          {showResult && (index < tasks.length - 1 ? <Button className="w-full" onClick={next}>DALEJ →</Button> : <Button className="w-full" onClick={() => alert('Gratulacje! 🎉 Rozwiązałeś wszystkie zadania.')}>KONIEC</Button>)}
+        </div>
+      </Card>
+    </DndProvider>
+  );
+}
