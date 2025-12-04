@@ -85,10 +85,10 @@ const CareerGame = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link to="/">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
-              className="text-xs border-2 border-border hover:border-primary arcade-button"
+              className="fixed top-4 left-4 z-50 text-xs border-2 border-border hover:border-primary arcade-button"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               MENU

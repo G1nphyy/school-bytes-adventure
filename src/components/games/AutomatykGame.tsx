@@ -70,7 +70,7 @@ const AutomatykGame = () => {
   };
 
   return (
-    <Card className="bg-card border-4 border-border p-6">
+    <Card className="h-screen w-[35%] fixed left-0 top-0 border-r bg-card text-card-foreground flex flex-col p-6 overflow-y-auto">
       <div className="mb-6 text-center">
         <Cable className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
         <h2 className="text-lg text-foreground mb-2">OKABLOWANIE RJ-45</h2>

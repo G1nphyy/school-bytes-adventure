@@ -173,4 +173,8 @@ All colors MUST be HSL.
   .glitch-effect {
     animation: glitch 0.3s ease-in-out;
   }
+
+  .menu-button {
+      @apply fixed top-4 left-4 z-50;
+    }
 }

@@ -226,7 +226,7 @@ const ProgrammerGame = () => {
   }
 
   return (
-    <Card className="bg-card border-4 border-border p-6">
+    <Card className="h-screen w-[35%] fixed left-0 top-0 border-r bg-card text-card-foreground flex flex-col p-6 overflow-y-auto">
       {/* Progress */}
       <div className="mb-6">
         <div className="flex justify-between text-xs text-muted-foreground mb-2">
