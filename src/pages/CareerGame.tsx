@@ -8,6 +8,7 @@ import KomunikacjaGame from "@/components/games/KomunikacjaGame";
 import InformatykGame from "@/components/games/InformatykGame";
 import ElektroenergetykGame from "@/components/games/ElektroenergetykGame";
 import TransportGame from "@/components/games/TransportGame";
+import DsdGame from "@/components/games/DsdGame";
 
 const careerGames: Record<string, { name: string; component: React.ComponentType }> = {
   programista: {
@@ -37,6 +38,10 @@ const careerGames: Record<string, { name: string; component: React.ComponentType
   transport: {
     name: "Technik transportu",
     component: TransportGame,
+  },
+  niemiecki: {
+    name: "DSD",
+    component: DsdGame,
   },
 };
 

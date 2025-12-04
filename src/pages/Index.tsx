@@ -8,7 +8,8 @@ import {
   Code, 
   Cog,
   Train,
-  RouteIcon
+  RouteIcon,
+  Flag
 } from "lucide-react";
 import ZSK_LOGO from '@/assets/ZSK_logOO.png';
 
@@ -61,6 +62,13 @@ const careers = [
     icon: Train,
     color: "from-primary to-accent",
     description: "Transport kolejowy",
+  },
+  {
+     id: "niemiecki",
+     name: "DSD",
+     icon: Flag,
+     color: "from-secondary to-primary",
+     description: "Dodatkowe zajęcia językowe",
   },
 ];
 
