@@ -64,6 +64,13 @@ const careers = [
     description: "Transport kolejowy",
   },
   {
+      id: "schody",
+      name: "Podczas przerwy",
+      icon: Code,
+      color: "from-primary to-accent",
+      description: "Dasz radę przed dzwonkiem?",
+  },
+  {
      id: "niemiecki",
      name: "DSD",
      icon: Flag,
