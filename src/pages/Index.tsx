@@ -9,7 +9,8 @@ import {
   Cog,
   Train,
   RouteIcon,
-  Flag
+  Flag,
+  Clock
 } from "lucide-react";
 import ZSK_LOGO from '@/assets/ZSK_logOO.png';
 
@@ -66,8 +67,8 @@ const careers = [
   {
       id: "schody",
       name: "Podczas przerwy",
-      icon: Code,
-      color: "from-primary to-accent",
+      icon: Clock,
+      color: "from-secondary to-accent",
       description: "Dasz radę przed dzwonkiem?",
   },
   {
