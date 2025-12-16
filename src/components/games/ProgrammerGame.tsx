@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 
 /* ----------------- dane quizowe (7 pytań) ----------------- */
-const quizQuestions = [
+let quizQuestions = [
   {
     id: 1,
     type: "single",
@@ -147,6 +147,22 @@ const quizQuestions = [
   },
 ] as const;
 
+const shuffle_questions = <T,>(arr: readonly T[]) => {
+  const copy = [...arr]
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+  return copy
+}
+
+quizQuestions = quizQuestions.map((q) =>
+    "answers" in q
+        ? { ...q, answers: shuffle_questions(q.answers) }
+        : q
+)
+
+
 /* ----------------- mini-gra (edytor: rozsypany kod) ----------------- */
 const editorTask = {
   lore: "Podczas rozmowy kwalifikacyjnej na kierunek Technik Programista rekruter poprosi Cię o krótką próbkę umiejętności. Klocki kodu zostały rozsypane — ułóż je tak, aby funkcja poprawnie działała.",
@@ -158,6 +174,7 @@ const editorTask = {
     "}",
     "let max = arr[0];",
     "function findMax(arr) {",
+    "}",
   ],
   correct: [
     "function findMax(arr) {",
@@ -166,6 +183,7 @@ const editorTask = {
     "if(x > max) max = x;",
     "}",
     "return max;",
+    "}",
   ],
   hints: [
     "Zacznij od deklaracji funkcji: function nazwa(param)",
@@ -336,21 +354,32 @@ function MiniGameInner({ onFinish }: { onFinish: () => void }) {
   });
 
   const validate = useCallback(() => {
-    const isCorrect = JSON.stringify(rows) === JSON.stringify(editorTask.correct);
-    setAttempts((a) => a + 1);
+    const isCorrect = JSON.stringify(rows) === JSON.stringify(editorTask.correct)
+    setAttempts((a) => a + 1)
+
     if (isCorrect) {
-      setFeedback("✅ Poprawnie! Za 5 sekund przejdziesz dalej...");
-      setSuccessPending(true);
-      successTimerRef.current = setTimeout(() => {
-        setFeedback("");
-        setSuccessPending(false);
-        onFinish();
-      }, 5000);
+      let seconds = 5
+      setFeedback(`✅ Poprawnie! Przejście za ${seconds} s…`)
+      setSuccessPending(true)
+
+      successTimerRef.current = setInterval(() => {
+        seconds -= 1
+
+        if (seconds > 0) {
+          setFeedback(`✅ Poprawnie! Przejście za ${seconds} s…`)
+        } else {
+          clearInterval(successTimerRef.current!)
+          setFeedback("")
+          setSuccessPending(false)
+          onFinish()
+        }
+      }, 1000)
     } else {
-      setFeedback("❌ Kolejność nie jest poprawna — popraw i sprawdź ponownie.");
-      setHintsVisible((h) => Math.min(editorTask.hints.length, h + 1));
+      setFeedback("❌ Kolejność nie jest poprawna — popraw i sprawdź ponownie.")
+      setHintsVisible((h) => Math.min(editorTask.hints.length, h + 1))
     }
-  }, [rows, onFinish]);
+  }, [rows, onFinish])
+
 
   const [lastDroppedRow, setLastDroppedRow] = useState<number | null>(null);
   useEffect(() => {
@@ -601,67 +630,68 @@ export default function ProgrammerGame() {
   /* ------------ render konkretnego pytania ------------ */
   function renderQuestion() {
     const val = answers[q.id];
-    if (q.type === "single")
+    if (q.type === "single") {
       return (
-        <div className="grid grid-cols-2 gap-2">
-          {q.answers.map((a) => (
-            <button
-              key={a.id}
-              onClick={() => updateAnswer(a.id)}
-              className={`p-3 border rounded text-left ${val === a.id ? "bg-primary/20 border-primary" : "bg-background border-border"}`}
-            >
-              {a.text}
-            </button>
-          ))}
-        </div>
-      );
-
-    if (q.type === "multiple")
-      return (
-        <div className="space-y-2">
-          {q.answers.map((a) => (
-            <label key={a.id} className="flex items-center gap-2 cursor-pointer">
-              <Checkbox
-                checked={(val || []).includes(a.id)}
-                onCheckedChange={(chk) => {
-                  const arr = val || [];
-                  updateAnswer(chk ? [...arr, a.id] : arr.filter((x: string) => x !== a.id));
-                }}
-              />
-              <span>{a.text}</span>
-            </label>
-          ))}
-        </div>
-      );
-
-    if (q.type === "short")
-      return (
-        <Input placeholder="Wpisz odpowiedź..." value={val || ""} onChange={(e) => updateAnswer(e.target.value)} />
-      );
-
-    if (q.type === "combo")
-      return (
-        <div className="space-y-3">
-          {/* Input – osobny stan */}
-          <Input
-            placeholder="Wpisz odpowiedź..."
-            value={answers[q.id + "_text"] || ""}
-            onChange={(e) => setAnswers((a) => ({ ...a, [q.id + "_text"]: e.target.value }))}
-          />
-          {/* Przyciski – osobny stan */}
           <div className="grid grid-cols-2 gap-2">
             {q.answers.map((a) => (
-              <button
-                key={a.id}
-                onClick={() => updateAnswer(a.id)}
-                className={`p-3 border rounded text-left ${answers[q.id] === a.id ? "bg-primary/20 border-primary" : "bg-background border-border"}`}
-              >
-                {a.text}
-              </button>
+                <button
+                    key={a.id}
+                    onClick={() => updateAnswer(a.id)}
+                    className={`p-3 border rounded text-left ${val === a.id ? "bg-primary/20 border-primary" : "bg-background border-border"}`}
+                >
+                  {a.text}
+                </button>
             ))}
           </div>
-        </div>
       );
+    }
+    if (q.type === "multiple") {
+      return (
+          <div className="space-y-2">
+            {q.answers.map((a) => (
+                <label key={a.id} className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox
+                      checked={(val || []).includes(a.id)}
+                      onCheckedChange={(chk) => {
+                        const arr = val || [];
+                        updateAnswer(chk ? [...arr, a.id] : arr.filter((x: string) => x !== a.id));
+                      }}
+                  />
+                  <span>{a.text}</span>
+                </label>
+            ))}
+          </div>
+      );
+    }
+    if (q.type === "short") {
+      return (
+          <Input placeholder="Wpisz odpowiedź..." value={val || ""} onChange={(e) => updateAnswer(e.target.value)}/>
+      );
+    }
+    if (q.type === "combo") {
+      return (
+          <div className="space-y-3">
+            {/* Input – osobny stan */}
+            <Input
+                placeholder="Wpisz odpowiedź..."
+                value={answers[q.id + "_text"] || ""}
+                onChange={(e) => setAnswers((a) => ({...a, [q.id + "_text"]: e.target.value}))}
+            />
+            {/* Przyciski – osobny stan */}
+            <div className="grid grid-cols-2 gap-2">
+              {q.answers.map((a) => (
+                  <button
+                      key={a.id}
+                      onClick={() => updateAnswer(a.id)}
+                      className={`p-3 border rounded text-left ${answers[q.id] === a.id ? "bg-primary/20 border-primary" : "bg-background border-border"}`}
+                  >
+                    {a.text}
+                  </button>
+              ))}
+            </div>
+          </div>
+      );
+    }
   }
 
   return (
@@ -755,7 +785,7 @@ export default function ProgrammerGame() {
         <Card className="p-8 max-w-xl w-full text-center space-y-4">
           <h1 className="text-3xl font-bold text-primary">Świetna robota 👏</h1>
           <p>Twój wynik: {score} / {quizQuestions.length}</p>
-          <Button onClick={() => window.location.assign("/menu")}>Wróć do menu</Button>
+          <Button onClick={() => window.location.assign("/")}>Wróć do menu</Button>
         </Card>
       )}
     </div>
