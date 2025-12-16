@@ -162,6 +162,16 @@ const rj45Hints = [
   "Pełna kolejność to: Biało-Pomarańczowy, Pomarańczowy, Biało-Zielony, Niebieski, Biało-Niebieski, Zielony, Biało-Brązowy, Brązowy.",
 ];
 
+// HELPER: Funkcja tasująca (Fisher-Yates shuffle)
+const shuffleArray = (array) => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
 
 // Helper: Mapowanie ID na obiekt kabla
 const getCableById = (id: number) => cables.find(c => c.id === id);
@@ -318,6 +328,9 @@ const InformatykGame = () => {
   const [rjHintLevel, setRjHintLevel] = useState(0); // STAN DLA PODPOWIEDZI RJ-45
   const [showRjSummary, setShowRjSummary] = useState(false); // NOWY STAN PODSUMOWANIA RJ-45
 
+  // ZASZUFELOWANE KABLE (LOSOWE USTAWIENIE NA PÓŁCE)
+  const [shuffledCables, setShuffledCables] = useState(shuffleArray(cables));
+
   // Wymagane, aby gra RJ-45 się nie kończyła automatycznie
   const isRjReady = cableSlots.every(id => id !== null);
   const usedCableIds = cableSlots.filter((id): id is number => id !== null);
@@ -328,12 +341,13 @@ const InformatykGame = () => {
       : `Błąd. Prawidłowa kolejność T568B to: ${cables.map(c => c.label_short).join(', ')}. Konieczność nauki standardów to podstawa pracy sieciowca.`;
 
   const rjUsefulness = "Umiejętność prawidłowego zarabiania wtyków RJ-45 zgodnie z normami (T568A i T568B) jest podstawową, praktyczną kompetencją każdego technika informatyka (INF.02). Bez tego nie zbudujesz ani nie naprawisz żadnej sieci LAN.";
-  // Używamy tagu Image, aby zasugerować diagram T568B
 
   // -------------------------- EFFECT ---------------------------------
 
   useEffect(() => {
+    // Inicjalizacja kabli i slotów przy starcie
     setCableSlots(new Array(correctOrder.length).fill(null));
+    setShuffledCables(shuffleArray(cables));
   }, []);
 
   // -------------------------- QUIZ LOGIC ---------------------------------
@@ -401,6 +415,7 @@ const InformatykGame = () => {
     setWrongAttempts(0);
     setRjHintLevel(0); // Resetuj podpowiedzi RJ
     setShowRjSummary(false); // Resetuj podsumowanie RJ
+    setShuffledCables(shuffleArray(cables)); // NOWE: ZASZUFELUJ KABLE PRZY RESTARCIE
   };
 
   // -------------------------- RJ GAME DND LOGIC ---------------------------------
@@ -676,8 +691,6 @@ const InformatykGame = () => {
                   ZŁĄCZE RJ-45 | Pozostałe próby: {attemptsLeft > 0 ? attemptsLeft : 0}
                 </div>
 
-                {/* TUTAJ USUNIĘTO TAG Z OBRAZKIEM */}
-
                 <div className="flex gap-2 justify-center">
                   {cableSlots.map((cableId, index) => (
                       <CableSlot
@@ -699,7 +712,7 @@ const InformatykGame = () => {
               </p>
               <motion.div layout className="flex flex-wrap gap-3 justify-center">
                 <AnimatePresence>
-                  {cables.map((cable) => (
+                  {shuffledCables.map((cable) => (
                       <CableSource
                           key={cable.id}
                           cable={cable}
