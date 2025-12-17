@@ -50,6 +50,7 @@ export default function TransportGame() {
   const [level, setLevel] = useState(levels[0].map);
   const [x, setX] = useState(levels[0].start.x * cell);
   const [y, setY] = useState(levels[0].start.y * cell);
+  const [rotation, setRotation] = useState(0);
   const [direction, setDirection] = useState([cell, 0]);
   const [switchDirs, setSwitchDirs] = useState({});
   const [activeSwitch, setActiveSwitch] = useState(null);
@@ -104,6 +105,7 @@ export default function TransportGame() {
   const autoMove = () => {
     if (gameOver || gameWon) return;
 
+    const speed = 2;
     let dx = direction[0];
     let dy = direction[1];
 
@@ -112,49 +114,67 @@ export default function TransportGame() {
       dy = targetDir[1];
     }
 
-    let nx = x + dx;
-    let ny = y + dy;
-    const gx = Math.floor(nx / cell);
-    const gy = Math.floor(ny / cell);
+    // Normalizacja wektora ruchu dla stałej prędkości
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const moveX = (dx / distance) * speed;
+    const moveY = (dy / distance) * speed;
 
-    if (!canMove(nx, ny)) {
+    const nx = x + moveX;
+    const ny = y + moveY;
+
+    const gx = Math.floor((nx + cell / 2) / cell);
+    const gy = Math.floor((ny + cell / 2) / cell);
+
+    // Obliczanie rotacji (w stopniach)
+    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+    setRotation(angle);
+
+    if (gx < 0 || gy < 0 || gx >= mapWidth || gy >= mapHeight) {
       setGameOver(true);
       return;
     }
 
-    if (transitioning && level[gy][gx] === "-") {
-      setDirection([cell, 0]);
+    const tile = level[gy][gx];
+
+    // Wykrywanie wyjścia z trybu skręcania (powrót na prosty tor)
+    if (transitioning && tile === "-" && Math.abs(ny - gy * cell) < speed) {
       setTransitioning(false);
-      const snapY = gy * cell;
-      nx = x + cell;
-      ny = snapY;
+      setDirection([cell, 0]);
+      setY(gy * cell); // Snap do środka toru
     }
 
-    if (level[gy][gx] === "T" && !transitioning) {
+    // Wykrywanie zwrotnicy
+    if (tile === "T" && !transitioning && Math.abs(nx - gx * cell) < speed) {
       const key = `${gx}-${gy}`;
       const state = switchDirs[key] || "straight";
       setTransitioning(true);
-      setTargetDir([cell, state === 'up' ? -cell : state === 'down' ? cell : 0]);
+      const targetYDir = state === 'up' ? -cell : state === 'down' ? cell : 0;
+      setTargetDir([cell, targetYDir]);
     }
 
-    if (level[gy][gx] === "P") {
+    if (tile === "P") {
       setScore(prev => prev + 1);
-      level[gy][gx] = "-";
+      const newLevel = [...level];
+      newLevel[gy][gx] = "-";
+      setLevel(newLevel);
     }
 
     setX(nx);
     setY(ny);
 
-    if (!transitioning) setDirection([cell, 0]);
-
-    if (level[gy][gx] === "E") {
+    if (tile === "E") {
       nextLevel();
     }
   };
 
   useEffect(() => {
-    const interval = setInterval(autoMove, 300);
-    return () => clearInterval(interval);
+    let frameId: number;
+    const loop = () => {
+      autoMove();
+      frameId = requestAnimationFrame(loop);
+    };
+    frameId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(frameId);
   }, [x, y, direction, switchDirs, transitioning, targetDir, gameOver, gameWon, levelIndex]);
 
   const getPopupStyle = () => {
@@ -212,7 +232,7 @@ export default function TransportGame() {
             })
           )}
 
-        <Train x={x} y={y} />
+          <Train x={x} y={y} rotation={rotation} />
 
 
           {activeSwitch && (
