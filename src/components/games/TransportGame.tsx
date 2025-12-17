@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
+import Carriage from "@/components/ui/carriage";
 
-const cell = 40;
+const cell = 85;
 const mapWidth = 80;
 const mapHeight = 10;
 
@@ -167,12 +168,17 @@ export default function TransportGame() {
   };
 
   return (
+
     <div className="relative w-full h-[450px]">
       <div className="absolute top-2 left-2 text-white font-bold z-50 pointer-events-none">
         Punkty: {score}
       </div>
+    <Card className="h-screen w-[35%] fixed left-0 top-0 border-r bg-card text-card-foreground flex flex-col p-6 overflow-y-auto">
+        {/* POLECENIE */}
+        <h1>Coś tu będzie</h1>
+    </Card>
 
-      <Card className="p-2 border-4 bg-card w-full h-full overflow-x-scroll overflow-y-hidden" ref={mapRef}>
+     <Card className="h-screen w-[75%] fixed right-0 top-0 border-l bg-card text-card-foreground flex flex-col p-6 overflow-y-auto" ref={mapRef}>
         <div className="relative" style={{ width: mapWidth * cell, height: mapHeight * cell }}>
           {level.map((row, ry) =>
             row.map((tile, rx) => {
@@ -206,10 +212,10 @@ export default function TransportGame() {
             })
           )}
 
-          <div
-            className="absolute bg-red-600 w-10 h-10 rounded-sm z-20"
-            style={{ left: x, top: y, transition: "left 0.2s, top 0.2s" }}
-          />
+        {[0, 1, 2].map((i) => (
+          <Carriage key={i} x={x} y={y} index={i} />
+        ))}
+
 
           {activeSwitch && (
             <div
