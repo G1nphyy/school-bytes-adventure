@@ -1,24 +1,22 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Cable, CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Lightbulb, ToggleLeft, ToggleRight, Settings2, Factory, AlertTriangle, ShieldCheck, Info, Briefcase, GraduationCap } from "lucide-react";
+
+// --- IMPORTY OBRAZÓW (NIENARUSZONE) ---
 import question4img from '@/assets/AutomatykZad4.png';
 import question5img from '@/assets/AutomatykZad5.png';
 import question6img from '@/assets/AutomatykZad6.png';
 import question7img from '@/assets/AutomatykZad7.png';
 
-
-// ---------------- QUIZ DATA ----------------
-// Each question can have an image for question and images for answers
-// For now placeholders; replace image URLs later
+// ---------------- PIERWOTNY QUIZ ----------------
 const quizQuestions = [
-  // ------------------ PYTANIA 1–2 (schemat + tekst + odpowiedzi tekstowe) ------------------
   {
     id: 1,
     questionText: "Które urządzenie jest przykładem automatyki w domu?",
-     hint: "Szukasz czegoś, co SAMO podejmuje decyzje – nie tylko włącza/wyłącza.",
-     practical: "Automatyk musi rozróżniać „głupie” urządzenia od tych, które mają sprzętowy lub programowy układ decyzyjny – tylko wtedy można je wpiąć do systemu sterowania.",
-     feedback: { good: "Dokładnie! Termostat to prawdziwy automat.", bad: "To nie jest automat – nie podejmuje decyzji." },
+    hint: "Szukasz czegoś, co SAMO podejmuje decyzje – nie tylko włącza/wyłącza.",
+    practical: "Automatyk musi rozróżniać „głupie” urządzenia od tych, które mają sprzętowy lub programowy układ decyzyjny – tylko wtedy można je wpiąć do systemu sterowania.",
+    feedback: { good: "Dokładnie! Termostat to prawdziwy automat.", bad: "To nie jest automat – nie podejmuje decyzji." },
     answers: [
       { id: "a", text: "Zwykła żarówka", correct: false },
       { id: "b", text: "Kuchenka gazowa odpalana zapałką", correct: false },
@@ -39,26 +37,25 @@ const quizQuestions = [
       { id: "d", text: "Kable są odłączone", correct: false },
     ],
   },
-    {
-      id: 3,
-      questionText: "Co to jest sterownik PLC",
-      hint: "To specjalny komputer, który cały czas powtarza trzy kroki: odczyt wejść → wykonaj program → zapisz wyjścia.",
-      practical: "PLC jest sercem każdej linii produkcyjnej – od pakowania czekoladek po sterowanie turbiną w elektrowni. Automatyk spędzi z nim większość kariery.",
-      feedback: { good: "Dokładnie! PLC to mózg automatyki.", bad: "To nie jest poprawna definicja PLC." },
-      answers: [
-        { id: "a", text: "Komputer osobisty", correct: false },
-        { id: "b", text: "Gra video", correct: false },
-        { id: "c", text: "Nadajnik sieci bezprzewodowych Wi-Fi", correct: false },
-        { id: "d", text: "Urządzenie elektroniczne, które na podstawie odebranych sygnałów na swoich wejściach, uruchamia odpowiednie sygnały na swoich wyjściach", correct: true },
-      ],
-    },
-  // ------------------ PYTANIA 4–7 (tekst + zdjęcie, odpowiedzi tekstowe) ------------------
+  {
+    id: 3,
+    questionText: "Co to jest sterownik PLC",
+    hint: "To specjalny komputer, który cały czas powtarza trzy kroki: odczyt wejść → wykonaj program → zapisz wyjścia.",
+    practical: "PLC jest sercem każdej linii produkcyjnej – od pakowania czekoladek po sterowanie turbiną w elektrowni.",
+    feedback: { good: "Dokładnie! PLC to mózg automatyki.", bad: "To nie jest poprawna definicja PLC." },
+    answers: [
+      { id: "a", text: "Komputer osobisty", correct: false },
+      { id: "b", text: "Gra video", correct: false },
+      { id: "c", text: "Nadajnik Wi-Fi", correct: false },
+      { id: "d", text: "Urządzenie elektroniczne, które na podstawie odebranych sygnałów na swoich wejściach, uruchamia odpowiednie sygnały na swoich wyjściach", correct: true },
+    ],
+  },
   {
     id: 4,
     questionText: "Przedstawiony schemat elektryczny pokazuje",
     questionImage: question4img,
     hint: "Spójrz na kontakt zwierny przekaźnika K1 – czy jest zwarty, czy rozwarty?",
-    practical: "Umiejętność czytania schematów pozwala automatykowi szybko znaleźć, gdzie „ginie” sygnał i dlaczego silnik nie wystartuje.",
+    practical: "Umiejętność czytania schematów pozwala automatykowi szybko znaleźć, gdzie „ginie” sygnał.",
     feedback: { good: "Idealnie! To obwód otwarty, przekaźnik niezałączony.", bad: "Sprawdź jeszcze raz stan przekaźnika i obwodu." },
     answers: [
       { id: "a", text: "Obwód zamknięty gdzie przekaźnik K1 jest załączony", correct: false },
@@ -72,35 +69,35 @@ const quizQuestions = [
     questionText: "Co przedstawia ten rysunek?",
     questionImage: question5img,
     hint: "Zwróć uwagę na symbol zaworu – prostokąt z kreską w środku to pneumatyka.",
-    practical: "Pneumatyka jest wszędzie tam, gdzie potrzeba szybkiego i czystego ruchu – np. w fabrykach butelek, samochodów czy chipów. Automatyk musi umieć ją czytać jak elektrykę.",
+    practical: "Pneumatyka jest wszędzie tam, gdzie potrzeba szybkiego i czystego ruchu.",
     feedback: { good: "Tak! To schemat pneumatyki.", bad: "To nie ten rodzaj sterowania." },
     answers: [
       { id: "a", text: "Schemat sterowania elektrycznego", correct: false },
       { id: "b", text: "Schemat sterowania pneumatycznego", correct: true },
       { id: "c", text: "Schemat sterowania hydraulicznego", correct: false },
-      { id: "d", text: "Schemat programowania sterownika PLC", correct: false },
+      { id: "d", text: "Schemat programowania PLC", correct: false },
     ],
   },
   {
     id: 6,
-    questionText: "Kiedy w sterowniku PLC na wyjściu %Q0.1 pojawi się sygnał sterujący na podstawie poniższego programu",
+    questionText: "Kiedy w sterowniku PLC na wyjściu %Q0.1 pojawi się sygnał sterujący?",
     questionImage: question6img,
     hint: "Wykonaj program „po kolei”: sprawdź oba wejścia i zobacz, co daje kropka AND.",
-    practical: "Rozumienie logiki PLC pozwala projektować bezpieczne interlocki – np. aby nie włączyć mieszadla bez wcześniejszego zamknięcia pokrywy.",
+    practical: "Rozumienie logiki PLC pozwala projektować bezpieczne blokady maszyn.",
     feedback: { good: "Dokładnie! AND wymaga obu sygnałów.", bad: "Sprawdź logikę AND jeszcze raz." },
     answers: [
-      { id: "a", text: "Gdy na wejściu %I0.0 oraz wejściu %I0.1 będzie brak sygnału sterującego", correct: false },
-      { id: "b", text: "Gdy na wejściu %I0.0 oraz wejściu %I0.1 pojawi się sygnału sterującego ", correct: false },
-      { id: "c", text: "Gdy na wejście %I0.0 pojawi się sygnał sterujący i na wejście %I0.1 będzie brak sygnału sterującego ", correct: false },
-      { id: "d", text: "Gdy na wejście %I0.0 będzie brak sygnału sterującego i na wejście %I0.1 pojawi się sygnał sterujący ", correct: true },
+      { id: "a", text: "Brak sygnału na obu wejściach", correct: false },
+      { id: "b", text: "Sygnał na obu wejściach", correct: false },
+      { id: "c", text: "Sygnał na %I0.0, brak na %I0.1", correct: false },
+      { id: "d", text: "Brak na %I0.0, sygnał na %I0.1", correct: true },
     ],
   },
   {
     id: 7,
-    questionText: "Do pomiaru przepływu gazu w rurociągu na przedstawionym rysunku, głównym elementem przetwornika jest",
+    questionText: "Do pomiaru przepływu gazu w rurociągu na przedstawionym rysunku, głównym elementem jest",
     questionImage: question7img,
-    hint: "Turbina kręci się proporcjonalnie do przepływu – impulsy można policzyć.",
-    practical: "Czujniki przepływu są kluczowe w kotłowniach, klimatyzacji, gazowych turbinach. Automatyk dobiera je do zakresu mocy i dokładności linii.",
+    hint: "Turbina kręci się proporcjonalnie do przepływu.",
+    practical: "Czujniki przepływu są kluczowe w instalacjach przemysłowych i gazowych.",
     feedback: { good: "Tak! Turbina to podstawa.", bad: "To nie ten element pomiarowy." },
     answers: [
       { id: "a", text: "Zwężka", correct: false },
@@ -111,351 +108,269 @@ const quizQuestions = [
   },
 ];
 
-// ---------------- GAME DATA ----------------
-
-type CableColor = "orange" | "green" | "blue" | "brown" | "white" | "yellow";
-
-interface CableType {
-  id: number;
-  color: CableColor;
-  label: string;
-}
-
-const cables: CableType[] = [
-  { id: 1, color: "orange", label: "TX+" },
-  { id: 2, color: "green", label: "TX-" },
-  { id: 3, color: "blue", label: "RX+" },
-  { id: 4, color: "brown", label: "RX-" },
-  { id: 5, color: "white", label: "NC" },
-  { id: 6, color: "yellow", label: "NC" },
+const LAMPS_CONFIG = [
+  { id: 1, color: "text-yellow-400", label: "ZASILANIE" },
+  { id: 2, color: "text-cyan-400", label: "CHŁODZENIE" },
+  { id: 3, color: "text-blue-500", label: "KOMUNIKACJA" },
+  { id: 4, color: "text-orange-500", label: "NAPĘDY" },
+  { id: 5, color: "text-green-500", label: "BEZPIECZEŃSTWO" },
 ];
 
-const correctOrder = [1, 2, 3, 4, 5, 6];
-
-// ----------------------------------------------------
-//                     MAIN COMPONENT
-// ----------------------------------------------------
-
 const AutomatykGame = () => {
-  const [selectedCables, setSelectedCables] = useState<number[]>([]);
-  const [availableCables, setAvailableCables] = useState<CableType[]>([...cables]);
-  const [isComplete, setIsComplete] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
-  const [attempts, setAttempts] = useState(0);
+  const [gameState, setGameState] = useState<'quiz' | 'lore' | 'logic' | 'finish'>('quiz');
+  const [switches, setSwitches] = useState(new Array(12).fill(false));
+  const [activeLamps, setActiveLamps] = useState<number[]>([]);
+  const [generatedLogic, setGeneratedLogic] = useState<{label: string, condition: (sw: boolean[]) => boolean, text: string}[]>([]);
+  const [showSchoolInfo, setShowSchoolInfo] = useState(false);
 
-  // QUIZ STATES
-  const [showQuizIntro, setShowQuizIntro] = useState(false);
-  const [quizStarted, setQuizStarted] = useState(false);
+  // --- STATE QUIZU ---
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
-  const [quizFinished, setQuizFinished] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null);
   const [attemptNumber, setAttemptNumber] = useState<1 | 2>(1);
-  
-  useEffect(() => {
-    setAvailableCables([...cables].sort(() => Math.random() - 0.5));
+
+  const generateSolvableLogic = useCallback(() => {
+    const targetState = new Array(12).fill(0).map(() => Math.random() > 0.5);
+    const newLogic = LAMPS_CONFIG.map((lamp, idx) => {
+      const p1 = Math.floor(Math.random() * 12);
+      const p2 = (p1 + 1 + Math.floor(Math.random() * 10)) % 12;
+      const p3 = (p2 + 1 + Math.floor(Math.random() * 9)) % 12;
+      const isP1 = targetState[p1];
+      const isP2 = targetState[p2];
+      const isP3 = targetState[p3];
+      const op = Math.random() > 0.5 ? "&" : "|";
+      const condition = (sw: boolean[]) => {
+        const v1 = isP1 ? sw[p1] : !sw[p1];
+        const v2 = isP2 ? sw[p2] : !sw[p2];
+        const v3 = isP3 ? sw[p3] : !sw[p3];
+        return op === "&" ? (v1 && v2 && v3) : (v1 || (v2 && v3));
+      };
+      const text = `L${idx+1} [${lamp.label}]: ${isP1 ? '' : '!' }P${p1+1} ${op} ${isP2 ? '' : '!' }P${p2+1} ${op === '&' ? '&' : '|'} ${isP3 ? '' : '!' }P${p3+1}`;
+      return { label: lamp.label, condition, text };
+    });
+    setGeneratedLogic(newLogic);
+    setSwitches(new Array(12).fill(false));
   }, []);
 
-  const handleCableSelect = (cableId: number) => {
-    if (selectedCables.length < 6 && !selectedCables.includes(cableId)) {
-      const newSelected = [...selectedCables, cableId];
-      setSelectedCables(newSelected);
+  useEffect(() => {
+    if (generatedLogic.length > 0) {
+      const active = generatedLogic
+        .map((l, idx) => l.condition(switches) ? idx + 1 : null)
+        .filter(id => id !== null) as number[];
+      setActiveLamps(active);
+    }
+  }, [switches, generatedLogic]);
 
-      if (newSelected.length === 6) {
-        setIsComplete(true);
-        setAttempts(attempts + 1);
-        const correct = newSelected.every((id, index) => id === correctOrder[index]);
-        setIsCorrect(correct);
-        if (correct) setShowQuizIntro(true);
+  const handleQuizAnswer = (correct: boolean) => {
+    setLastAnswerCorrect(correct);
+    if (correct) {
+      setScore(prev => prev + (attemptNumber === 1 ? 1 : 0.5));
+      setTimeout(() => {
+        setLastAnswerCorrect(null);
+        if (currentQuestion + 1 < quizQuestions.length) {
+          setCurrentQuestion(q => q + 1);
+          setAttemptNumber(1); setShowHint(false);
+        } else {
+          generateSolvableLogic();
+          setGameState('lore');
+        }
+      }, 2000);
+    } else {
+      if (attemptNumber === 1) {
+        setAttemptNumber(2);
+        setTimeout(() => setLastAnswerCorrect(null), 1500);
+      } else {
+        setTimeout(() => {
+          setLastAnswerCorrect(null);
+          if (currentQuestion + 1 < quizQuestions.length) {
+            setCurrentQuestion(q => q + 1);
+            setAttemptNumber(1); setShowHint(false);
+          } else {
+            generateSolvableLogic();
+            setGameState('lore');
+          }
+        }, 2000);
       }
     }
   };
 
-  const handleReset = () => {
-    setSelectedCables([]);
-    setIsComplete(false);
-    setIsCorrect(false);
-    setAvailableCables([...cables].sort(() => Math.random() - 0.5));
-  };
-
-  const getCableColor = (color: CableColor) => {
-    const colorMap = {
-      orange: "bg-orange-500",
-      green: "bg-green-500",
-      blue: "bg-blue-500",
-      brown: "bg-amber-700",
-      white: "bg-gray-300",
-      yellow: "bg-yellow-400",
-    };
-    return colorMap[color];
-  };
-
-  // ---------------- QUIZ LOGIC ----------------
-
-    const handleAnswerClick = (correct: boolean) => {
-      setLastAnswerCorrect(correct);
-
-      if (correct) {
-        // dobra odpowiedź – dodaj punkty i przejdź dalej
-        setScore(prev => prev + (attemptNumber === 1 ? 1 : 0.5));
-        setTimeout(() => {
-          setLastAnswerCorrect(null);
-          nextQuestion();
-        }, 3000);
-      } else {
-        // zła odpowiedź
-        if (attemptNumber === 1) {
-          // pierwsza porażka – pozwól spróbować jeszcze raz
-          setAttemptNumber(2);
-          setTimeout(() => setLastAnswerCorrect(null), 1500);
-        } else {
-          // druga porażka – 0 pkt, idź dalej
-          setTimeout(() => {
-            setLastAnswerCorrect(null);
-            nextQuestion();
-          }, 3000);
-        }
-      }
-    };
-
-    const nextQuestion = () => {
-      if (currentQuestion + 1 < quizQuestions.length) {
-        setCurrentQuestion(q => q + 1);
-        setAttemptNumber(1);   // reset na nowe pytanie
-        setShowHint(false);
-      } else {
-        setQuizFinished(true);
-      }
-    };
-
-    const toggleHint = () => setShowHint(h => !h);
-
-  const resetQuiz = () => {
-    setQuizStarted(false);
-    setQuizFinished(false);
-    setScore(0);
-    setCurrentQuestion(0);
-  };
-
-  // ---------------- FEEDBACK TEXT ----------------
-  const getFeedbackMessage = () => {
-    if (score === 5) return "WOW! Perfekcyjnie! Masz talent do automatyki — widać, że to kierunek dla Ciebie!";
-    if (score >= 3) return "Świetna robota! Widać, że masz do tego smykałkę. Z takimi podstawami daleko zajdziesz!";
-    return "Nie przejmuj się! Każdy ekspert zaczynał od podstaw — masz potencjał, żeby zostać świetnym automatykiem!";
-  };
-
-    const CareerInfo = () => (
-      <div className="mt-6 text-left text-sm text-muted-foreground space-y-2">
-        <p><strong>Przedmioty rozszerzone:</strong> matematyka</p>
-        <p><strong>Zdobywane kwalifikacje:</strong> ELM.01, ELM.04 – montaż, uruchamianie i eksploatacja automatyki przemysłowej.</p>
-        <p><strong>Cele kształcenia:</strong> montaż, uruchamianie, obsługa, konserwacja i diagnostyka urządzeń automatyki.</p>
-        <p><strong>Gwarancja pracy:</strong> rozwój Przemysłu 4.0 = rosnące zapotrzebowanie na techników automatyków (m.in. Volkswagen, Phoenix Contact, Fibaro).</p>
-      </div>
-    );
-
   return (
-    <Card className="h-screen w-[35%] fixed left-0 top-0 border-r bg-card text-card-foreground flex flex-col p-6 overflow-y-auto">
-      {/* QUIZ INTRO AFTER COMPLETING GAME */}
-      {showQuizIntro && !quizStarted && !quizFinished && (
-        <div className="animate-fade-in text-center mt-10">
-          <h2 className="text-xl font-bold mb-4">GRATULACJE!</h2>
-          <p className="text-sm mb-6">Prawidłowo wykonałeś okablowanie RJ‑45. Teraz sprawdź się w krótkim quizie!</p>
-          <Button onClick={() => setQuizStarted(true)} className="w-full">Rozpocznij Quiz</Button>
-          <CareerInfo />
-        </div>
-      )}
+    <Card className="h-screen w-[35%] fixed left-0 top-0 border-r bg-card flex flex-col p-6 overflow-y-auto">
 
-      {quizFinished && (
+      {/* --- ETAP 1: QUIZ --- */}
+      {gameState === 'quiz' && (
         <div className="text-center animate-fade-in">
-          <h2 className="text-xl font-bold mb-4">Wynik: {score}/7</h2>
-          <p className="text-sm mb-6">{getFeedbackMessage()}</p>
-          <Button onClick={resetQuiz} className="w-full">Zagraj ponownie</Button>
-          <CareerInfo />
-        </div>
-      )}
-
-      {/* QUIZ */}
-      {quizStarted && !quizFinished && (
-        <div className="text-center">
-          <h3 className="text-lg mb-2">
-            Pytanie {currentQuestion + 1} / {quizQuestions.length}
-          </h3>
-
-          {/* OBRAZEK – większy, czytelny */}
+          <h3 className="text-lg mb-2 font-semibold">Pytanie {currentQuestion + 1} / {quizQuestions.length}</h3>
           {quizQuestions[currentQuestion].questionImage && (
-            <img
-              src={quizQuestions[currentQuestion].questionImage}
-              className="mx-auto w-64 md:w-80 rounded-lg shadow-md mb-4"
-              alt="ilustracja pytania"
-            />
+            <img src={quizQuestions[currentQuestion].questionImage} className="mx-auto w-full max-h-48 object-contain rounded-lg shadow-md mb-4 bg-white p-2" alt="zadanie" />
           )}
-
-          {/* TEKST PYTANIA */}
-          <p className="text-xl mb-3">{quizQuestions[currentQuestion].questionText}</p>
-
-          {/* PRZYCISK PODPOWIEDZI */}
-          <div className="mb-4">
-            <Button variant="outline" size="sm" onClick={toggleHint}>
+          <p className="text-xl mb-4 font-bold leading-snug">{quizQuestions[currentQuestion].questionText}</p>
+          <div className="mb-4 text-center">
+            <Button variant="outline" size="sm" onClick={() => setShowHint(!showHint)}>
               {showHint ? "Ukryj podpowiedź" : "Pokaż podpowiedź"}
             </Button>
-            {showHint && (
-              <div className="mt-2 text-sm text-muted-foreground italic">
-                {quizQuestions[currentQuestion].hint}
-              </div>
-            )}
-
-            {/* INFORMACJA O SZANSIE */}
-            <div className="mt-2 text-xs text-muted-foreground">
-              {attemptNumber === 1
-                ? "Masz dwie szanse – za drugą dobrą odpowiedź dostaniesz 0,5 pkt."
-                : "To Twoja ostatnia próba – brak punktów za błędną odpowiedź."}
+            {showHint && <div className="mt-2 text-sm text-muted-foreground italic bg-muted p-2 rounded">{quizQuestions[currentQuestion].hint}</div>}
+            <div className="mt-2 text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+              {attemptNumber === 1 ? "Dwie szanse (1 pkt)" : "Ostatnia szansa (0.5 pkt)"}
             </div>
           </div>
-
-          {/* PRAKTYCZNE ZASTOSOWANIE */}
           <details className="mb-4 text-left text-sm text-muted-foreground cursor-pointer">
             <summary className="font-semibold">Do czego mi się to przyda?</summary>
             <p className="mt-1">{quizQuestions[currentQuestion].practical}</p>
           </details>
-
-          {/* NATYCHMIASTOWY FEEDBACK */}
-          {lastAnswerCorrect !== null && (
-            <div
-              className={`mb-4 p-3 rounded-md border text-sm font-medium ${lastAnswerCorrect
-                ? "bg-green-100 text-green-800 border-green-300"
-                : "bg-red-100 text-red-800 border-red-300"
-                }`}
-            >
-              {lastAnswerCorrect
-                ? quizQuestions[currentQuestion].feedback.good
-                : quizQuestions[currentQuestion].feedback.bad}
-            </div>
-          )}
-
-          {/* ODPOWIEDZI */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3">
             {quizQuestions[currentQuestion].answers.map((ans) => (
-              <button
-                key={ans.id}
-                onClick={() => handleAnswerClick(ans.correct)}
-                className="border p-3 rounded-md hover:border-primary hover:bg-primary/5 transition"
-              >
+              <button key={ans.id} onClick={() => handleQuizAnswer(ans.correct)} className="border p-3 rounded-md hover:bg-accent text-sm text-left transition font-medium">
                 {ans.text}
               </button>
             ))}
           </div>
+          {lastAnswerCorrect !== null && (
+            <div className={`mt-4 p-3 rounded-md border text-sm font-bold ${lastAnswerCorrect ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+              {lastAnswerCorrect ? quizQuestions[currentQuestion].feedback.good : quizQuestions[currentQuestion].feedback.bad}
+            </div>
+          )}
         </div>
       )}
 
-      {/* ORIGINAL GAME (Hidden when quiz starts) */}
-      {!quizStarted && !showQuizIntro && !quizFinished && (
-        <>
-          <div className="mb-6 text-center">
-            <Cable className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
-            <h2 className="text-lg text-foreground mb-2">OKABLOWANIE RJ-45</h2>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Ułóż kable w prawidłowej kolejności zgodnie z normą T568B
-            </p>
-          </div>
-
-          {/* RJ-45 CONNECTOR */}
-          <div className="mb-8">
-            <div className="bg-muted border-4 border-border p-6 mx-auto max-w-md">
-              <div className="text-xs text-muted-foreground mb-2 text-center">ZŁĄCZE RJ-45</div>
-              <div className="flex gap-1 justify-center">
-                {[0, 1, 2, 3, 4, 5].map((index) => {
-                  const cable = selectedCables[index]
-                    ? cables.find((c) => c.id === selectedCables[index])
-                    : null;
-                  return (
-                    <div key={index} className="flex flex-col items-center">
-                      <div className={`w-8 h-24 border-2 border-border ${cable ? getCableColor(cable.color) : "bg-background"} transition-all duration-300`}>
-                        {cable && (
-                          <div className="h-full flex items-center justify-center">
-                            <span className="text-[8px] text-black font-bold writing-mode-vertical transform rotate-180">
-                              {cable.label}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <span className="text-[8px] text-muted-foreground mt-1">{index + 1}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Available Cables */}
-          {!isComplete && (
-            <div className="mb-6">
-              <p className="text-xs text-muted-foreground mb-3 text-center">
-                Wybierz kable w kolejności ({selectedCables.length}/6):
-              </p>
-              <div className="flex flex-wrap gap-3 justify-center">
-                {availableCables.map((cable) => (
-                  <button
-                    key={cable.id}
-                    onClick={() => handleCableSelect(cable.id)}
-                    disabled={selectedCables.includes(cable.id)}
-                    className={`px-4 py-3 border-2 border-border arcade-button transition-all ${selectedCables.includes(cable.id) ? "opacity-30 cursor-not-allowed" : "hover:border-primary cursor-pointer"}`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className={`w-6 h-6 ${getCableColor(cable.color)} border border-border`} />
-                      <span className="text-xs text-foreground">{cable.label}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Result */}
-          {isComplete && (
-            <div className="animate-slide-in-up">
-              <div className={`p-6 border-4 mb-6 text-center ${isCorrect ? "border-accent bg-accent/20" : "border-destructive bg-destructive/20"}`}>
-                {isCorrect ? (
-                  <>
-                    <CheckCircle2 className="w-12 h-12 text-accent mx-auto mb-3" />
-                    <h3 className="text-lg text-accent mb-2">ŚWIETNIE!</h3>
-                    <p className="text-xs text-accent leading-relaxed">
-                      Prawidłowo okablowałeś złącze RJ-45!
-                      <br />
-                      Próba {attempts}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <div className="text-4xl mb-3">❌</div>
-                    <h3 className="text-lg text-destructive mb-2">NIEPRAWIDŁOWO</h3>
-                    <p className="text-xs text-destructive leading-relaxed">
-                      Kolejność kabli nie jest zgodna z normą T568B.
-                      <br />
-                      Spróbuj ponownie! (Próba {attempts})
-                    </p>
-                  </>
-                )}
-              </div>
-
-              <Button
-                onClick={handleReset}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button"
-              >
-                {isCorrect ? "ZAGRAJ PONOWNIE" : "SPRÓBUJ JESZCZE RAZ"}
-              </Button>
-            </div>
-          )}
-
-          {!isComplete && attempts > 0 && (
-            <div className="mt-4 p-3 bg-muted/50 border-2 border-border text-center">
-              <p className="text-[10px] text-muted-foreground">
-                💡 Wskazówka: Standard T568B to najpopularniejszy schemat okablowania
-              </p>
-            </div>
-          )}
-        </>
+      {/* --- ETAP 2: LORE --- */}
+      {gameState === 'lore' && (
+        <div className="flex flex-col h-full justify-center text-center animate-in zoom-in-95">
+          <Factory className="w-20 h-20 mx-auto text-blue-600 mb-6" />
+          <h2 className="text-3xl font-black mb-4">SYSTEM OFFLINE</h2>
+          <p className="bg-slate-900 text-blue-100 p-6 rounded-2xl text-sm italic mb-8 border-b-4 border-blue-500">
+            "Teoria zaliczona! Ale linia produkcyjna stoi. Musisz ustawić 12 przełączników zgodnie z nowym schematem PLC, aby przywrócić pracę. Każda sekcja musi dostać zielone światło!"
+          </p>
+          <Button onClick={() => setGameState('logic')} className="h-16 bg-blue-600 hover:bg-blue-700 text-xl font-bold">
+            URUCHOM DIAGNOSTYKĘ
+          </Button>
+        </div>
       )}
+
+      {/* --- ETAP 3: LOGIKA --- */}
+      {gameState === 'logic' && (
+        <div className="animate-in fade-in slide-in-from-right-4">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-sm font-black flex items-center gap-2 text-blue-600"><Settings2 size={18}/> PLC LOGIC CORE</h3>
+            <Button variant="ghost" size="sm" onClick={generateSolvableLogic} className="text-[9px] border h-6">REGENERUJ KOD</Button>
+          </div>
+          <div className="bg-slate-950 p-4 rounded-xl border-t-2 border-blue-500 mb-6 font-mono text-slate-300">
+            <p className="text-blue-400 text-[9px] font-bold mb-2 tracking-widest uppercase">// PROCEDURAL_RECOVERY_SYS</p>
+            <div className="text-[10px] space-y-1">
+              {generatedLogic.map((line, idx) => {
+                const parts = line.text.split(':');
+                return (
+                  <p key={idx}>
+                    <span className="text-orange-400 font-bold">{parts[0]}</span>:
+                    <span className="text-cyan-300 italic">{parts[1]}</span>
+                  </p>
+                )
+              })}
+            </div>
+          </div>
+          <div className="grid grid-cols-5 gap-2 mb-8">
+            {LAMPS_CONFIG.map((l) => {
+              const active = activeLamps.includes(l.id);
+              return (
+                <div key={l.id} className="flex flex-col items-center">
+                  <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all ${active ? `${l.color} border-current shadow-lg bg-slate-800` : 'bg-slate-100 text-slate-300 border-slate-200'}`}>
+                    <Lightbulb size={18} fill={active ? "currentColor" : "none"} />
+                  </div>
+                  <span className="text-[6px] font-bold mt-1 text-center leading-tight uppercase">{l.label}</span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {switches.map((val, i) => (
+              <button key={i} onClick={() => {const n=[...switches]; n[i]=!n[i]; setSwitches(n);}} className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all ${val ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-slate-400'}`}>
+                <span className="text-[10px] font-mono font-bold">P{i+1}</span>
+                {val ? <ToggleRight size={22} /> : <ToggleLeft size={22} />}
+              </button>
+            ))}
+          </div>
+          {activeLamps.length === 5 && (
+            <Button onClick={() => setGameState('finish')} className="w-full h-14 bg-green-600 mt-6 font-black animate-bounce shadow-lg">
+              URUCHOM SYSTEM
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* --- ETAP 4: KONIEC + INFO O ZAWODZIE --- */}
+      {gameState === 'finish' && (
+        <div className="text-center animate-in zoom-in-95 py-6">
+          {!showSchoolInfo ? (
+            <>
+              <ShieldCheck className="w-20 h-20 mx-auto text-green-500 mb-6" />
+              <h2 className="text-3xl font-black mb-2 uppercase">MISJA UDANA!</h2>
+              <p className="text-sm text-slate-500 mb-8">System przywrócony. Twój wynik: <strong>{score}/7</strong></p>
+
+              <div className="flex flex-col gap-3">
+                <Button onClick={() => setShowSchoolInfo(true)} className="h-14 bg-blue-600 hover:bg-blue-700 font-bold flex gap-2 shadow-lg">
+                  <Briefcase size={20} /> DLACZEGO WARTO BYĆ AUTOMATYKIEM?
+                </Button>
+                <Button onClick={() => window.location.reload()} variant="outline" className="h-12">
+                  ZAGRAJ PONOWNIE
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="text-left animate-in slide-in-from-bottom-4">
+              <Button onClick={() => setShowSchoolInfo(false)} variant="ghost" className="mb-4 text-xs p-0 flex gap-1">← POWRÓT</Button>
+              <h3 className="text-xl font-black text-blue-600 mb-4 border-b pb-2 uppercase tracking-tighter">TWOJA PRZYSZŁOŚĆ W ZAWODZIE</h3>
+
+              <div className="space-y-4">
+                <section>
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-1">
+                    <GraduationCap size={14} className="text-blue-500"/> Kwalifikacje, które zdobędziesz:
+                  </h4>
+                  <div className="bg-slate-50 p-3 rounded-lg border text-[11px] font-bold text-slate-700 leading-tight">
+                    • ELM.01. Montaż i uruchamianie urządzeń automatyki przemysłowej<br/>
+                    • ELM.04. Eksploatacja układów automatyki przemysłowej
+                  </div>
+                </section>
+
+                <section>
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-1">
+                    <Briefcase size={14} className="text-blue-500"/> Gdzie znajdziesz pracę?
+                  </h4>
+                  <p className="text-[11px] text-slate-600 leading-relaxed italic">
+                    Wielkie firmy czekają na Ciebie: <strong>Volkswagen, Phoenix Contact, Fibaro czy Zakład Automatyki Kolejowej</strong>. Rynek potrzebuje specjalistów Przemysłu 4.0!
+                  </p>
+                </section>
+
+                <section>
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-1">
+                    <Info size={14} className="text-blue-500"/> Możliwe ścieżki kariery:
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2 text-[10px] font-semibold text-slate-700">
+                    <div className="bg-blue-50 p-2 rounded border border-blue-100 italic">Programista PLC</div>
+                    <div className="bg-blue-50 p-2 rounded border border-blue-100 italic">Główny Technolog</div>
+                    <div className="bg-blue-50 p-2 rounded border border-blue-100 italic">Kierownik Utrzymania Ruchu</div>
+                    <div className="bg-blue-50 p-2 rounded border border-blue-100 italic">Projektant Smart Home</div>
+                  </div>
+                </section>
+
+                <div className="bg-blue-600 text-white p-4 rounded-xl shadow-inner mt-4">
+                   <p className="text-[10px] leading-relaxed text-center font-medium">
+                     "Automatyka to branża, która wciąż się rozwija. Po ukończeniu szkoły możesz zostać nawet kierownikiem zakładu!"
+                   </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="mt-auto pt-4 border-t flex justify-between items-center text-[9px] text-slate-400 font-bold uppercase tracking-tighter">
+        <span>Kierunek: Technik Automatyk</span>
+        <div className="flex gap-2">
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+          <span>System Online</span>
+        </div>
+      </div>
     </Card>
   );
 };
