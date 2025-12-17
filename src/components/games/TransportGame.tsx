@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
-import Carriage from "@/components/ui/carriage";
+import Train from "@/components/ui/train";
 
 const cell = 85;
 const mapWidth = 80;
@@ -212,9 +212,7 @@ export default function TransportGame() {
             })
           )}
 
-        {[0, 1, 2].map((i) => (
-          <Carriage key={i} x={x} y={y} index={i} />
-        ))}
+        <Train x={x} y={y} />
 
 
           {activeSwitch && (
