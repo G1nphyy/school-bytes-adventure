@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------ */
-/*  ProgrammerGame.tsx  – Q7 fix: niezależne pola + usunięty blok     */
+/*  ProgrammerGame.tsx  – Styl InformatykGame + Centrowanie           */
 /* ------------------------------------------------------------------ */
 "use client";
 
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Code, CheckCircle2, XCircle, Lightbulb, Trophy, Terminal } from "lucide-react";
 
 /* ----------------- dane quizowe (7 pytań) ----------------- */
 let quizQuestions = [
@@ -219,17 +220,17 @@ function CodeBlock({ text, origin, index, dragId, isGhost }: any) {
   });
 
   return (
-    <motion.div
-      ref={drag}
-      layout
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -6 }}
-      className={`px-3 py-2 m-1 border rounded cursor-move bg-white shadow text-black text-sm font-mono ${isGhost ? "opacity-60" : ""}`}
-      style={{ opacity: isDragging ? 0.4 : 1, minWidth: 160 }}
-    >
-      <code>{text}</code>
-    </motion.div>
+      <motion.div
+          ref={drag}
+          layout
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          className={`px-3 py-2 m-1 border rounded cursor-move bg-white shadow text-black text-sm font-mono ${isGhost ? "opacity-60" : ""}`}
+          style={{ opacity: isDragging ? 0.4 : 1, minWidth: 160 }}
+      >
+        <code>{text}</code>
+      </motion.div>
   );
 }
 
@@ -244,58 +245,59 @@ function RowSlot({ rowIndex, value, onDropToRow, onSwapRows, highlight }: any) {
   });
 
   return (
-    <motion.div
-      ref={drop}
-      layout
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      whileHover={{ scale: 1.01 }}
-      className={`flex items-start gap-3 px-2 py-1 rounded ${isOver ? "ring-2 ring-offset-1 ring-primary/50" : ""}`}
-    >
-      <div className="w-10 text-right pr-2 text-gray-400 select-none">{rowIndex + 1}</div>
-      <div
-        className={`flex-1 rounded-md border px-3 py-2 bg-[linear-gradient(180deg,#0f172a, #020617)] text-white shadow-sm min-h-[40px] font-mono text-sm relative overflow-hidden`}
-        style={{ boxShadow: highlight ? "0 8px 30px rgba(37,99,235,0.12)" : undefined }}
+      <motion.div
+          ref={drop}
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          whileHover={{ scale: 1.01 }}
+          className={`flex items-start gap-3 px-2 py-1 rounded ${isOver ? "ring-2 ring-offset-1 ring-primary/50" : ""}`}
       >
-        <AnimatePresence>
-          {value ? (
-            <motion.div
-              key={value}
-              initial={{ opacity: 0, y: 6, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.98 }}
-            >
-              <CodeBlock text={value} origin={"row"} index={rowIndex} dragId={`row-${rowIndex}`} />
-            </motion.div>
-          ) : (
-            <motion.div key={"empty-" + rowIndex} initial={{ opacity: 0.4 }} animate={{ opacity: 0.7 }} className="text-gray-300 italic text-xs">
-              Przeciągnij tutaj fragment kodu...
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.div>
+        <div className="w-10 text-right pr-2 text-gray-400 select-none">{rowIndex + 1}</div>
+        <div
+            className={`flex-1 rounded-md border px-3 py-2 bg-[linear-gradient(180deg,#0f172a, #020617)] text-white shadow-sm min-h-[40px] font-mono text-sm relative overflow-hidden`}
+            style={{ boxShadow: highlight ? "0 8px 30px rgba(37,99,235,0.12)" : undefined }}
+        >
+          <AnimatePresence>
+            {value ? (
+                <motion.div
+                    key={value}
+                    initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                >
+                  <CodeBlock text={value} origin={"row"} index={rowIndex} dragId={`row-${rowIndex}`} />
+                </motion.div>
+            ) : (
+                <motion.div key={"empty-" + rowIndex} initial={{ opacity: 0.4 }} animate={{ opacity: 0.7 }} className="text-gray-300 italic text-xs">
+                  Przeciągnij tutaj fragment kodu...
+                </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
   );
 }
 
 /* ----------------- MiniGame component (in-editor dragging only) ----------------- */
-function MiniGame({ onFinish }: { onFinish: () => void }) {
+function MiniGame({ onFinish, addScore }: { onFinish: () => void, addScore: (points: number) => void }) {
   return (
-    <DndProvider backend={HTML5Backend}>
-      <MiniGameInner onFinish={onFinish} />
-    </DndProvider>
+      <DndProvider backend={HTML5Backend}>
+        <MiniGameInner onFinish={onFinish} addScore={addScore} />
+      </DndProvider>
   );
 }
 
-function MiniGameInner({ onFinish }: { onFinish: () => void }) {
+function MiniGameInner({ onFinish, addScore }: { onFinish: () => void, addScore: (points: number) => void }) {
   const [pool, setPool] = useState(() => shuffle(editorTask.pool));
   const [rows, setRows] = useState(() => Array(editorTask.correct.length).fill(null));
-  const [feedback, setFeedback] = useState("");
+  const [feedback, setFeedback] = useState<{ok: boolean, msg: string} | null>(null);
   const [attempts, setAttempts] = useState(0);
   const [hintsVisible, setHintsVisible] = useState(0);
   const [successPending, setSuccessPending] = useState(false);
   const successTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [usefulnessVisible, setUsefulnessVisible] = useState(false);
+  const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -304,6 +306,7 @@ function MiniGameInner({ onFinish }: { onFinish: () => void }) {
   }, []);
 
   const dropFromPoolToRow = useCallback((poolIndex: number, rowIndex: number) => {
+    if(completed) return;
     setPool((prevPool) => {
       const copy = [...prevPool];
       const [item] = copy.splice(poolIndex, 1);
@@ -315,9 +318,10 @@ function MiniGameInner({ onFinish }: { onFinish: () => void }) {
       });
       return copy;
     });
-  }, []);
+  }, [completed]);
 
   const moveRowToRow = useCallback((fromRow: number, toRow: number) => {
+    if(completed) return;
     setRows((prev) => {
       const copy = [...prev];
       const tmp = copy[fromRow];
@@ -325,9 +329,10 @@ function MiniGameInner({ onFinish }: { onFinish: () => void }) {
       copy[toRow] = tmp;
       return copy;
     });
-  }, []);
+  }, [completed]);
 
   const moveRowToPool = useCallback((rowIndex: number) => {
+    if(completed) return;
     setRows((prev) => {
       const copy = [...prev];
       const item = copy[rowIndex];
@@ -335,15 +340,15 @@ function MiniGameInner({ onFinish }: { onFinish: () => void }) {
       if (item) setPool((p) => [...p, item]);
       return copy;
     });
-  }, []);
+  }, [completed]);
 
   const handleDropToRow = useCallback(
-    (item: any, targetRowIndex: number) => {
-      const { origin, index } = item;
-      if (origin === "pool") dropFromPoolToRow(index, targetRowIndex);
-      else if (origin === "row") moveRowToRow(index, targetRowIndex);
-    },
-    [dropFromPoolToRow, moveRowToRow]
+      (item: any, targetRowIndex: number) => {
+        const { origin, index } = item;
+        if (origin === "pool") dropFromPoolToRow(index, targetRowIndex);
+        else if (origin === "row") moveRowToRow(index, targetRowIndex);
+      },
+      [dropFromPoolToRow, moveRowToRow]
   );
 
   const [, dropToPool] = useDrop({
@@ -358,27 +363,40 @@ function MiniGameInner({ onFinish }: { onFinish: () => void }) {
     setAttempts((a) => a + 1)
 
     if (isCorrect) {
-      let seconds = 5
-      setFeedback(`✅ Poprawnie! Przejście za ${seconds} s…`)
-      setSuccessPending(true)
+      setCompleted(true);
+      const points = Math.max(0, 30 - (attempts * 5) - (hintsVisible * 5));
+      // Prosta punktacja: max 30, kara za próby i podpowiedzi, ale w tym flow dajemy stałą nagrodę za sukces
+      // W InformatykGame logika punktacji jest bardziej złożona, tu uprościmy:
+      // Jeśli sukces w 1 próbie: 30 pkt. Jeśli w kolejnych: 15 pkt.
+      const reward = attempts === 0 ? 30 : 15;
+      const penalty = hintsVisible * 5;
+      const finalScore = Math.max(0, reward - penalty);
+
+      addScore(finalScore);
+
+      let seconds = 3;
+      setFeedback({ ok: true, msg: `PRAWIDŁOWO! Przejście za ${seconds} s…` });
+      setSuccessPending(true);
 
       successTimerRef.current = setInterval(() => {
-        seconds -= 1
-
+        seconds -= 1;
         if (seconds > 0) {
-          setFeedback(`✅ Poprawnie! Przejście za ${seconds} s…`)
+          setFeedback({ ok: true, msg: `PRAWIDŁOWO! Przejście za ${seconds} s…` });
         } else {
-          clearInterval(successTimerRef.current!)
-          setFeedback("")
-          setSuccessPending(false)
-          onFinish()
+          clearInterval(successTimerRef.current!);
+          onFinish();
         }
-      }, 1000)
+      }, 1000);
+
     } else {
-      setFeedback("❌ Kolejność nie jest poprawna — popraw i sprawdź ponownie.")
-      setHintsVisible((h) => Math.min(editorTask.hints.length, h + 1))
+      if (attempts >= 2) {
+        // Ostatnia szansa / koniec prób - tu pozwalamy próbować do skutku ale z komunikatem błędu
+        setFeedback({ ok: false, msg: "BŁĄD. Sprawdź podpowiedzi i spróbuj ponownie." });
+      } else {
+        setFeedback({ ok: false, msg: "BŁĄD. Kolejność instrukcji jest niepoprawna." });
+      }
     }
-  }, [rows, onFinish])
+  }, [rows, onFinish, attempts, hintsVisible, addScore]);
 
 
   const [lastDroppedRow, setLastDroppedRow] = useState<number | null>(null);
@@ -390,11 +408,11 @@ function MiniGameInner({ onFinish }: { onFinish: () => void }) {
   }, [lastDroppedRow]);
 
   const onDropToRowWithHighlight = useCallback(
-    (item: any, targetRow: number) => {
-      handleDropToRow(item, targetRow);
-      setLastDroppedRow(targetRow);
-    },
-    [handleDropToRow]
+      (item: any, targetRow: number) => {
+        handleDropToRow(item, targetRow);
+        setLastDroppedRow(targetRow);
+      },
+      [handleDropToRow]
   );
 
   function PoolBlock({ text, idx }: { text: string; idx: number }) {
@@ -404,149 +422,122 @@ function MiniGameInner({ onFinish }: { onFinish: () => void }) {
       collect: (m) => ({ isDragging: !!m.isDragging() }),
     });
     return (
-      <motion.div
-        ref={drag}
-        layout
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0 }}
-        className="px-3 py-2 m-1 border rounded cursor-move bg-white shadow text-black text-sm font-mono"
-        style={{ opacity: isDragging ? 0.5 : 1, minWidth: 160 }}
-      >
-        <code>{text}</code>
-      </motion.div>
+        <motion.div
+            ref={drag}
+            layout
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="px-3 py-2 m-1 border rounded cursor-move bg-white shadow text-black text-sm font-mono"
+            style={{ opacity: isDragging ? 0.5 : 1, minWidth: 160 }}
+        >
+          <code>{text}</code>
+        </motion.div>
     );
   }
 
   const placedCount = rows.filter(Boolean).length;
 
   return (
-    <Card className="p-6 border-4 space-y-4 max-w-3xl mx-auto">
-      <h2 className="text-xl font-bold">Mini-gra: Rozsypany kod</h2>
-      <p className="text-sm italic">{editorTask.lore}</p>
-      <p className="font-semibold">{editorTask.question}</p>
-
-      {/* IDE-like editor */}
-      <div className="mt-3">
-        <div className="bg-slate-800 rounded-md p-3">
-          {rows.map((val, idx) => (
-            <div key={idx} className="mb-2">
-              <RowSlot
-                rowIndex={idx}
-                value={val}
-                onDropToRow={onDropToRowWithHighlight}
-                onSwapRows={moveRowToRow}
-                highlight={lastDroppedRow === idx}
-              />
-            </div>
-          ))}
+      <Card className="p-6 border-4 space-y-4 max-w-3xl w-full mx-auto bg-card text-card-foreground">
+        <div className="text-center mb-4">
+          <Terminal className="w-10 h-10 text-primary mx-auto mb-2 animate-pixel-float" />
+          <h2 className="text-lg font-bold">ETAP 2: MINI-GRA KODOWA</h2>
+          <p className="text-xs text-muted-foreground">Ułóż rozsypany algorytm w poprawnej kolejności.</p>
         </div>
-      </div>
 
-      {/* Pool */}
-      <div className="mt-2">
-        <h3 className="font-semibold text-sm mb-1">Dostępne fragmenty kodu</h3>
-        <div ref={dropToPool} className="min-h-[80px] p-2 border-2 border-dashed rounded bg-gray-100 flex flex-wrap">
-          {pool.length === 0 ? (
-            <div className="text-xs italic text-gray-500">Brak dostępnych fragmentów (wszystkie są umieszczone w wierszach)</div>
-          ) : (
-            pool.map((t, i) => <PoolBlock key={i} text={t} idx={i} />)
+        <p className="text-sm italic text-center bg-muted/50 p-2 rounded">{editorTask.lore}</p>
+        <p className="font-bold text-center">{editorTask.question}</p>
+
+        {/* IDE-like editor */}
+        <div className="mt-3">
+          <div className="bg-slate-900 rounded-md p-4 border-2 border-slate-700">
+            {rows.map((val, idx) => (
+                <div key={idx} className="mb-2">
+                  <RowSlot
+                      rowIndex={idx}
+                      value={val}
+                      onDropToRow={onDropToRowWithHighlight}
+                      onSwapRows={moveRowToRow}
+                      highlight={lastDroppedRow === idx}
+                  />
+                </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Pool */}
+        <div className="mt-2">
+          <h3 className="font-semibold text-sm mb-1">Dostępne fragmenty kodu</h3>
+          <div ref={dropToPool} className="min-h-[80px] p-2 border-2 border-dashed border-primary/30 rounded bg-accent/5 flex flex-wrap gap-2 justify-center">
+            {pool.length === 0 ? (
+                <div className="text-xs italic text-muted-foreground self-center">Wszystkie fragmenty użyte</div>
+            ) : (
+                pool.map((t, i) => <PoolBlock key={i} text={t} idx={i} />)
+            )}
+          </div>
+        </div>
+
+        {/* Hints */}
+        <div className="space-y-3 pt-2">
+          {hintsVisible < editorTask.hints.length && !completed && (
+              <Button
+                  onClick={() => {
+                    setHintsVisible(prev => prev + 1);
+                    addScore(-5); // Penalizacja od razu przy odkryciu? W InformatykGame jest po prostu licznik, tu upraszczamy.
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button"
+              >
+                💡 POKAŻ PODPOWIEDŹ ({hintsVisible + 1}/{editorTask.hints.length}) (KOSZT: 5 PKT)
+              </Button>
           )}
-        </div>
-      </div>
 
-      {/* Hints */}
-      <div className="mt-2">
-        <div className="flex justify-between items-center">
-          <h4 className="font-semibold">Podpowiedzi</h4>
-          <div className="text-xs text-gray-400">pokazane: {hintsVisible}/{editorTask.hints.length}</div>
-        </div>
-        <div className="mt-2 space-y-1">
-          {editorTask.hints.slice(0, hintsVisible).map((h, i) => (
-            <div key={i} className="text-xs p-2 bg-yellow-50 border rounded text-gray-700">{h}</div>
-          ))}
-        </div>
-        <div className="mt-2 flex gap-2">
-          <Button size="sm" variant="outline" onClick={() => setHintsVisible((h) => Math.min(editorTask.hints.length, h + 1))}>
-            Pokaż kolejną podpowiedź
-          </Button>
-          <Button size="sm" variant="secondary" onClick={() => setHintsVisible(0)}>
-            Resetuj podpowiedzi
-          </Button>
-        </div>
-      </div>
-
-      {/* Usefulness – pokazywane / ukrywane */}
-      <div className="mt-3">
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => setUsefulnessVisible((v) => !v)}
-        >
-          {usefulnessVisible ? "Ukryj" : "Pokaż"} – Do czego przyda mi się ta wiedza?
-        </Button>
-
-        <AnimatePresence>
-          {usefulnessVisible && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="overflow-hidden"
-            >
-              <div className="mt-2 p-3 bg-secondary/10 border rounded">
-                <h4 className="font-semibold">Do czego przyda mi się ta wiedza?</h4>
-                <ul className="text-xs list-disc ml-5 mt-2">
-                  {editorTask.usefulness.map((u, i) => (
-                    <li key={i}>{u}</li>
-                  ))}
-                </ul>
+          {hintsVisible > 0 && (
+              <div className="space-y-2">
+                {editorTask.hints.slice(0, hintsVisible).map((h, i) => (
+                    <div key={i} className="text-xs p-3 bg-secondary/10 border-2 border-secondary text-secondary rounded animate-slide-in-up">
+                      <span className="font-bold">Podpowiedź {i+1}:</span> {h}
+                    </div>
+                ))}
               </div>
-            </motion.div>
           )}
-        </AnimatePresence>
-      </div>
+        </div>
 
-      {/* Feedback */}
-      <div>
+        {/* Feedback & Result */}
         {feedback && (
-          <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`p-2 rounded ${feedback.startsWith("✅") ? "bg-green-50 border border-green-200 text-green-800" : "bg-red-50 border border-red-200 text-red-800"}`}
-          >
-            {feedback}
-          </motion.div>
+            <div className={`p-4 border-4 text-center animate-fade-in ${feedback.ok ? "border-accent bg-accent/20 text-accent" : "border-destructive bg-destructive/20 text-destructive"}`}>
+              {feedback.ok ? <CheckCircle2 className="w-8 h-8 mx-auto mb-2"/> : <XCircle className="w-8 h-8 mx-auto mb-2"/>}
+              <p className="font-bold">{feedback.msg}</p>
+            </div>
         )}
-        {!feedback && placedCount > 0 && <div className="text-xs text-gray-400 mt-1">Umieszczono {placedCount}/{rows.length} fragmentów</div>}
-      </div>
 
-      {/* Controls */}
-      <div className="flex gap-2 mt-3">
-        <Button className="w-full" onClick={validate} disabled={successPending}>
-          Sprawdź
-        </Button>
+        {/* Controls */}
+        <div className="space-y-3 mt-4">
+          {!completed && (
+              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 text-md" onClick={validate} disabled={successPending}>
+                SPRAWDŹ ROZWIĄZANIE
+              </Button>
+          )}
 
-        <Button
-          className="w-full"
-          variant="outline"
-          onClick={() => {
-            setPool(shuffle(editorTask.pool));
-            setRows(Array(editorTask.correct.length).fill(null));
-            setFeedback("");
-            setHintsVisible(0);
-            setAttempts(0);
-          }}
-        >
-          Resetuj
-        </Button>
-      </div>
-
-      <div className="text-xs text-gray-500 mt-1">
-        Jeśli odpowiedź jest niepoprawna — poprawiaj do skutku. Po poprawnym ułożeniu nastąpi 5-sekundowe opóźnienie, a następnie automatyczne przejście dalej.
-      </div>
-    </Card>
+          {!completed && (
+              <Button
+                  className="w-full"
+                  variant="ghost"
+                  onClick={() => {
+                    setPool(shuffle(editorTask.pool));
+                    setRows(Array(editorTask.correct.length).fill(null));
+                    setFeedback(null);
+                    setHintsVisible(0);
+                    setAttempts(0);
+                  }}
+              >
+                Resetuj planszę
+              </Button>
+          )}
+        </div>
+      </Card>
   );
 }
 
@@ -559,135 +550,235 @@ export default function ProgrammerGame() {
   const [view, setView] = useState<View>("quiz");
   const [qIndex, setQIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, any>>({});
-  const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null);
-  const [score, setScore] = useState(0);
+  const [showResult, setShowResult] = useState(false);
+  const [feedback, setFeedback] = useState<{ ok: boolean; msg: string; explanation?: string } | null>(null);
+  const [totalScore, setTotalScore] = useState(0);
+  const [quizScore, setQuizScore] = useState(0);
   const [locked, setLocked] = useState(false);
+
+  // Hint states per question
+  const [hintLevel, setHintLevel] = useState(0);
+  const [showUsefulness, setShowUsefulness] = useState(false);
 
   const q = quizQuestions[qIndex];
 
   /* ------------ pomoc ------------ */
-  const updateAnswer = (val: any) => setAnswers((a) => ({ ...a, [q.id]: val }));
+  const updateAnswer = (val: any) => {
+    if(showResult) return;
+    setAnswers((a) => ({ ...a, [q.id]: val }));
+  }
 
-  const check = () => {
-    if (locked) return;
+  // Obsługa natychmiastowego kliknięcia dla pytań jednokrotnego wyboru
+  const handleSingleChoice = (answerId: string) => {
+    if (showResult || locked) return;
+
+    // Zapisz odpowiedź
+    setAnswers((a) => ({ ...a, [q.id]: answerId }));
+
     setLocked(true);
+    setShowResult(true);
+    setShowUsefulness(false);
 
+    // Znajdź poprawną odpowiedź w danych
+    const isCorrect = answerId === q.answers.find((x) => x.correct)?.id;
+
+    if (isCorrect) {
+      const points = 10;
+      setQuizScore(s => s + points);
+      setTotalScore(s => s + points);
+      setFeedback({ ok: true, msg: "PRAWIDŁOWO! +10 PKT" });
+    } else {
+      setFeedback({ ok: false, msg: "BŁĄD!", explanation: "Sprawdź podpowiedzi lub spróbuj zrozumieć dlaczego." });
+    }
+    setLocked(false);
+  };
+
+  // Funkcja sprawdzająca (dla pozostałych typów pytań)
+  const check = () => {
+    if (locked || showResult) return;
+
+    // Walidacja czy cokolwiek zaznaczono
     const user = answers[q.id];
+    if (user === undefined || user === "" || (Array.isArray(user) && user.length === 0)) return;
+
+    setLocked(true);
+    setShowResult(true);
+    setShowUsefulness(false);
+
     let ok = false;
 
-    if (q.type === "single")
-      ok = user === q.answers.find((x) => x.correct)?.id;
-
-    if (q.type === "multiple")
+    if (q.type === "multiple") {
       ok = JSON.stringify((user || []).sort()) === JSON.stringify(q.correct?.sort());
-
-    if (q.type === "combo") {
+    }
+    else if (q.type === "combo") {
       const textVal = answers[q.id + "_text"];
       const choiceVal = answers[q.id];
-
-      // Sprawdzamy krótką odpowiedź
       const textAccepted = [q.correctText, ...(q.acceptable || [])]
-        .map((x) => x.toLowerCase().trim());
+          .map((x) => x.toLowerCase().trim());
       const textOk = textAccepted.includes((textVal || "").toLowerCase().trim());
-
-      // Sprawdzamy wybór A/B/C/D – poprawna to C
       const choiceOk = choiceVal === "c";
-
       ok = textOk && choiceOk;
-    } else if (q.type === "short") {
+    }
+    else if (q.type === "short") {
       const accepted = [q.correctText, ...(q.acceptable || [])]
-        .map((x) => x.toLowerCase().trim());
+          .map((x) => x.toLowerCase().trim());
       ok = accepted.includes((user || "").toLowerCase().trim());
     }
 
-    setFeedback({ ok, msg: ok ? "🎉 Dobrze!" : "❌ Źle – spróbuj ponownie." });
-
-    if (ok && !answers[q.id + "_scored"]) {
-      setScore((s) => s + 1);
-      setAnswers((a) => ({ ...a, [q.id + "_scored"]: true }));
-    }
-
     if (ok) {
-      setTimeout(() => {
-        setLocked(false);
-        setFeedback(null);
-
-        if (qIndex < quizQuestions.length - 1) {
-          setQIndex((i) => i + 1);
-        } else {
-          setView("minigame");
-        }
-      }, 1500);
+      const points = 10;
+      setQuizScore(s => s + points);
+      setTotalScore(s => s + points);
+      setFeedback({ ok: true, msg: "PRAWIDŁOWO! +10 PKT" });
     } else {
-      setLocked(false);
+      setFeedback({ ok: false, msg: "BŁĄD!", explanation: "Sprawdź podpowiedzi lub spróbuj zrozumieć dlaczego." });
     }
+    setLocked(false);
   };
 
-  /* ------------ podpowiedzi & „do czego przyda mi się” ------------ */
-  const [hintsOpen, setHintsOpen] = useState(false);
-  const [useOpen, setUseOpen] = useState(false);
+  const handleNextQuestion = () => {
+    setShowResult(false);
+    setFeedback(null);
+    setHintLevel(0);
+    setShowUsefulness(false);
+    setLocked(false);
+
+    if (qIndex < quizQuestions.length - 1) {
+      setQIndex((i) => i + 1);
+    } else {
+      setView("minigame");
+    }
+  }
 
   /* ------------ render konkretnego pytania ------------ */
-  function renderQuestion() {
+  function renderQuestionInputs() {
     const val = answers[q.id];
+
     if (q.type === "single") {
       return (
-          <div className="grid grid-cols-2 gap-2">
-            {q.answers.map((a) => (
-                <button
-                    key={a.id}
-                    onClick={() => updateAnswer(a.id)}
-                    className={`p-3 border rounded text-left ${val === a.id ? "bg-primary/20 border-primary" : "bg-background border-border"}`}
-                >
-                  {a.text}
-                </button>
-            ))}
+          <div className="space-y-3">
+            {q.answers.map((a, index) => {
+              const isCorrectAnswer = a.correct;
+              const isSelected = val === a.id;
+              const showCorrect = showResult && isCorrectAnswer;
+              const showWrong = showResult && isSelected && !isCorrectAnswer;
+
+              // Base styles from InformatykGame
+              const baseClasses = "w-full justify-start text-left arcade-button transition-all duration-200 cursor-pointer p-4 text-xs border h-auto whitespace-normal";
+              let stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30";
+
+              if(showResult) {
+                if (showCorrect) {
+                  stateClasses = "border-accent bg-accent/20 text-accent font-bold cursor-not-allowed";
+                } else if (showWrong) {
+                  stateClasses = "border-destructive bg-destructive/20 text-destructive font-bold cursor-not-allowed";
+                } else if (isCorrectAnswer) {
+                  // Pokaż poprawną, jeśli użytkownik wybrał źle
+                  stateClasses = "border-accent bg-accent/10 text-accent cursor-not-allowed";
+                } else {
+                  stateClasses = "border-border bg-background/50 text-muted-foreground opacity-60 cursor-not-allowed";
+                }
+              } else if (isSelected) {
+                stateClasses = "border-primary bg-primary/20 text-primary font-bold";
+              } else {
+                // Default hover state
+                stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30 hover:bg-background/5 hover:text-foreground";
+              }
+
+              return (
+                  <Button
+                      key={a.id}
+                      onClick={() => handleSingleChoice(a.id)}
+                      variant="outline"
+                      disabled={showResult}
+                      className={`${baseClasses} ${stateClasses}`}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                        <span className="flex-grow">
+                             {String.fromCharCode(65 + index)}. {a.text}
+                        </span>
+                      {showCorrect && <CheckCircle2 className="w-5 h-5 ml-2" />}
+                      {showWrong && <XCircle className="w-5 h-5 ml-2" />}
+                    </div>
+                  </Button>
+              )
+            })}
           </div>
       );
     }
     if (q.type === "multiple") {
       return (
-          <div className="space-y-2">
-            {q.answers.map((a) => (
-                <label key={a.id} className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox
-                      checked={(val || []).includes(a.id)}
-                      onCheckedChange={(chk) => {
-                        const arr = val || [];
-                        updateAnswer(chk ? [...arr, a.id] : arr.filter((x: string) => x !== a.id));
-                      }}
-                  />
-                  <span>{a.text}</span>
-                </label>
-            ))}
+          <div className="space-y-3">
+            {q.answers.map((a) => {
+              const isSelected = (val || []).includes(a.id);
+              // Stylizacja checkboxa
+              const containerClass = isSelected
+                  ? "border-primary bg-primary/10"
+                  : "border-border hover:border-primary/50 bg-background hover:shadow-md hover:shadow-primary/30";
+
+              return (
+                  <div key={a.id}
+                       className={`flex items-center gap-3 p-4 rounded border arcade-button transition-all cursor-pointer ${showResult ? 'opacity-80 pointer-events-none' : ''} ${containerClass}`}
+                       onClick={() => {
+                         if(showResult) return;
+                         const arr = val || [];
+                         updateAnswer(isSelected ? arr.filter((x: string) => x !== a.id) : [...arr, a.id]);
+                       }}
+                  >
+                    <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => {}} // handled by div click
+                        className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground border-primary"
+                    />
+                    <span className="text-xs">{a.text}</span>
+                  </div>
+              )
+            })}
           </div>
       );
     }
     if (q.type === "short") {
       return (
-          <Input placeholder="Wpisz odpowiedź..." value={val || ""} onChange={(e) => updateAnswer(e.target.value)}/>
+          <div className="space-y-2">
+            <Input
+                placeholder="Wpisz odpowiedź..."
+                value={val || ""}
+                onChange={(e) => updateAnswer(e.target.value)}
+                disabled={showResult}
+                className="border-2 border-primary/50 focus-visible:ring-0 focus-visible:border-primary text-lg p-6"
+            />
+          </div>
       );
     }
     if (q.type === "combo") {
       return (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {/* Input – osobny stan */}
-            <Input
-                placeholder="Wpisz odpowiedź..."
-                value={answers[q.id + "_text"] || ""}
-                onChange={(e) => setAnswers((a) => ({...a, [q.id + "_text"]: e.target.value}))}
-            />
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground font-bold uppercase">Wartość zwrotna:</label>
+              <Input
+                  placeholder="Wpisz wynik (np. 10)..."
+                  value={answers[q.id + "_text"] || ""}
+                  onChange={(e) => setAnswers((a) => ({...a, [q.id + "_text"]: e.target.value}))}
+                  disabled={showResult}
+                  className="border-2 border-primary/50 p-6"
+              />
+            </div>
             {/* Przyciski – osobny stan */}
-            <div className="grid grid-cols-2 gap-2">
-              {q.answers.map((a) => (
-                  <button
-                      key={a.id}
-                      onClick={() => updateAnswer(a.id)}
-                      className={`p-3 border rounded text-left ${answers[q.id] === a.id ? "bg-primary/20 border-primary" : "bg-background border-border"}`}
-                  >
-                    {a.text}
-                  </button>
-              ))}
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground font-bold uppercase">Opis działania:</label>
+              <div className="grid grid-cols-1 gap-2">
+                {q.answers.map((a, index) => (
+                    <button
+                        key={a.id}
+                        onClick={() => updateAnswer(a.id)}
+                        disabled={showResult}
+                        className={`p-4 border rounded text-left text-xs transition-all arcade-button hover:shadow-md hover:shadow-primary/30 ${answers[q.id] === a.id ? "bg-primary/20 border-primary text-primary font-bold" : "bg-background border-border hover:border-primary"}`}
+                    >
+                      {String.fromCharCode(65 + index)}. {a.text}
+                    </button>
+                ))}
+              </div>
             </div>
           </div>
       );
@@ -695,99 +786,159 @@ export default function ProgrammerGame() {
   }
 
   return (
-    <div className="p-6 min-h-screen flex items-center justify-center">
-      {view === "quiz" && (
-        <Card className="p-6 border-4 space-y-4 max-w-3xl mx-auto">
-          <h2 className="text-xl font-bold">Pytanie {qIndex + 1}/{quizQuestions.length}</h2>
+      <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+        {view === "quiz" && (
+            <Card className="p-6 border-4 space-y-4 max-w-3xl w-full mx-auto shadow-2xl bg-card text-card-foreground">
+              <div className="text-center mb-6">
+                <Code className="w-12 h-12 text-primary mx-auto mb-2 animate-pixel-float" />
+                <h2 className="text-xl font-bold tracking-tight">ETAP 1: QUIZ PROGRAMISTYCZNY</h2>
+                <p className="text-lg font-bold text-primary">Punkty: {totalScore}</p>
+                <p className="text-xs text-muted-foreground">Pytanie {qIndex + 1}/{quizQuestions.length}. Poprawna odpowiedź: 10 PKT.</p>
+              </div>
 
-          {q.code && (
-            <pre className="bg-slate-900 text-slate-100 p-4 rounded-md overflow-x-auto text-sm">
-              <code>{q.code}</code>
-            </pre>
-          )}
-
-          <p className="font-semibold">{q.questionText}</p>
-
-          {renderQuestion()}
-
-          {feedback && (
-            <div
-              className={`p-3 rounded border ${
-                feedback.ok
-                  ? "bg-green-50 border-green-300 text-green-800"
-                  : "bg-red-50 border-red-300 text-red-800"
-              }`}
-            >
-              {feedback.msg}
-            </div>
-          )}
-
-          {/* przyciski pomocy */}
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => setHintsOpen((v) => !v)}>
-              Podpowiedzi
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => setUseOpen((v) => !v)}>
-              Do czego przyda mi się ta wiedza?
-            </Button>
-          </div>
-
-          {/* podpowiedzi */}
-          <AnimatePresence>
-            {hintsOpen && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="mt-2 space-y-1">
-                  {q.hints?.map((h, i) => (
-                    <div key={i} className="text-xs p-2 bg-yellow-50 border rounded text-gray-700">
-                      {h}
+              <div className="space-y-4">
+                {q.code && (
+                    <div className="bg-slate-950 text-slate-100 p-4 rounded-md border-2 border-slate-800 overflow-x-auto text-sm font-mono shadow-inner">
+                      <pre>{q.code}</pre>
                     </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                )}
 
-          {/* usefulness ogólne */}
-          <AnimatePresence>
-            {useOpen && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden"
+                <p className="font-semibold text-lg">{q.questionText}</p>
+
+                {renderQuestionInputs()}
+              </div>
+
+              {/* Sekcja Podpowiedzi */}
+              <div className="space-y-3 pt-4 border-t border-border/50">
+                {hintLevel < q.hints.length && !showResult && (
+                    <Button
+                        onClick={() => {
+                          setHintLevel(h => h + 1);
+                          setTotalScore(s => s - 2); // Koszt podpowiedzi
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button"
+                    >
+                      💡 POKAŻ PODPOWIEDŹ ({hintLevel + 1}/{q.hints.length}) (KOSZT: 2 PKT)
+                    </Button>
+                )}
+
+                {hintLevel > 0 && !showResult && (
+                    <div className="space-y-2 animate-slide-in-up">
+                      {q.hints.slice(0, hintLevel).map((h, i) => (
+                          <div key={i} className="p-3 border-2 border-secondary bg-secondary/10 text-secondary text-xs rounded">
+                            <span className="font-bold">Podpowiedź {i+1}:</span> {h}
+                          </div>
+                      ))}
+                    </div>
+                )}
+              </div>
+
+
+              {/* Result Block */}
+              {showResult && feedback && (
+                  <div className="space-y-4 animate-slide-in-up">
+                    <div
+                        className={`p-4 border-4 text-center ${
+                            feedback.ok
+                                ? "border-accent bg-accent/20 text-accent"
+                                : "border-destructive bg-destructive/20 text-destructive"
+                        }`}
+                    >
+                      {feedback.ok ? (
+                          <>
+                            <CheckCircle2 className="w-8 h-8 mx-auto mb-2" />
+                            <h3 className="text-lg font-bold">{feedback.msg}</h3>
+                          </>
+                      ) : (
+                          <>
+                            <XCircle className="w-8 h-8 mx-auto mb-2" />
+                            <h3 className="text-lg font-bold">{feedback.msg}</h3>
+                            {feedback.explanation && <p className="text-xs mt-1">{feedback.explanation}</p>}
+                          </>
+                      )}
+                    </div>
+
+                    <Button
+                        onClick={() => setShowUsefulness(!showUsefulness)}
+                        variant="outline"
+                        size="sm"
+                        className={`w-full border-2 ${showUsefulness ? 'border-primary/50 bg-primary/20' : 'border-border hover:border-primary/50'} text-foreground arcade-button hover:bg-primary/10 hover:text-primary-foreground`}
+                    >
+                      <Lightbulb className="w-4 h-4 mr-2" />
+                      DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
+                    </Button>
+
+                    {showUsefulness && (
+                        <div className="p-4 border-2 border-primary/50 bg-primary/10 text-primary-foreground animate-slide-in-up rounded">
+                          <ul className="text-xs list-disc ml-5 space-y-1">
+                            {q.usefulness?.map((u, i) => (
+                                <li key={i}>{u}</li>
+                            ))}
+                          </ul>
+                        </div>
+                    )}
+                  </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="pt-2">
+                {/* Przycisk SPRAWDŹ pokazujemy tylko dla typów innych niż 'single', bo 'single' sprawdza się samo */}
+                {!showResult && q.type !== "single" && (
+                    <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 text-md tracking-wider font-bold shadow-lg shadow-primary/20" onClick={check} disabled={locked}>
+                      SPRAWDŹ ODPOWIEDŹ
+                    </Button>
+                )}
+
+                {showResult && (
+                    <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 text-md tracking-wider font-bold shadow-lg shadow-primary/20" onClick={handleNextQuestion}>
+                      {qIndex < quizQuestions.length - 1 ? "NASTĘPNE PYTANIE" : "PRZEJDŹ DO ETAPU 2"}
+                    </Button>
+                )}
+              </div>
+            </Card>
+        )}
+
+        {view === "minigame" && (
+            <div className="flex flex-col items-center w-full">
+              <div className="mb-4 text-center bg-card p-4 rounded border-2 border-border shadow-md">
+                <p className="text-lg font-bold text-primary">Twój Wynik: {totalScore} PKT</p>
+              </div>
+              <MiniGame onFinish={() => setView("finished")} addScore={(points) => setTotalScore(s => s + points)} />
+            </div>
+        )}
+
+        {view === "finished" && (
+            <Card className="p-8 max-w-xl w-full text-center space-y-6 border-4 shadow-2xl animate-fade-in bg-card text-card-foreground mx-auto">
+              <div className="relative inline-block">
+                <Trophy className="w-20 h-20 text-yellow-500 mx-auto mb-4 animate-bounce drop-shadow-md" />
+              </div>
+
+              <div className="space-y-2">
+                <h1 className="text-3xl font-black text-foreground tracking-tight uppercase">Świetna robota!</h1>
+                <p className="text-muted-foreground uppercase tracking-widest text-sm">Ukończono ścieżkę Programisty</p>
+              </div>
+
+              <div className="bg-primary/10 border-2 border-primary/30 rounded-xl p-6 relative overflow-hidden">
+                <span className="relative z-10 text-xs text-muted-foreground font-bold uppercase">Twój Wynik Końcowy</span>
+                <div className="relative z-10 text-6xl font-black text-primary mt-2 drop-shadow-sm">{totalScore} <span className="text-2xl font-medium text-foreground/60">PKT</span></div>
+              </div>
+
+              <div className="bg-muted/50 p-4 rounded-lg text-sm border border-border/50 italic text-muted-foreground">
+                {totalScore > ((quizQuestions.length * 10) + 20)
+                    ? "Masz zadatki na seniora! Kod i logika nie mają przed Tobą tajemnic."
+                    : "Dobre podstawy! Programowanie wymaga praktyki, więc nie poddawaj się."}
+              </div>
+
+              <Button
+                  className="w-full h-12 text-lg font-bold arcade-button"
+                  onClick={() => window.location.assign("/")}
               >
-                <div className="mt-2 p-3 bg-secondary/10 border rounded">
-                  <h4 className="font-semibold">Do czego przyda mi się ta wiedza?</h4>
-                  <ul className="text-xs list-disc ml-5 mt-2">
-                    {q.usefulness?.map((u, i) => (
-                      <li key={i}>{u}</li>
-                    ))}
-                  </ul>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <Button className="w-full" onClick={check} disabled={locked}>
-            Sprawdź
-          </Button>
-        </Card>
-      )}
-
-      {view === "minigame" && <MiniGame onFinish={() => setView("finished")} />}
-
-      {view === "finished" && (
-        <Card className="p-8 max-w-xl w-full text-center space-y-4">
-          <h1 className="text-3xl font-bold text-primary">Świetna robota 👏</h1>
-          <p>Twój wynik: {score} / {quizQuestions.length}</p>
-          <Button onClick={() => window.location.assign("/")}>Wróć do menu</Button>
-        </Card>
-      )}
-    </div>
+                WRÓĆ DO MENU
+              </Button>
+            </Card>
+        )}
+      </div>
   );
 }
