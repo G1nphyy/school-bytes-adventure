@@ -9,7 +9,6 @@ export default function Carriage({ x, y, index }: { x: number; y: number; index:
   const [frame, setFrame] = useState(0);
 
   useEffect(() => {
-    // Sprawdzamy, czy tablica ma elementy
     if (frames.length === 0) return;
 
     const interval = setInterval(() => {
@@ -18,9 +17,6 @@ export default function Carriage({ x, y, index }: { x: number; y: number; index:
 
     return () => clearInterval(interval);
   }, []);
-
-  // Debugowanie - sprawdź w konsoli czy licznik leci
-  // useEffect(() => { console.log("Aktualna klatka wagonika " + index + ":", frame); }, [frame]);
 
   return (
     <div
@@ -34,7 +30,7 @@ export default function Carriage({ x, y, index }: { x: number; y: number; index:
       }}
     >
       <img
-        src={frames[frame].src || frames[frame]} // Obsługa różnych bundlerów (Next.js vs Vite)
+        src={frames[frame].src || frames[frame]}
         alt={`Wagon klatka ${frame}`}
         className="w-full h-full object-contain"
       />

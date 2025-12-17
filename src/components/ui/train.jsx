@@ -16,7 +16,6 @@ import sprite7 from "@/assets/graphics/train/sprite_7.png";
 const trainFrames = [train0, train1, train2, train3];
 const carriageFrames = [sprite0, sprite1, sprite2, sprite3, sprite4, sprite5, sprite6, sprite7];
 
-// Lokomotywa
 function TrainHead({ x, y, frame }) {
   return (
     <div
@@ -34,7 +33,6 @@ function TrainHead({ x, y, frame }) {
   );
 }
 
-// Wagon
 function Carriage({ x, y, offset, frame }) {
   return (
     <div
@@ -52,7 +50,6 @@ function Carriage({ x, y, offset, frame }) {
   );
 }
 
-// Wrapper – cały pociąg
 export default function TrainSet({ x, y }) {
   const [frame, setFrame] = useState(0);
 
@@ -71,3 +68,4 @@ export default function TrainSet({ x, y }) {
     </>
   );
 }
+
