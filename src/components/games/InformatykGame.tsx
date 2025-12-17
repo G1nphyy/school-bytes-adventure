@@ -680,7 +680,7 @@ const InformatykGame = () => {
   };
 
   // -------------------------- PC ASSEMBLY LOGIC ---------------------------------
-
+  // TODO: Zrobić żeby było można dropnąć element na każdy slot, nie tylko poprawny 
   const handleAssemblyDrop = useCallback((componentId: number, targetSlotName: string, sourceSlotName: string | null) => {
     if (showAssemblyResult && assemblyAttempts >= 1) return;
 
@@ -1241,6 +1241,7 @@ const InformatykGame = () => {
               <p className="text-xs text-muted-foreground mb-3 text-center">
                 Dostępne podzespoły:
               </p>
+              {/*TODO: Zrobić napis "Wykorzystałeś wszystkie podzespoły !!!!!!"*/}
               <div className="flex flex-wrap gap-3 justify-center">
                 {assemblyComponents.map((component) => {
                   // Sprawdzamy, czy ten komponent jest już użyty (w dowolnym slocie)
