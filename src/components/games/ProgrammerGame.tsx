@@ -664,7 +664,7 @@ export default function ProgrammerGame() {
               const showWrong = showResult && isSelected && !isCorrectAnswer;
 
               // Base styles from InformatykGame
-              const baseClasses = "w-full justify-start text-left arcade-button transition-all duration-200 cursor-pointer p-4 text-xs border h-auto whitespace-normal";
+              const baseClasses = "w-full justify-start text-left arcade-button transition-all duration-200 cursor-pointer p-4 text-sm border h-auto border-2 rounded-xl whitespace-normal";
               let stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30";
 
               if(showResult) {
@@ -695,7 +695,7 @@ export default function ProgrammerGame() {
                   >
                     <div className="flex items-center justify-between w-full">
                         <span className="flex-grow">
-                             {String.fromCharCode(65 + index)}. {a.text}
+                             {a.text}
                         </span>
                       {showCorrect && <CheckCircle2 className="w-5 h-5 ml-2" />}
                       {showWrong && <XCircle className="w-5 h-5 ml-2" />}
@@ -718,7 +718,7 @@ export default function ProgrammerGame() {
 
               return (
                   <div key={a.id}
-                       className={`flex items-center gap-3 p-4 rounded border arcade-button transition-all cursor-pointer ${showResult ? 'opacity-80 pointer-events-none' : ''} ${containerClass}`}
+                       className={`flex items-center gap-3 p-4 border-2 rounded-xl arcade-button transition-all cursor-pointer h-auto whitespace-normal ${showResult ? 'opacity-80 pointer-events-none' : ''} ${containerClass}`}
                        onClick={() => {
                          if(showResult) return;
                          const arr = val || [];
@@ -745,7 +745,7 @@ export default function ProgrammerGame() {
                 value={val || ""}
                 onChange={(e) => updateAnswer(e.target.value)}
                 disabled={showResult}
-                className="border-2 border-primary/50 focus-visible:ring-0 focus-visible:border-primary text-lg p-6"
+                className="border-2 border-primary/50 focus-visible:ring-0 focus-visible:border-primary text-lg p-6 rounded-xl"
             />
           </div>
       );
@@ -761,7 +761,7 @@ export default function ProgrammerGame() {
                   value={answers[q.id + "_text"] || ""}
                   onChange={(e) => setAnswers((a) => ({...a, [q.id + "_text"]: e.target.value}))}
                   disabled={showResult}
-                  className="border-2 border-primary/50 p-6"
+                  className="border-2 border-primary/50 p-6 rounded-xl whitespace-normal"
               />
             </div>
             {/* Przyciski – osobny stan */}
@@ -773,9 +773,9 @@ export default function ProgrammerGame() {
                         key={a.id}
                         onClick={() => updateAnswer(a.id)}
                         disabled={showResult}
-                        className={`p-4 border rounded text-left text-xs transition-all arcade-button hover:shadow-md hover:shadow-primary/30 ${answers[q.id] === a.id ? "bg-primary/20 border-primary text-primary font-bold" : "bg-background border-border hover:border-primary"}`}
+                        className={`p-4 border rounded-xl h-auto whitespace-normal text-left text-sm transition-all arcade-button hover:shadow-md hover:shadow-primary/30 ${answers[q.id] === a.id ? "bg-primary/20 border-primary text-primary font-bold" : "bg-background border-border hover:border-primary"}`}
                     >
-                      {String.fromCharCode(65 + index)}. {a.text}
+                      {a.text}
                     </button>
                 ))}
               </div>

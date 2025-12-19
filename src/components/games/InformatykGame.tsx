@@ -1356,7 +1356,7 @@ const InformatykGame = () => {
               const isSelected = selectedAnswer === index;
               const showCorrect = showResult && isCorrectAnswer;
               const showWrong = showResult && isSelected && !isCorrectAnswer;
-              const baseClasses = "w-full justify-start text-left arcade-button transition-all duration-200 cursor-pointer p-4 text-xs";
+              const baseClasses = "w-full justify-start text-left arcade-button transition-all rounded-xl duration-200 cursor-pointer p-4 text-sm h-auto whitespace-normal";
 
               let stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30";
 
@@ -1386,7 +1386,7 @@ const InformatykGame = () => {
                   >
                     <div className="flex items-center justify-between w-full">
                     <span className="flex-grow">
-                        {String.fromCharCode(65 + index)}. {option}
+                        {option}
                     </span>
                       {showCorrect && <CheckCircle2 className="w-5 h-5 ml-2" />}
                       {showWrong && <XCircle className="w-5 h-5 ml-2" />}
