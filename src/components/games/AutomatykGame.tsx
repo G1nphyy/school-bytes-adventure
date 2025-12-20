@@ -187,8 +187,8 @@ const AutomatykGame = () => {
   };
 
   return (
-      <Card className="h-screen w-[35%] fixed left-0 top-0 border-r bg-card text-card-foreground flex flex-col p-6 overflow-y-auto animate-fade-in">
-
+     <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+        <Card className="w-full max-w-4xl animate-fade-in flex flex-col">
         {/* Kontener treści, który pcha stopkę w dół */}
         <div className="flex-grow pt-12">
 
@@ -207,7 +207,7 @@ const AutomatykGame = () => {
                     </div>
                 )}
 
-                <div className="mb-6">
+                <div className="mb-6 px-6">
                   <p className="text-lg font-bold leading-tight mb-6 text-foreground">{quizQuestions[currentQuestion].questionText}</p>
 
                   <div className="grid grid-cols-1 gap-3">
@@ -242,7 +242,7 @@ const AutomatykGame = () => {
                   </div>
                 </div>
 
-                <div className="space-y-4 mb-8">
+                <div className="space-y-4 mb-8 px-6">
                   {!showResult && (
                       <Button
                           variant="outline"
@@ -311,7 +311,7 @@ const AutomatykGame = () => {
 
           {/* --- ETAP 3: LOGIKA --- */}
           {gameState === 'logic' && (
-              <div className="animate-in fade-in slide-in-from-right-4 mb-8">
+              <div className="animate-in fade-in slide-in-from-right-4 mb-8 px-6">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-sm font-black flex items-center gap-2 text-primary uppercase tracking-widest"><Settings2 size={18}/> PLC Logic Core v2.1</h3>
                   <Button variant="outline" size="sm" onClick={generateSolvableLogic} className="text-[10px] h-8 arcade-button px-4 border-2">Regeneruj kod</Button>
@@ -377,7 +377,7 @@ const AutomatykGame = () => {
 
           {/* --- ETAP 4: KONIEC + INFO O ZAWODZIE --- */}
           {gameState === 'finish' && (
-              <div className="text-center animate-in zoom-in-95 py-6 mb-8">
+              <div className="text-center animate-in zoom-in-95 py-6 mb-8 px-6">
                 {!showSchoolInfo ? (
                     <>
                       <ShieldCheck className="w-24 h-24 mx-auto text-emerald-500 mb-6 drop-shadow-md" />
@@ -446,7 +446,7 @@ const AutomatykGame = () => {
         </div>
 
         {/* Stopka przypięta do dołu karty */}
-        <div className="mt-auto pt-6 border-t flex justify-between items-center text-[10px] text-muted-foreground font-black uppercase tracking-widest shrink-0">
+        <div className="mt-auto p-6 border-t flex justify-between items-center text-[10px] text-muted-foreground font-black uppercase tracking-widest shrink-0">
           <span className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-primary"></div>
             Technik Automatyk
@@ -457,6 +457,7 @@ const AutomatykGame = () => {
           </div>
         </div>
       </Card>
+    </div>
   );
 };
 
