@@ -6,6 +6,16 @@ import {
   Map as MapIcon, ShieldCheck, Lightbulb, HelpCircle, Info
 } from "lucide-react";
 import Train from "@/components/ui/train";
+import rails from "@/assets/graphics/train/rails.png";
+import point0 from "@/assets/graphics/train/point_0.png";
+import point1 from "@/assets/graphics/train/point_1.png";
+import point2 from "@/assets/graphics/train/point_2.png";
+import point3 from "@/assets/graphics/train/point_3.png";
+import point4 from "@/assets/graphics/train/point_4.png";
+import point5 from "@/assets/graphics/train/point_5.png";
+import point6 from "@/assets/graphics/train/point_6.png";
+
+const pointFrames = [point0, point1, point2, point3, point4, point5, point6];
 
 const cell = 85;
 const mapHeight = 10;
@@ -96,7 +106,7 @@ const railwayQuestions = [
 
 export default function TransportGame() {
   const [levelIndex, setLevelIndex] = useState(0);
-  const [level, setLevel] = useState(levels[0].map);
+  const [level, setLevel] = useState(levels[0].map.map(row => [...row]));
   const [x, setX] = useState(levels[0].start.x * cell);
   const [y, setY] = useState(levels[0].start.y * cell);
   const [rotation, setRotation] = useState(0);
@@ -108,6 +118,8 @@ export default function TransportGame() {
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [score, setScore] = useState(0);
+  const [isGameStarted, setIsGameStarted] = useState(false);
+  const [pointFrame, setPointFrame] = useState(0);
 
   // Stany quizu
   const [isQuizActive, setIsQuizActive] = useState(false);
@@ -119,6 +131,14 @@ export default function TransportGame() {
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const mapWidth = level[0].length;
+
+  // Punkt animacja
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPointFrame(prev => (prev + 1) % pointFrames.length);
+    }, 120);
+    return () => clearInterval(interval);
+  }, []);
 
   // Kamera: Resetowanie scrolla na start poziomu
   useEffect(() => {
@@ -170,7 +190,7 @@ export default function TransportGame() {
   const resetGame = (newLevelIndex = 0, fullReset = true) => {
     const nextLvl = levels[newLevelIndex];
     setLevelIndex(newLevelIndex);
-    setLevel(nextLvl.map);
+    setLevel(nextLvl.map.map(row => [...row]));
     setX(nextLvl.start.x * cell);
     setY(nextLvl.start.y * cell);
     setDirection([cell, 0]);
@@ -192,7 +212,7 @@ export default function TransportGame() {
   };
 
   const autoMove = () => {
-    if (gameOver || gameWon || isQuizActive) return;
+    if (!isGameStarted || gameOver || gameWon || isQuizActive) return;
 
     const speed = 2;
     let dx = direction[0];
@@ -223,6 +243,11 @@ export default function TransportGame() {
 
     const tile = level[gy][gx];
 
+    if (!transitioning && !["-", "T", "P", "E"].includes(tile)) {
+      setGameOver(true);
+      return;
+    }
+
     if (transitioning && tile === "-" && Math.abs(ny - gy * cell) < speed) {
       setTransitioning(false);
       setDirection([cell, 0]);
@@ -233,13 +258,13 @@ export default function TransportGame() {
       const key = `${gx}-${gy}`;
       const state = switchDirs[key] || "straight";
       setTransitioning(true);
-      const targetYDir = state === 'up' ? -cell : state === 'down' ? cell : 0;
+      const targetYDir = state === 'up' ? -cell / 4 : state === 'down' ? cell / 4 : 0;
       setTargetDir([cell, targetYDir]);
     }
 
     if (tile === "P") {
       setScore(prev => prev + 1);
-      const newLevel = [...level];
+      const newLevel = level.map(row => [...row]);
       newLevel[gy][gx] = "-";
       setLevel(newLevel);
     }
@@ -260,13 +285,13 @@ export default function TransportGame() {
     };
     frameId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frameId);
-  }, [x, y, direction, switchDirs, transitioning, targetDir, gameOver, gameWon, levelIndex, isQuizActive]);
+  }, [x, y, direction, switchDirs, transitioning, targetDir, gameOver, gameWon, levelIndex, isQuizActive, isGameStarted]);
 
   return (
       <div className="relative w-full h-screen overflow-hidden bg-slate-950 font-sans text-slate-50">
 
         {/* HUD: Punkty */}
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] pointer-events-none">
+        <div className="fixed top-4 left-[64%] -translate-x-1/2 z-[100] pointer-events-none">
           <div className="bg-black/60 px-8 py-3 rounded-full border-2 border-primary/30 backdrop-blur-lg flex items-center gap-4 shadow-[0_0_20px_rgba(59,130,246,0.2)]">
             <TrainIcon className="text-primary w-6 h-6" />
             <span className="text-2xl font-black uppercase tracking-tighter italic">Punkty: {score}</span>
@@ -414,65 +439,151 @@ export default function TransportGame() {
         {/* MAPA Z DYNAMICZNĄ SZEROKOŚCIĄ */}
         <Card className="h-screen w-[72%] fixed right-0 top-0 border-l border-white/5 bg-slate-900 flex flex-col overflow-hidden shadow-2xl">
           <div
-              ref={scrollContainerRef}
-              className="relative overflow-auto flex-1 cursor-crosshair custom-scrollbar"
+            ref={scrollContainerRef}
+            className={`relative flex-1 cursor-crosshair custom-scrollbar ${isGameStarted ? 'overflow-auto' : 'overflow-hidden'}`}
           >
-            <div className="relative bg-slate-800 shadow-inner rounded-sm" style={{ width: mapWidth * cell, height: mapHeight * cell }}>
+            <div
+              className="relative bg-slate-800 shadow-inner rounded-sm"
+              style={{ width: mapWidth * cell, height: mapHeight * cell }}
+            >
               {level.map((row, ry) =>
-                  row.map((tile, rx) => {
-                    const key = `${rx}-${ry}`;
-                    const isSwitch = tile === "T";
-                    const switchState = switchDirs[key] || "straight";
-                    return (
-                        <div
-                            key={key}
-                            onClick={isSwitch ? () => chooseDirection(rx, ry) : undefined}
-                            className={
-                              tile === "#"
-                                  ? "bg-slate-700 border border-slate-600 shadow-inner"
-                                  : tile === "E"
-                                      ? "bg-emerald-600/20 border-2 border-emerald-500 animate-pulse flex items-center justify-center after:content-['CEL'] after:text-emerald-500 after:text-[10px] after:font-black"
-                                      : tile === "P"
-                                          ? "bg-pink-500/20 border-2 border-pink-500 flex items-center justify-center after:content-['+1'] after:text-pink-500 after:text-[10px] after:font-black shadow-[0_0_15px_rgba(236,72,153,0.3)]"
-                                          : isSwitch
-                                              ? "bg-amber-500/10 border-2 border-amber-500/50 cursor-pointer hover:bg-amber-500/30 transition-all hover:scale-95 group"
-                                              : tile === "-"
-                                                  ? "bg-slate-700/50 border border-slate-600/30"
-                                                  : "opacity-10"
-                            }
-                            style={{ width: cell, height: cell, position: "absolute", top: ry * cell, left: rx * cell }}
-                        >
-                          {isSwitch && (
-                              <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-amber-500 uppercase tracking-tighter text-center p-1 group-hover:scale-110 transition-transform">
-                                {switchState === 'up' ? '↗ Góra' : switchState === 'down' ? '↘ Dół' : '→ Prosto'}
-                              </div>
-                          )}
+                row.map((tile, rx) => {
+                  const key = `${rx}-${ry}`;
+                  const isSwitch = tile === "T";
+                  const switchState = switchDirs[key] || "straight";
+
+                  return (
+                    <div
+                      key={key}
+                      onClick={isSwitch ? () => chooseDirection(rx, ry) : undefined}
+                      className={
+                        tile === "#"
+                          ? "bg-slate-700 shadow-inner"
+                          : tile === "E"
+                          ? "flex items-center justify-center"
+                          : tile === "P"
+                          ? "flex items-center justify-center"
+                          : isSwitch
+                          ? "cursor-pointer hover:scale-95 transition-all"
+                          : ""
+                      }
+                      style={{
+                        width: cell,
+                        height: cell,
+                        position: "absolute",
+                        top: ry * cell,
+                        left: rx * cell,
+                      }}
+                    >
+                      {/* 🔥 TOR */}
+                      { (tile === "-" || tile === "T") && (
+                        <img
+                          src={rails}
+                          alt="rail"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                            imageRendering: "pixelated",
+                          }}
+                        />
+                      )}
+
+                      {/* 🔥 ANIMOWANY PUNKT */}
+                      {tile === "P" && (
+                        <img
+                          src={pointFrames[pointFrame]}
+                          alt="point"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                            imageRendering: "pixelated",
+                          }}
+                        />
+                      )}
+
+                      {/* 🔥 META */}
+                      {tile === "E" && (
+                        <div className="text-emerald-400 font-black text-[10px]">CEL</div>
+                      )}
+
+                      {/* 🔥 ZWROTNICA */}
+                      {isSwitch && (
+                        <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-amber-500 uppercase tracking-tighter text-center p-1">
+                          {switchState === "up"
+                            ? "↗ Góra"
+                            : switchState === "down"
+                            ? "↘ Dół"
+                            : "→ Prosto"}
                         </div>
-                    );
-                  })
+                      )}
+                      {/* Aby dodać grafikę zakrętów, możesz zaimportować odpowiednie assety (np. curve_up.png, curve_down.png) */}
+                      {/* i warunkowo renderować je tutaj dla isSwitch, w zależności od switchState. */}
+                      {/* Na przykład: */}
+                      {/* if (isSwitch && switchState === 'up') <img src={curveUp} ... /> */}
+                      {/* Ponieważ zakręt spans multiple cells, rozważ dodanie overlay divów o większej szerokości dla segmentów krzywych. */}
+                    </div>
+                  );
+                })
               )}
 
+
+              {/* POCIĄG */}
               <Train x={x} y={y} rotation={rotation} />
 
+              {/* PANEL ZMIANY ZWROTNICY */}
               {activeSwitch && !isQuizActive && (
-                  <div
-                      className="absolute bg-slate-900 p-5 border-4 border-primary z-[60] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in zoom-in-95 text-white"
-                      style={{
-                        top: activeSwitch.ry * cell + 40,
-                        left: activeSwitch.rx * cell
-                      }}
-                  >
-                    <p className="text-[10px] font-black mb-4 uppercase text-primary tracking-[0.3em] text-center border-b border-primary/20 pb-2">Przestaw:</p>
-                    <div className="flex gap-3">
-                      <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-xs font-black arcade-button h-12 w-20" onClick={() => startDirectionQuiz('up')}>Góra</Button>
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs font-black arcade-button h-12 w-20" onClick={() => startDirectionQuiz('straight')}>Prosto</Button>
-                      <Button size="sm" className="bg-red-600 hover:bg-red-700 text-xs font-black arcade-button h-12 w-20" onClick={() => startDirectionQuiz('down')}>Dół</Button>
-                    </div>
+                <div
+                  className="absolute bg-slate-900 p-5 border-4 border-primary z-[60] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in zoom-in-95 text-white"
+                  style={{
+                    top: activeSwitch.ry * cell + 40,
+                    left: activeSwitch.rx * cell,
+                  }}
+                >
+                  <p className="text-[10px] font-black mb-4 uppercase text-primary tracking-[0.3em] text-center border-b border-primary/20 pb-2">
+                    Przestaw:
+                  </p>
+                  <div className="flex gap-3">
+                    <Button
+                      size="sm"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-xs font-black arcade-button h-12 w-20"
+                      onClick={() => startDirectionQuiz("up")}
+                    >
+                      Góra
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="bg-blue-600 hover:bg-blue-700 text-xs font-black arcade-button h-12 w-20"
+                      onClick={() => startDirectionQuiz("straight")}
+                    >
+                      Prosto
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="bg-red-600 hover:bg-red-700 text-xs font-black arcade-button h-12 w-20"
+                      onClick={() => startDirectionQuiz("down")}
+                    >
+                      Dół
+                    </Button>
                   </div>
+                </div>
               )}
             </div>
+
+            {!isGameStarted && (
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
+                <Button
+                  onClick={() => setIsGameStarted(true)}
+                  className="h-24 px-16 bg-primary hover:bg-primary/90 text-3xl font-black arcade-button shadow-[0_0_50px_rgba(59,130,246,0.4)] uppercase tracking-tighter italic"
+                >
+                  Start
+                </Button>
+              </div>
+            )}
           </div>
         </Card>
+
 
         {/* GAME OVER / WON */}
         {(gameOver || gameWon) && (
@@ -485,7 +596,13 @@ export default function TransportGame() {
                   <p className="text-xl text-muted-foreground uppercase tracking-widest mb-2 font-bold">Raport Końcowy Dyżurnego:</p>
                   <div className="text-6xl font-black text-primary italic drop-shadow-sm">{score} PKT</div>
                 </div>
-                <Button onClick={() => resetGame(0, true)} className="h-24 px-16 bg-primary hover:bg-primary/90 text-3xl font-black arcade-button shadow-[0_0_50px_rgba(59,130,246,0.4)] uppercase tracking-tighter italic">
+                <Button
+                  onClick={() => {
+                    resetGame(0, true);
+                    setIsGameStarted(false);
+                  }}
+                  className="h-24 px-16 bg-primary hover:bg-primary/90 text-3xl font-black arcade-button shadow-[0_0_50px_rgba(59,130,246,0.4)] uppercase tracking-tighter italic"
+                >
                   Spróbuj Ponownie
                 </Button>
               </div>

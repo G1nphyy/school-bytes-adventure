@@ -16,13 +16,15 @@ import sprite7 from "@/assets/graphics/train/sprite_7.png";
 const trainFrames = [train0, train1, train2, train3];
 const carriageFrames = [sprite0, sprite1, sprite2, sprite3, sprite4, sprite5, sprite6, sprite7];
 
+const cell = 85; // Import or define cell size here for consistency
+
 function TrainHead({ x, y, frame, rotation }) {
     return (
         <div
             className="absolute"
             style={{
                 width: 120,
-                height: 85,
+                height: cell,
                 left: 0,
                 top: 0,
                 transform: `translate3d(${x}px, ${y}px, 0) rotate(${rotation}deg)`,
@@ -39,7 +41,7 @@ function Carriage({ x, y, frame, rotation }) {
             className="absolute"
             style={{
                 width: 120,
-                height: 85,
+                height: cell,
                 left: 0,
                 top: 0,
                 transform: `translate3d(${x}px, ${y}px, 0) rotate(${rotation}deg)`,
