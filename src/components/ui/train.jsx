@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import train0 from "@/assets/graphics/train/train0.png";
 import train1 from "@/assets/graphics/train/train1.png";
 import train2 from "@/assets/graphics/train/train2.png";
@@ -54,16 +54,20 @@ function Carriage({ x, y, frame, rotation }) {
 
 export default function TrainSet({ x, y, rotation = 0 }) {
     const [frame, setFrame] = useState(0);
-    const [history, setHistory] = useState([]);
+    // Używamy useRef zamiast useState dla historii, aby uniknąć zbędnych re-renderów przy każdej aktualizacji pozycji
+    const historyRef = useRef([]);
 
     useEffect(() => {
-        setHistory(prev => {
-            // Dodajemy nową pozycję tylko jeśli pociąg faktycznie się poruszył
-            if (prev.length > 0 && prev[0].x === x && prev[0].y === y) return prev;
+        const history = historyRef.current;
+        // Dodajemy nową pozycję tylko jeśli faktycznie się poruszył o zauważalny dystans (np. 1px)
+        if (history.length > 0) {
+            const last = history[0];
+            const dist = Math.sqrt(Math.pow(x - last.x, 2) + Math.pow(y - last.y, 2));
+            if (dist < 1) return;
+        }
 
-            const newHistory = [{ x, y, rotation }, ...prev];
-            return newHistory.slice(0, 500); // Większa historia dla pewności
-        });
+        history.unshift({ x, y, rotation });
+        if (history.length > 500) history.pop();
     }, [x, y, rotation]);
 
     useEffect(() => {
@@ -73,10 +77,13 @@ export default function TrainSet({ x, y, rotation = 0 }) {
         return () => clearInterval(interval);
     }, []);
 
-    // Funkcja szukająca pozycji w historii oddalonej o dany dystans (pixel-perfect)
     const getPositionAfterDistance = (startIndex, targetDistance) => {
+        const history = historyRef.current;
         let currentDistance = 0;
-        if (history.length <= startIndex + 1) return { pos: history[history.length - 1] || { x, y, rotation }, index: history.length - 1 };
+
+        if (history.length <= startIndex + 1) {
+            return { pos: history[history.length - 1] || { x, y, rotation }, index: history.length - 1 };
+        }
 
         for (let i = startIndex + 1; i < history.length; i++) {
             const p1 = history[i - 1];
@@ -89,7 +96,7 @@ export default function TrainSet({ x, y, rotation = 0 }) {
                     pos: {
                         x: p1.x + (p2.x - p1.x) * ratio,
                         y: p1.y + (p2.y - p1.y) * ratio,
-                        rotation: p2.rotation
+                        rotation: p1.rotation // Używamy rotacji z p1 dla lepszej płynności
                     },
                     index: i
                 };
@@ -99,18 +106,13 @@ export default function TrainSet({ x, y, rotation = 0 }) {
         return { pos: history[history.length - 1], index: history.length - 1 };
     };
 
-    // Parametry dystansu
-    const baseSpacing = 120; // Stały odstęp na prostej
-    const turnReduction = 5; // O ile skrócić dystans, gdy dany segment skręca
+    const baseSpacing = 120;
+    const turnReduction = 8;
 
-    // 1. Obliczamy pozycję 1. wagonu względem lokomotywy
-    const dist1 = Math.abs(rotation) > 5 ? baseSpacing - turnReduction : baseSpacing;
-    const result1 = getPositionAfterDistance(0, dist1);
+    const result1 = getPositionAfterDistance(0, baseSpacing - (Math.abs(rotation) > 10 ? turnReduction : 0));
     const carriage1 = result1.pos;
 
-    // 2. Obliczamy pozycję 2. wagonu względem 1. wagonu
-    const dist2 = Math.abs(carriage1.rotation) > 5 ? baseSpacing - turnReduction : baseSpacing;
-    const result2 = getPositionAfterDistance(result1.index, dist2);
+    const result2 = getPositionAfterDistance(result1.index, baseSpacing - (Math.abs(carriage1.rotation) > 10 ? turnReduction : 0));
     const carriage2 = result2.pos;
 
     return (

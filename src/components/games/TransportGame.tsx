@@ -12,7 +12,8 @@ import switchImg from "@/assets/graphics/train/switch.png";
 import switchToTop from "@/assets/graphics/train/switch_to_top.png";
 import switchToBottom from "@/assets/graphics/train/switch_to_bottom.png";
 import ground from "@/assets/graphics/train/ground.png";
-
+import exitLevel from "@/assets/graphics/train/exit_level.png"
+import enterLevel from "@/assets/graphics/train/enter_level.png"
 
 const cell = 85;
 const mapHeight = 10;
@@ -54,6 +55,7 @@ levels.forEach(levelObj => {
   levelObj.switches.forEach(sw => levelObj.map[sw.y][sw.x] = "T");
   levelObj.map[levelObj.end.y][levelObj.end.x] = "E";
   levelObj.points.forEach(pt => levelObj.map[pt.y][pt.x] = "P");
+  levelObj.map[levelObj.start.y][levelObj.start.x + 2 ] = "S";
 });
 
 const railwayQuestions = [
@@ -478,137 +480,88 @@ export default function TransportGame() {
         {/* MAPA Z DYNAMICZNĄ SZEROKOŚCIĄ */}
         <Card className="h-screen w-[72%] fixed right-0 top-0 border-l border-white/5 bg-slate-900 flex flex-col overflow-hidden shadow-2xl">
           <div
-            ref={scrollContainerRef}
-            className={`relative flex-1 cursor-crosshair custom-scrollbar ${isGameStarted ? 'overflow-auto' : 'overflow-hidden'}`}
+              ref={scrollContainerRef}
+              className={`relative flex-1 cursor-crosshair custom-scrollbar ${isGameStarted ? 'overflow-auto' : 'overflow-hidden'}`}
           >
             <div
-              className="relative bg-slate-800 shadow-inner rounded-sm"
-              style={{ width: mapWidth * cell, height: mapHeight * cell }}
+                className="relative bg-slate-800 shadow-inner rounded-sm overflow-hidden"
+                style={{
+                  width: mapWidth * cell,
+                  height: mapHeight * cell,
+                  backgroundImage: `url(${ground})`, // Tło ziemi jako powtarzalny obrazek
+                  backgroundSize: `${cell}px ${cell}px`
+                }}
             >
-              {level.map((row, ry) =>
-                row.map((tile, rx) => {
-                  const key = `${rx}-${ry}`;
-                  const isSwitch = tile === "T";
-                  const switchState = switchDirs[key] || "straight";
-
-                  return (
+              {/* Renderujemy tło torów tylko dla wierszy, które je mają (znaczna poprawa wydajności) */}
+              {level.map((row, ry) => {
+                const hasRails = row.some(tile => tile === "-" || tile === "P" || tile === "T");
+                if (!hasRails) return null;
+                return (
                     <div
-                      key={key}
-                      onClick={isSwitch ? () => chooseDirection(rx, ry) : undefined}
-                      className={
-                        tile === "#"
-                          ? "bg-slate-700 shadow-inner"
-                          : tile === "E"
-                          ? "flex items-center justify-center "
-                          : tile === "P"
-                          ? "flex items-center justify-center"
-                          : isSwitch
-                          ? "cursor-pointer transition-all border-4 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)] hover:scale-105 hover:shadow-[0_0_25px_rgba(245,158,11,0.8)] bg-amber-500/10"
-                          : ""
-                      }
-                      style={{
-                        width: cell,
-                        height: cell,
-                        position: "absolute",
-                        top: ry * cell,
-                        left: rx * cell,
-                        userSelect: "none",
-                      }}
-                    >
-                      {tile === " " && (
-                        <img
-                          src={ground}
-                          alt="ground"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "contain",
-                            imageRendering: "pixelated",
-                            userSelect: "none",
-                          }}
-                        />
-                      )}
-                      {/* 🔥 TOR */}
-                      { (tile === "-" || tile === "P") && (
-                        <img
-                          src={rails}
-                          alt="rail"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "contain",
-                            imageRendering: "pixelated",
-                            userSelect: "none",
-                          }}
-                        />
-                      )}
-                      { isSwitch && switchState === "straight" && (
-                        <img
-                          src={switchImg}
-                          alt="rail"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "contain",
-                            imageRendering: "pixelated",
-                            userSelect: "none",
-                          }}
-                        />
-                      )}
-                      { isSwitch && switchState === "up" && (
-                        <img
-                          src={switchToTop}
-                          alt="switch_to_top"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "contain",
-                            imageRendering: "pixelated",
-                            userSelect: "none",
-                          }}
-                        />
-                      )}
-                      { isSwitch && switchState === "down" && (
-                        <img
-                          src={switchToBottom}
-                          alt="switch_to_bottom"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "contain",
-                            imageRendering: "pixelated",
-                            userSelect: "none",
-                          }}
-                        />
-                      )}
+                        key={`rail-row-${ry}`}
+                        className="absolute left-0 w-full opacity-90 pointer-events-none"
+                        style={{
+                          top: ry * cell,
+                          height: cell,
+                          backgroundImage: `url(${rails})`,
+                          backgroundSize: `${cell}px ${cell}px`,
+                          backgroundRepeat: 'repeat-x'
+                        }}
+                    />
+                );
+              })}
 
-                      {/* 🔥 ANIMOWANY PUNKT */}
-                      {tile === "P" && (
-                          <div
-                              className="w-full h-full flex items-center justify-center absolute z-10 "
-                          >
-                            <div className="w-6 h-6 bg-primary rounded-full border-4 border-white shadow-[0_0_25px_rgba(59,130,246,0.8)] flex items-center justify-center">
-                              {/* Mały błysk w środku punktu */}
-                              <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                            </div>
+              {level.map((row, ry) =>
+                  row.map((tile, rx) => {
+                    if (tile === " " || tile === "-") return null; // NIE RENDERUJEMY PUSTYCH DIVÓW
 
-                            {/* Dodatkowy blask pod spodem */}
-                            <div className="absolute w-8 h-2 bg-black/20 blur-md rounded-full bottom-2 scale-x-150" />
-                          </div>
-                      )}
+                    const key = `${rx}-${ry}`;
+                    const isSwitch = tile === "T";
+                    const switchState = switchDirs[key] || "straight";
 
-                      {/* 🔥 META */}
-                      {tile === "E" && (
-                        <div className="text-emerald-400 font-black text-[10px]">CEL</div>
-                      )}
-                    </div>
-                  );
-                })
+                    return (
+                        <div
+                            key={key}
+                            onClick={isSwitch ? () => chooseDirection(rx, ry) : undefined}
+                            className={
+                              isSwitch
+                                  ? "cursor-pointer transition-all border-4 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)] z-20 bg-amber-500/10"
+                                  : "z-10"
+                            }
+                            style={{
+                              width: cell,
+                              height: cell,
+                              position: "absolute",
+                              top: ry * cell,
+                              left: rx * cell,
+                            }}
+                        >
+                          {isSwitch && (
+                              <img
+                                  src={switchState === "up" ? switchToTop : switchState === "down" ? switchToBottom : switchImg}
+                                  alt="switch"
+                                  className="w-full h-full object-contain pixelated"
+                              />
+                          )}
+
+                          {tile === "P" && (
+                              <div className="w-full h-full flex items-center justify-center relative">
+                                <div className="w-6 h-6 bg-primary rounded-full border-4 border-white shadow-[0_0_20px_rgba(59,130,246,0.8)] animate-pulse" />
+                              </div>
+                          )}
+
+                          {tile === "E" && <img src={exitLevel} className="w-full h-full object-contain pixelated" />}
+                          {tile === "S" && <img src={enterLevel} className="w-full h-full object-contain pixelated" />}
+                        </div>
+                    );
+                  })
               )}
 
-
-              {/* POCIĄG */}
-              <Train x={x} y={y} rotation={rotation} />
+              {/* POCIĄG NA SAMYM WIERZCHU */}
+              <div className="relative z-50">
+                <Train x={x} y={y} rotation={rotation} />
+              </div>
+            </div>
 
               {/* PANEL ZMIANY ZWROTNICY */}
               {activeSwitch && !isQuizActive && (
@@ -659,7 +612,6 @@ export default function TransportGame() {
                 </Button>
               </div>
             )}
-          </div>
         </Card>
 
 
