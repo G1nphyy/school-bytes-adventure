@@ -14,6 +14,7 @@ import point3 from "@/assets/graphics/train/point_3.png";
 import point4 from "@/assets/graphics/train/point_4.png";
 import point5 from "@/assets/graphics/train/point_5.png";
 import point6 from "@/assets/graphics/train/point_6.png";
+import switchImg from "@/assets/graphics/train/switch.png";
 import switchToTop from "@/assets/graphics/train/switch_to_top.png";
 import switchToBottom from "@/assets/graphics/train/switch_to_bottom.png";
 
@@ -260,7 +261,7 @@ export default function TransportGame() {
       const key = `${gx}-${gy}`;
       const state = switchDirs[key] || "straight";
       setTransitioning(true);
-      const targetYDir = state === 'up' ? -cell / 4 : state === 'down' ? cell / 4 : 0;
+      const targetYDir = state === 'up' ? -cell / 2.8 : state === 'down' ? cell / 2.8 : 0;
       setTargetDir([cell, targetYDir]);
     }
 
@@ -466,7 +467,7 @@ export default function TransportGame() {
                           : tile === "P"
                           ? "flex items-center justify-center"
                           : isSwitch
-                          ? "cursor-pointer hover:scale-95 transition-all border-2 border-amber-500/50 rounded-md"
+                          ? "cursor-pointer"
                           : ""
                       }
                       style={{
@@ -492,7 +493,7 @@ export default function TransportGame() {
                       )}
                       { isSwitch && switchState === "straight" && (
                         <img
-                          src={rails}
+                          src={switchImg}
                           alt="rail"
                           style={{
                             width: "100%",
