@@ -20,30 +20,30 @@ const mapHeight = 10;
 const levels = [
   {
     map: Array(mapHeight).fill(0).map(() => Array(40).fill(" ")).map((row, ry) => {
-      if ([2, 4, 6].includes(ry)) for (let rx = 1; rx < 40 - 1; rx++) row[rx] = "-";
+      if ([2, 4, 6].includes(ry)) for (let rx = 0; rx < 40 - 1; rx++) row[rx] = "-";
       return row;
     }),
-    start: { x: 1, y: 2 },
+    start: { x: -2, y: 2 },
     end: { x: 38, y: 4 },
     switches: [{ x: 10, y: 2 }, { x: 20, y: 4 }],
     points: [{ x: 5, y: 2 }, { x: 15, y: 4 }]
   },
   {
     map: Array(mapHeight).fill(0).map(() => Array(60).fill(" ")).map((row, ry) => {
-      if ([1, 3, 5].includes(ry)) for (let rx = 1; rx < 60 - 1; rx++) row[rx] = "-";
+      if ([1, 3, 5].includes(ry)) for (let rx = 0; rx < 60 - 1; rx++) row[rx] = "-";
       return row;
     }),
-    start: { x: 1, y: 1 },
+    start: { x: -2, y: 1 },
     end: { x: 58, y: 3 },
     switches: [{ x: 15, y: 1 }, { x: 30, y: 3 }, { x: 45, y: 1 }],
     points: [{ x: 10, y: 1 }, { x: 25, y: 3 }, { x: 40, y: 1 }]
   },
   {
     map: Array(mapHeight).fill(0).map(() => Array(80).fill(" ")).map((row, ry) => {
-      if ([0, 2, 4, 6].includes(ry)) for (let rx = 1; rx < 80 - 1; rx++) row[rx] = "-";
+      if ([0, 2, 4, 6].includes(ry)) for (let rx = 0; rx < 80 - 1; rx++) row[rx] = "-";
       return row;
     }),
-    start: { x: 1, y: 0 },
+    start: { x: -2, y: 0 },
     end: { x: 78, y: 6 },
     switches: [{ x: 10, y: 0 }, { x: 25, y: 2 }, { x: 40, y: 4 }, { x: 55, y: 6 }],
     points: [{ x: 5, y: 0 }, { x: 15, y: 2 }, { x: 30, y: 4 }, { x: 45, y: 6 }]
@@ -275,14 +275,14 @@ export default function TransportGame() {
     const angle = Math.atan2(dy, dx) * (180 / Math.PI);
     setRotation(angle);
 
-    if (gx < 0 || gy < 0 || gx >= mapWidth || gy >= mapHeight) {
+    if (gx < -2 || gy < 0 || gx >= mapWidth || gy >= mapHeight) {
       setGameOver(true);
       return;
     }
 
     const tile = level[gy][gx];
 
-    if (!transitioning && !["-", "T", "P", "E"].includes(tile)) {
+    if ( (!transitioning && !["-", "T", "P", "E"].includes(tile) ) && !(gx >= -2 && gx <= 1) ) {
       setGameOver(true);
       return;
     }
