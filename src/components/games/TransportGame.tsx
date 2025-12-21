@@ -511,6 +511,7 @@ export default function TransportGame() {
                         position: "absolute",
                         top: ry * cell,
                         left: rx * cell,
+                        userSelect: "none",
                       }}
                     >
                       {/* 🔥 TOR */}
@@ -523,6 +524,7 @@ export default function TransportGame() {
                             height: "100%",
                             objectFit: "contain",
                             imageRendering: "pixelated",
+                            userSelect: "none",
                           }}
                         />
                       )}
@@ -535,6 +537,7 @@ export default function TransportGame() {
                             height: "100%",
                             objectFit: "contain",
                             imageRendering: "pixelated",
+                            userSelect: "none",
                           }}
                         />
                       )}
@@ -547,6 +550,7 @@ export default function TransportGame() {
                             height: "100%",
                             objectFit: "contain",
                             imageRendering: "pixelated",
+                            userSelect: "none",
                           }}
                         />
                       )}
@@ -559,18 +563,14 @@ export default function TransportGame() {
                             height: "100%",
                             objectFit: "contain",
                             imageRendering: "pixelated",
+                            userSelect: "none",
                           }}
                         />
                       )}
 
                       {/* 🔥 ANIMOWANY PUNKT */}
                       {tile === "P" && (
-                          <motion.div
-                              animate={{
-                                y: [0, -20, 0],
-                                scale: [1, 1.2, 1],
-                                rotate: [0, 10, -10, 0]
-                              }}
+                          <div
                               transition={{
                                 repeat: Infinity,
                                 duration: 2,
@@ -585,7 +585,7 @@ export default function TransportGame() {
 
                             {/* Dodatkowy blask pod spodem */}
                             <div className="absolute w-8 h-2 bg-black/20 blur-md rounded-full bottom-2 scale-x-150" />
-                          </motion.div>
+                          </div>
                       )}
 
                       {/* 🔥 META */}
