@@ -1,221 +1,160 @@
-import { useState } from "react";
+// MultimeterWorkshop.jsx
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Zap, CheckCircle2 } from "lucide-react";
+import { Battery, Zap, Microchip } from "lucide-react";
 
-interface Component {
-  id: string;
-  name: string;
-  symbol: string;
-  placed: boolean;
-}
-
-const components: Component[] = [
-  { id: "battery", name: "Bateria", symbol: "⚡", placed: false },
-  { id: "resistor", name: "Rezystor", symbol: "▭▭▭", placed: false },
-  { id: "led", name: "Dioda LED", symbol: "►|", placed: false },
-  { id: "switch", name: "Przełącznik", symbol: "⎓", placed: false },
-];
-
-const correctOrder = ["battery", "switch", "resistor", "led"];
-
-const ElektronikGame = () => {
-  const [availableComponents, setAvailableComponents] = useState<Component[]>([...components]);
-  const [circuit, setCircuit] = useState<string[]>([]);
-  const [isComplete, setIsComplete] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
-  const [attempts, setAttempts] = useState(0);
-  const [hintLevel, setHintLevel] = useState(0);
-
-  const hints = [
-    "Każdy obwód potrzebuje źródła zasilania na początku",
-    "Przełącznik pozwala kontrolować przepływ prądu",
-    "Rezystor ogranicza prąd, aby chronić diodę LED",
-    "Dioda LED świeci gdy przez nią przepływa prąd",
-  ];
-
-  const handleComponentSelect = (componentId: string) => {
-    if (!isComplete) {
-      const newCircuit = [...circuit, componentId];
-      setCircuit(newCircuit);
-      
-      const updatedComponents = availableComponents.map((comp) =>
-        comp.id === componentId ? { ...comp, placed: true } : comp
-      );
-      setAvailableComponents(updatedComponents);
-
-      if (newCircuit.length === 4) {
-        setIsComplete(true);
-        setAttempts(attempts + 1);
-        const correct = newCircuit.every((id, index) => id === correctOrder[index]);
-        setIsCorrect(correct);
-      }
-    }
-  };
-
-  const handleReset = () => {
-    setCircuit([]);
-    setAvailableComponents(components.map((c) => ({ ...c, placed: false })));
-    setIsComplete(false);
-    setIsCorrect(false);
-    setHintLevel(0);
-  };
-
-  const showHint = () => {
-    if (hintLevel < hints.length) {
-      setHintLevel(hintLevel + 1);
-    }
-  };
-
-  const getComponentById = (id: string) => components.find((c) => c.id === id);
-
-  return (
-    <Card className="h-screen w-[35%] fixed left-0 top-0 border-r bg-card text-card-foreground flex flex-col p-6 overflow-y-auto">
-      <div className="mb-6 text-center">
-        <Zap className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
-        <h2 className="text-lg text-foreground mb-2">OBWÓD ELEKTRYCZNY</h2>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          Ułóż komponenty w prawidłowej kolejności, aby zapalić LED
-        </p>
-      </div>
-
-      {/* Circuit Display */}
-      <div className="mb-8">
-        <div className="bg-muted border-4 border-border p-6">
-          <div className="text-xs text-muted-foreground mb-3 text-center">SCHEMAT OBWODU</div>
-          <div className="flex items-center justify-center gap-2 min-h-[80px]">
-            <div className="text-4xl">⊝</div>
-            {circuit.length === 0 ? (
-              <div className="text-muted-foreground text-xs">Wybierz komponenty...</div>
-            ) : (
-              <>
-                {circuit.map((compId, index) => {
-                  const comp = getComponentById(compId);
-                  return (
-                    <div key={index} className="flex items-center">
-                      <div className="text-2xl px-2 animate-slide-in-up">{comp?.symbol}</div>
-                      {index < circuit.length - 1 && (
-                        <div className="text-muted-foreground">━━</div>
-                      )}
-                    </div>
-                  );
-                })}
-              </>
-            )}
-            <div className="text-4xl">⊕</div>
-          </div>
-          <div className="flex justify-center gap-4 mt-4 text-xs">
-            {circuit.map((compId) => {
-              const comp = getComponentById(compId);
-              return (
-                <span key={compId} className="text-muted-foreground">
-                  {comp?.name}
-                </span>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Available Components */}
-      {!isComplete && (
-        <>
-          <div className="mb-6">
-            <p className="text-xs text-muted-foreground mb-3 text-center">
-              Dostępne komponenty ({circuit.length}/4):
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              {availableComponents.map((comp) => (
-                <button
-                  key={comp.id}
-                  onClick={() => handleComponentSelect(comp.id)}
-                  disabled={comp.placed}
-                  className={`p-4 border-2 border-border arcade-button ${
-                    comp.placed
-                      ? "opacity-30 cursor-not-allowed"
-                      : "hover:border-primary cursor-pointer"
-                  }`}
-                >
-                  <div className="text-2xl mb-2">{comp.symbol}</div>
-                  <div className="text-xs text-foreground">{comp.name}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Hints */}
-          {attempts > 0 && hintLevel < hints.length && (
-            <div className="mb-4">
-              <Button
-                onClick={showHint}
-                variant="outline"
-                size="sm"
-                className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20"
-              >
-                💡 POKAŻ PODPOWIEDŹ ({hintLevel + 1}/{hints.length})
-              </Button>
-            </div>
-          )}
-
-          {hintLevel > 0 && (
-            <div className="mb-4 space-y-2">
-              {hints.slice(0, hintLevel).map((hint, index) => (
-                <div
-                  key={index}
-                  className="p-3 border-2 border-secondary bg-secondary/20 text-secondary animate-slide-in-up"
-                >
-                  <p className="text-xs">
-                    <span className="font-bold">Krok {index + 1}:</span> {hint}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Result */}
-      {isComplete && (
-        <div className="animate-slide-in-up">
-          <div
-            className={`p-6 border-4 mb-6 text-center ${
-              isCorrect ? "border-accent bg-accent/20" : "border-destructive bg-destructive/20"
-            }`}
-          >
-            {isCorrect ? (
-              <>
-                <CheckCircle2 className="w-12 h-12 text-accent mx-auto mb-3" />
-                <div className="text-4xl mb-3 animate-pixel-pulse">💡</div>
-                <h3 className="text-lg text-accent mb-2">ŚWIETNIE!</h3>
-                <p className="text-xs text-accent leading-relaxed">
-                  Dioda LED świeci! Prawidłowo złożyłeś obwód elektryczny.
-                  <br />
-                  Próba {attempts}
-                </p>
-              </>
-            ) : (
-              <>
-                <div className="text-4xl mb-3">❌</div>
-                <h3 className="text-lg text-destructive mb-2">NIEPRAWIDŁOWO</h3>
-                <p className="text-xs text-destructive leading-relaxed">
-                  Obwód nie działa. Sprawdź kolejność komponentów!
-                  <br />
-                  Próba {attempts}
-                </p>
-              </>
-            )}
-          </div>
-
-          <Button
-            onClick={handleReset}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button"
-          >
-            {isCorrect ? "ZAGRAJ PONOWNIE" : "SPRÓBUJ JESZCZE RAZ"}
-          </Button>
-        </div>
-      )}
-    </Card>
-  );
+const ITEMS = {
+  battery: { name: "Bateria 9 V", icon: Battery, value: "9.15 V", unit: "V DC" },
+  resistor: { name: "Rezystor 220 Ω", icon: Zap, value: "218 Ω", unit: "Ω" },
+  regulator: { name: "Stabilizator 5 V", icon: Microchip, value: "0 V", unit: "V DC" },
 };
 
-export default ElektronikGame;
+const RANGES = ["OFF", "V DC", "Ω", "A DC"];
+
+export default function MultimeterWorkshop() {
+  const [blackWire, setBlackWire] = useState(null);
+  const [redWire, setRedWire] = useState(null);
+  const [itemOnDesk, setItemOnDesk] = useState(null);
+  const [range, setRange] = useState("OFF");
+  const [result, setResult] = useState(null);
+  const [done, setDone] = useState([]);
+
+  const handleMeasure = () => {
+    if (!blackWire || !redWire || !itemOnDesk || range === "OFF") {
+      setResult("Ustaw wszystko: kable, element i zakres!");
+      return;
+    }
+    const wantedUnit = ITEMS[itemOnDesk].unit;
+    if (range !== wantedUnit) {
+      setResult(`Zły zakres! Dla tego elementu potrzebujesz ${wantedUnit}.`);
+      return;
+    }
+    setResult(`OK → ${ITEMS[itemOnDesk].value}`);
+    if (!done.includes(itemOnDesk)) setDone([...done, itemOnDesk]);
+  };
+
+  const isFinished = done.length >= 2;
+
+  return (
+    <div className="p-4 min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 to-slate-900 text-slate-200">
+      <Card className="w-full max-w-5xl bg-slate-800/60 border-slate-700 shadow-2xl">
+        <div className="p-6 grid md:grid-cols-2 gap-6">
+          {/* LEWA: warsztat + drag-and-drop */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold text-cyan-400">Stanowisko pomiarowe</h2>
+
+            {/* MULTIMETR */}
+            <div className="bg-slate-900 rounded-2xl p-4 border border-slate-700">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-mono text-slate-400">MULTIMETR</span>
+                <span className="text-xl font-bold text-cyan-300">{range}</span>
+              </div>
+              <div className="flex gap-2">
+                {RANGES.map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => setRange(r)}
+                    className={`px-3 py-1 rounded-md text-xs font-bold border transition ${range === r ? "bg-cyan-500 text-black border-cyan-400" : "bg-slate-800 border-slate-600 hover:border-cyan-500"}`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-4 grid grid-cols-3 gap-2 text-[10px] font-mono uppercase">
+                <div
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => { e.preventDefault(); if (e.dataTransfer.getData("wire") === "black") setBlackWire("COM"); }}
+                  className={`h-12 flex items-center justify-center rounded border ${blackWire ? "bg-green-500/20 border-green-500" : "bg-slate-800 border-slate-600"}`}
+                >COM<br />{blackWire ? "●" : "○"}</div>
+                <div
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => { e.preventDefault(); if (e.dataTransfer.getData("wire") === "red") setRedWire("VΩmA"); }}
+                  className={`h-12 flex items-center justify-center rounded border ${redWire === "VΩmA" ? "bg-green-500/20 border-green-500" : "bg-slate-800 border-slate-600"}`}
+                >VΩmA<br />{redWire === "VΩmA" ? "●" : "○"}</div>
+                <div
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => { e.preventDefault(); if (e.dataTransfer.getData("wire") === "red") setRedWire("10A"); }}
+                  className={`h-12 flex items-center justify-center rounded border ${redWire === "10A" ? "bg-green-500/20 border-green-500" : "bg-slate-800 border-slate-600"}`}
+                >10A<br />{redWire === "10A" ? "●" : "○"}</div>
+              </div>
+            </div>
+
+            {/* PRZEWODY */}
+            <div className="bg-slate-900 rounded-2xl p-4 border border-slate-700">
+              <div className="text-xs text-slate-400 mb-2">Przeciągnij kable na odpowiednie gniazda:</div>
+              <div className="flex gap-4">
+                <div
+                  draggable
+                  onDragStart={(e) => e.dataTransfer.setData("wire", "black")}
+                  className="cursor-grab active:cursor-grabbing bg-black text-white px-4 py-2 rounded-md border border-slate-600 text-xs font-bold"
+                >Czarny (COM)</div>
+                <div
+                  draggable
+                  onDragStart={(e) => e.dataTransfer.setData("wire", "red")}
+                  className="cursor-grab active:cursor-grabbing bg-red-600 text-white px-4 py-2 rounded-md border border-red-400 text-xs font-bold"
+                >Czerwony</div>
+              </div>
+            </div>
+
+            {/* ELEMENTY */}
+            <div className="bg-slate-900 rounded-2xl p-4 border border-slate-700">
+              <div className="text-xs text-slate-400 mb-2">Przeciągnij element na stanowisko:</div>
+              <div className="flex gap-3">
+                {Object.entries(ITEMS).map(([key, val]) => (
+                  <div
+                    key={key}
+                    draggable
+                    onDragStart={(e) => e.dataTransfer.setData("item", key)}
+                    className="cursor-grab active:cursor-grabbing bg-slate-800 border border-slate-600 rounded-lg p-3 text-center text-xs hover:border-cyan-500 transition"
+                  >
+                    <val.icon className="w-6 h-6 mx-auto mb-1 text-cyan-400" />
+                    <div className="font-bold">{val.name}</div>
+                  </div>
+                ))}
+              </div>
+              <div
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => { e.preventDefault(); setItemOnDesk(e.dataTransfer.getData("item")); }}
+                className={`mt-3 h-20 rounded-lg border-2 border-dashed flex items-center justify-center text-sm ${itemOnDesk ? "border-cyan-400 bg-cyan-500/10" : "border-slate-600"}`}
+              >
+                {itemOnDesk ? (
+                  <>
+                    {React.createElement(ITEMS[itemOnDesk].icon, { className: "w-6 h-6 mr-2 text-cyan-400" })}
+                    {ITEMS[itemOnDesk].name}
+                  </>
+                ) : "Upuść tutaj"}
+              </div>
+            </div>
+          </div>
+
+          {/* PRAWA: wyniki + przycisk */}
+          <div className="flex flex-col justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-cyan-400 mb-4">Wynik pomiaru</h3>
+              <div className="bg-black/50 rounded-xl p-4 min-h-[6rem] text-sm font-mono text-cyan-300">{result || "Czekam na pomiar…"}</div>
+
+              <div className="mt-4 text-xs text-slate-400">Poprawnie zmierzone: <span className="font-bold text-cyan-400">{done.length}/3</span></div>
+              <div className="mt-2 flex gap-2">
+                {Object.keys(ITEMS).map((k) => (
+                  <div key={k} className={`px-2 py-1 rounded text-[10px] border ${done.includes(k) ? "bg-green-500/20 border-green-500 text-green-400" : "bg-slate-800 border-slate-700 text-slate-500"}`}>{ITEMS[k].name}</div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Button onClick={handleMeasure} className="w-full bg-cyan-600 hover:bg-cyan-500 font-bold">
+                ZMIERZ
+              </Button>
+              {isFinished && (
+                <div className="p-3 rounded-xl bg-green-500/10 border border-green-500 text-green-300 text-sm font-bold">
+                  ✅ Zaliczone! Twój multimetr nie ma przed Tobą tajemnic.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}

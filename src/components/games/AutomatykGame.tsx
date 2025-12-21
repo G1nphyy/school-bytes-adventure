@@ -1,7 +1,21 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, XCircle, Lightbulb, ToggleLeft, ToggleRight, Settings2, Factory, ShieldCheck, Info, Briefcase, GraduationCap, Cpu } from "lucide-react";
+import {
+  CheckCircle2,
+  XCircle,
+  Lightbulb,
+  ToggleLeft,
+  ToggleRight,
+  Settings2,
+  Factory,
+  ShieldCheck,
+  Info,
+  Briefcase,
+  GraduationCap,
+  Cpu,
+  Trophy
+} from "lucide-react";
 
 // --- IMPORTY OBRAZÓW ---
 import question4img from '@/assets/AutomatykZad4.png';
@@ -122,6 +136,9 @@ const AutomatykGame = () => {
   const [activeLamps, setActiveLamps] = useState<number[]>([]);
   const [generatedLogic, setGeneratedLogic] = useState<{label: string, condition: (sw: boolean[]) => boolean, text: string}[]>([]);
   const [showSchoolInfo, setShowSchoolInfo] = useState(false);
+  const [totalScore, setTotalScore] = useState(10);
+  const [logicStartTime, setLogicStartTime] = useState<number>(0);
+
 
   // --- STATE QUIZU ---
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -169,7 +186,28 @@ const AutomatykGame = () => {
     setShowResult(true);
     if (isCorrect) {
       setScore(prev => prev + 1);
+      setTotalScore(prev => prev + 10);
     }
+  };
+
+  const handleShowHint = () => {
+    if (!showHint && totalScore >= 2) {
+      setTotalScore(prev => prev - 2);
+      setShowHint(true);
+    }
+  };
+
+  const handleStartLogic = () => {
+    setGameState('logic');
+    setLogicStartTime(Date.now());
+  };
+
+  const handleFinishLogic = () => {
+    // Bonus za czas w logice (max 50 pkt, maleje z czasem)
+    const timeTaken = (Date.now() - logicStartTime) / 1000;
+    const timeBonus = Math.max(10, Math.floor(50 - timeTaken / 2));
+    setTotalScore(prev => prev + timeBonus);
+    setGameState('finish');
   };
 
   const nextStep = () => {
@@ -187,8 +225,8 @@ const AutomatykGame = () => {
   };
 
   return (
-      <Card className="h-screen w-[35%] fixed left-0 top-0 border-r bg-card text-card-foreground flex flex-col p-6 overflow-y-auto animate-fade-in">
-
+     <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+        <Card className="w-full max-w-4xl animate-fade-in flex flex-col">
         {/* Kontener treści, który pcha stopkę w dół */}
         <div className="flex-grow pt-12">
 
@@ -198,6 +236,7 @@ const AutomatykGame = () => {
                 <div className="mb-6 text-center">
                   <Cpu className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
                   <h2 className="text-lg text-foreground mb-1 uppercase tracking-tight font-bold">Etap 1: Teoria Sterowania</h2>
+                  <p className="text-lg font-bold text-primary mb-1">Punkty: {totalScore}</p>
                   <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Pytanie {currentQuestion + 1} / {quizQuestions.length}</p>
                 </div>
 
@@ -207,7 +246,7 @@ const AutomatykGame = () => {
                     </div>
                 )}
 
-                <div className="mb-6">
+                <div className="mb-6 px-6">
                   <p className="text-lg font-bold leading-tight mb-6 text-foreground">{quizQuestions[currentQuestion].questionText}</p>
 
                   <div className="grid grid-cols-1 gap-3">
@@ -242,16 +281,17 @@ const AutomatykGame = () => {
                   </div>
                 </div>
 
-                <div className="space-y-4 mb-8">
+                <div className="space-y-4 mb-8 px-6">
                   {!showResult && (
                       <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setShowHint(!showHint)}
+                          onClick={handleShowHint}
+                          disabled={totalScore < 2}
                           className="w-full border-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50 arcade-button"
                       >
                         <Lightbulb className="w-4 h-4 mr-2" />
-                        {showHint ? "UKRYJ PODPOWIEDŹ" : "POKAŻ PODPOWIEDŹ"}
+                        {showHint ? "PODPOWIEDŹ AKTYWNA" : `POKAŻ PODPOWIEDŹ (KOSZT: 2 PKT)`}
                       </Button>
                   )}
 
@@ -303,7 +343,7 @@ const AutomatykGame = () => {
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-[10px] px-3 py-1 rounded-full font-bold not-italic tracking-widest uppercase">KRYTYCZNE POWIADOMIENIE</div>
                   "Teoria opanowana, ale linia produkcyjna właśnie przestała odpowiadać. Musisz ręcznie zrekonfigurować 12 węzłów logicznych w sterowniku PLC, aby przywrócić zasilanie i komunikację."
                 </div>
-                <Button onClick={() => setGameState('logic')} className="h-20 bg-primary hover:bg-primary/90 text-2xl font-black arcade-button shadow-xl shadow-primary/30 uppercase tracking-tighter">
+                <Button onClick={handleStartLogic} className="h-20 bg-primary hover:bg-primary/90 text-2xl font-black arcade-button shadow-xl shadow-primary/30 uppercase tracking-tighter">
                   Uruchom diagnostykę
                 </Button>
               </div>
@@ -311,10 +351,13 @@ const AutomatykGame = () => {
 
           {/* --- ETAP 3: LOGIKA --- */}
           {gameState === 'logic' && (
-              <div className="animate-in fade-in slide-in-from-right-4 mb-8">
+              <div className="animate-in fade-in slide-in-from-right-4 mb-8 px-6">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-sm font-black flex items-center gap-2 text-primary uppercase tracking-widest"><Settings2 size={18}/> PLC Logic Core v2.1</h3>
-                  <Button variant="outline" size="sm" onClick={generateSolvableLogic} className="text-[10px] h-8 arcade-button px-4 border-2">Regeneruj kod</Button>
+                  <div className="text-right">
+                    <p className="text-[10px] font-bold text-primary uppercase">Aktualne Punkty</p>
+                    <p className="text-lg font-black text-foreground">{totalScore}</p>
+                  </div>
                 </div>
 
                 <div className="bg-slate-950 p-6 rounded-2xl border-l-4 border-primary mb-8 font-mono shadow-2xl overflow-hidden relative">
@@ -368,7 +411,7 @@ const AutomatykGame = () => {
                 </div>
 
                 {activeLamps.length === 5 && (
-                    <Button onClick={() => setGameState('finish')} className="w-full h-16 bg-emerald-500 hover:bg-emerald-600 text-white mt-8 mb-4 font-black animate-bounce shadow-xl shadow-emerald-500/20 text-xl uppercase tracking-widest">
+                    <Button onClick={handleFinishLogic} className="w-full h-16 bg-emerald-500 hover:bg-emerald-600 text-white mt-8 mb-4 font-black animate-bounce shadow-xl shadow-emerald-500/20 text-xl uppercase tracking-widest">
                       Uruchom System
                     </Button>
                 )}
@@ -377,12 +420,29 @@ const AutomatykGame = () => {
 
           {/* --- ETAP 4: KONIEC + INFO O ZAWODZIE --- */}
           {gameState === 'finish' && (
-              <div className="text-center animate-in zoom-in-95 py-6 mb-8">
+              <div className="text-center animate-in zoom-in-95 py-6 mb-8 px-6">
                 {!showSchoolInfo ? (
                     <>
-                      <ShieldCheck className="w-24 h-24 mx-auto text-emerald-500 mb-6 drop-shadow-md" />
+                      <div className="relative inline-block mb-6">
+                        <Trophy className="w-20 h-20 text-yellow-500 mx-auto drop-shadow-md animate-bounce" />
+                      </div>
                       <h2 className="text-3xl font-black mb-2 uppercase tracking-tighter text-foreground">Misja Udana!</h2>
-                      <p className="text-sm text-muted-foreground mb-10">System przywrócony. Twój wynik: <strong className="text-primary">{score}/7</strong></p>
+
+                      <div className="bg-primary/5 border-2 border-primary/20 rounded-2xl p-6 text-center mb-8 relative overflow-hidden">
+                        <span className="relative z-10 text-xs text-muted-foreground font-bold uppercase">Twój Wynik Końcowy</span>
+                        <div className="relative z-10 text-5xl font-black text-primary mt-2 drop-shadow-sm">{totalScore} <span className="text-xl font-medium text-foreground/60">PKT</span></div>
+                      </div>
+
+                      <div className="space-y-3 mb-8 text-left">
+                        <div className="flex items-center justify-between p-3 border border-border/50 rounded-lg bg-card">
+                          <span className="text-xs font-bold text-muted-foreground uppercase">Poprawne odpowiedzi:</span>
+                          <span className="font-bold text-foreground">{score} / {quizQuestions.length}</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 border border-border/50 rounded-lg bg-card">
+                          <span className="text-xs font-bold text-muted-foreground uppercase">Status Logiki PLC:</span>
+                          <span className="text-emerald-500 font-bold text-xs bg-emerald-500/10 px-2 py-1 rounded-full">ZSYNCHRONIZOWANO</span>
+                        </div>
+                      </div>
 
                       <div className="flex flex-col gap-4">
                         <Button onClick={() => setShowSchoolInfo(true)} className="h-16 bg-primary hover:bg-primary/90 font-bold flex gap-2 shadow-lg shadow-primary/20 arcade-button uppercase">
@@ -446,7 +506,7 @@ const AutomatykGame = () => {
         </div>
 
         {/* Stopka przypięta do dołu karty */}
-        <div className="mt-auto pt-6 border-t flex justify-between items-center text-[10px] text-muted-foreground font-black uppercase tracking-widest shrink-0">
+        <div className="mt-auto p-6 border-t flex justify-between items-center text-[10px] text-muted-foreground font-black uppercase tracking-widest shrink-0">
           <span className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-primary"></div>
             Technik Automatyk
@@ -457,6 +517,7 @@ const AutomatykGame = () => {
           </div>
         </div>
       </Card>
+    </div>
   );
 };
 
