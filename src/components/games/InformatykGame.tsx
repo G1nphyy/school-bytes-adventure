@@ -1058,7 +1058,7 @@ const InformatykGame = () => {
                       onClick={showRjHint}
                       variant="outline"
                       size="sm"
-                      className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button"
+                      className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal"
                   >
                     💡 POKAŻ PODPOWIEDŹ ({rjHintLevel + 1}/{rj45Hints.length}) (KOSZT: 5 PKT)
                   </Button>
@@ -1276,7 +1276,7 @@ const InformatykGame = () => {
                       onClick={showAssemblyHint}
                       variant="outline"
                       size="sm"
-                      className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button"
+                      className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal"
                   >
                     💡 POKAŻ PODPOWIEDŹ ({assemblyHints + 1}/{assemblyHintsAvailable}) (KOSZT: 5 PKT)
                   </Button>
@@ -1414,7 +1414,7 @@ const InformatykGame = () => {
                   onClick={showQuizHint}
                   variant="outline"
                   size="sm"
-                  className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button"
+                  className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal"
               >
                 💡 POKAŻ PODPOWIEDŹ ({hintLevel + 1}/{question.podpowiedzi.length}) (KOSZT: 2 PKT)
               </Button>

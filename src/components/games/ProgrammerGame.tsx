@@ -488,7 +488,7 @@ function MiniGameInner({ onFinish, addScore }: { onFinish: () => void, addScore:
                   }}
                   variant="outline"
                   size="sm"
-                  className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button"
+                  className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal"
               >
                 💡 POKAŻ PODPOWIEDŹ ({hintsVisible + 1}/{editorTask.hints.length}) (KOSZT: 5 PKT)
               </Button>
@@ -818,7 +818,7 @@ export default function ProgrammerGame() {
                         }}
                         variant="outline"
                         size="sm"
-                        className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button"
+                        className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal"
                     >
                       💡 POKAŻ PODPOWIEDŹ ({hintLevel + 1}/{q.hints.length}) (KOSZT: 2 PKT)
                     </Button>

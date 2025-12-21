@@ -288,7 +288,7 @@ const AutomatykGame = () => {
                           size="sm"
                           onClick={handleShowHint}
                           disabled={totalScore < 2}
-                          className="w-full border-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50 arcade-button"
+                          className="w-full border-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50 arcade-button h-auto py-3 whitespace-normal"
                       >
                         <Lightbulb className="w-4 h-4 mr-2" />
                         {showHint ? "PODPOWIEDŹ AKTYWNA" : `POKAŻ PODPOWIEDŹ (KOSZT: 2 PKT)`}
