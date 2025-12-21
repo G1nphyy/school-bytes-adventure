@@ -5,20 +5,13 @@ import {
   CheckCircle2, XCircle, Train as TrainIcon, GraduationCap,
   Map as MapIcon, ShieldCheck, Lightbulb, HelpCircle, Info
 } from "lucide-react";
+import { motion } from "framer-motion";
 import Train from "@/components/ui/train";
 import rails from "@/assets/graphics/train/rails.png";
-import point0 from "@/assets/graphics/train/point_0.png";
-import point1 from "@/assets/graphics/train/point_1.png";
-import point2 from "@/assets/graphics/train/point_2.png";
-import point3 from "@/assets/graphics/train/point_3.png";
-import point4 from "@/assets/graphics/train/point_4.png";
-import point5 from "@/assets/graphics/train/point_5.png";
-import point6 from "@/assets/graphics/train/point_6.png";
 import switchImg from "@/assets/graphics/train/switch.png";
 import switchToTop from "@/assets/graphics/train/switch_to_top.png";
 import switchToBottom from "@/assets/graphics/train/switch_to_bottom.png";
 
-const pointFrames = [point0, point1, point2, point3, point4, point5, point6];
 
 const cell = 85;
 const mapHeight = 10;
@@ -177,14 +170,6 @@ export default function TransportGame() {
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const mapWidth = level[0].length;
-
-  // Punkt animacja
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPointFrame(prev => (prev + 1) % pointFrames.length);
-    }, 120);
-    return () => clearInterval(interval);
-  }, []);
 
   // Kamera: Resetowanie scrolla na start poziomu
   useEffect(() => {
@@ -529,7 +514,7 @@ export default function TransportGame() {
                       }}
                     >
                       {/* 🔥 TOR */}
-                      { tile === "-" && (
+                      { (tile === "-" || tile === "P") && (
                         <img
                           src={rails}
                           alt="rail"
@@ -580,16 +565,27 @@ export default function TransportGame() {
 
                       {/* 🔥 ANIMOWANY PUNKT */}
                       {tile === "P" && (
-                        <img
-                          src={pointFrames[pointFrame]}
-                          alt="point"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "contain",
-                            imageRendering: "pixelated",
-                          }}
-                        />
+                          <motion.div
+                              animate={{
+                                y: [0, -20, 0],
+                                scale: [1, 1.2, 1],
+                                rotate: [0, 10, -10, 0]
+                              }}
+                              transition={{
+                                repeat: Infinity,
+                                duration: 2,
+                                ease: "easeInOut"
+                              }}
+                              className="w-full h-full flex items-center justify-center absolute z-10 "
+                          >
+                            <div className="w-6 h-6 bg-primary rounded-full border-4 border-white shadow-[0_0_25px_rgba(59,130,246,0.8)] flex items-center justify-center">
+                              {/* Mały błysk w środku punktu */}
+                              <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                            </div>
+
+                            {/* Dodatkowy blask pod spodem */}
+                            <div className="absolute w-8 h-2 bg-black/20 blur-md rounded-full bottom-2 scale-x-150" />
+                          </motion.div>
                       )}
 
                       {/* 🔥 META */}
