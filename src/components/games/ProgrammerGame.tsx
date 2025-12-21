@@ -296,8 +296,11 @@ function MiniGameInner({ onFinish, addScore }: { onFinish: () => void, addScore:
   const [hintsVisible, setHintsVisible] = useState(0);
   const [successPending, setSuccessPending] = useState(false);
   const successTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const [usefulnessVisible, setUsefulnessVisible] = useState(false);
   const [completed, setCompleted] = useState(false);
+
+  // Stan dla systemu "Kliknij i Umieść"
+  const [selectedFromPool, setSelectedFromPool] = useState<number | null>(null);
+
 
   useEffect(() => {
     return () => {
@@ -318,6 +321,7 @@ function MiniGameInner({ onFinish, addScore }: { onFinish: () => void, addScore:
       });
       return copy;
     });
+    setSelectedFromPool(null); // Odznacz po umieszczeniu
   }, [completed]);
 
   const moveRowToRow = useCallback((fromRow: number, toRow: number) => {
@@ -341,6 +345,15 @@ function MiniGameInner({ onFinish, addScore }: { onFinish: () => void, addScore:
       return copy;
     });
   }, [completed]);
+
+  const handleSlotClick = (idx: number) => {
+    if (completed) return;
+    if (selectedFromPool !== null) {
+      dropFromPoolToRow(selectedFromPool, idx);
+    } else if (rows[idx] !== null) {
+      moveRowToPool(idx);
+    }
+  };
 
   const handleDropToRow = useCallback(
       (item: any, targetRowIndex: number) => {
@@ -416,6 +429,7 @@ function MiniGameInner({ onFinish, addScore }: { onFinish: () => void, addScore:
   );
 
   function PoolBlock({ text, idx }: { text: string; idx: number }) {
+    const isSelected = selectedFromPool === idx;
     const [{ isDragging }, drag] = useDrag({
       type: ItemTypes.BLOCK,
       item: { origin: "pool", index: idx },
@@ -426,20 +440,24 @@ function MiniGameInner({ onFinish, addScore }: { onFinish: () => void, addScore:
             ref={drag}
             layout
             initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="px-3 py-2 m-1 border rounded cursor-move bg-white shadow text-black text-sm font-mono"
-            style={{ opacity: isDragging ? 0.5 : 1, minWidth: 160 }}
+            animate={{
+              opacity: isDragging ? 0.5 : 1,
+              y: 0,
+              scale: isSelected ? 1.05 : 1
+            }}
+            onClick={() => setSelectedFromPool(isSelected ? null : idx)}
+            className={`px-3 py-2 m-1 border-2 rounded cursor-pointer bg-white shadow text-black text-sm font-mono transition-all ${
+                isSelected ? "border-primary ring-2 ring-primary/20 shadow-lg" : "border-transparent"
+            }`}
+            style={{ minWidth: 140 }}
         >
           <code>{text}</code>
         </motion.div>
     );
   }
 
-  const placedCount = rows.filter(Boolean).length;
-
   return (
-      <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto bg-card text-card-foreground">
+      <Card className="p-4 md:p-6 border-4 space-y-4 max-w-4xl w-full mx-auto bg-card text-card-foreground">
         <div className="text-center mb-4">
           <Terminal className="w-10 h-10 text-primary mx-auto mb-2 animate-pixel-float" />
           <h2 className="text-lg font-bold">ETAP 2: MINI-GRA KODOWA</h2>
@@ -451,15 +469,15 @@ function MiniGameInner({ onFinish, addScore }: { onFinish: () => void, addScore:
 
         {/* IDE-like editor */}
         <div className="mt-3">
-          <div className="bg-slate-900 rounded-md p-4 border-2 border-slate-700">
+          <div className="bg-slate-900 rounded-md p-2 md:p-4 border-2 border-slate-700">
             {rows.map((val, idx) => (
-                <div key={idx} className="mb-2">
+                <div key={idx} className="mb-2" onClick={() => handleSlotClick(idx)}>
                   <RowSlot
                       rowIndex={idx}
                       value={val}
                       onDropToRow={onDropToRowWithHighlight}
                       onSwapRows={moveRowToRow}
-                      highlight={lastDroppedRow === idx}
+                      highlight={lastDroppedRow === idx || (selectedFromPool !== null && val === null)}
                   />
                 </div>
             ))}
@@ -468,8 +486,10 @@ function MiniGameInner({ onFinish, addScore }: { onFinish: () => void, addScore:
 
         {/* Pool */}
         <div className="mt-2">
-          <h3 className="font-semibold text-sm mb-1">Dostępne fragmenty kodu</h3>
-          <div ref={dropToPool} className="min-h-[80px] p-2 border-2 border-dashed border-primary/30 rounded bg-accent/5 flex flex-wrap gap-2 justify-center">
+          <h3 className="font-semibold text-sm mb-1 text-center md:text-left">
+            {selectedFromPool !== null ? "Wybierz miejsce w edytorze ↑" : "Dostępne fragmenty kodu (kliknij lub przeciągnij)"}
+          </h3>
+          <div ref={dropToPool} className="min-h-[100px] p-2 border-2 border-dashed border-primary/30 rounded bg-accent/5 flex flex-wrap gap-2 justify-center">
             {pool.length === 0 ? (
                 <div className="text-xs italic text-muted-foreground self-center">Wszystkie fragmenty użyte</div>
             ) : (
@@ -864,7 +884,7 @@ export default function ProgrammerGame() {
                         onClick={() => setShowUsefulness(!showUsefulness)}
                         variant="outline"
                         size="sm"
-                        className={`w-full border-2 ${showUsefulness ? 'border-primary/50 bg-primary/20' : 'border-border hover:border-primary/50'} text-foreground arcade-button hover:bg-primary/10 hover:text-primary-foreground`}
+                        className={`w-full border-2 ${showUsefulness ? 'border-primary/50 bg-primary/20' : 'border-border hover:border-primary/50'} text-foreground arcade-button hover:bg-primary/10 hover:text-primary-foreground h-auto py-3 whitespace-normal`}
                     >
                       <Lightbulb className="w-4 h-4 mr-2" />
                       DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
