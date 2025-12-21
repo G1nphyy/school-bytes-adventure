@@ -104,6 +104,48 @@ const railwayQuestions = [
     correct: 1,
     hint: "Ma niebieskie i białe światła, w przeciwieństwie do semaforów pociągowych.",
     usefulness: "Wykorzystywana codziennie podczas formowania składów towarowych na stacjach rozrządowych."
+  },
+  {
+    question: "Co oznacza skrót PKP?",
+    options: ["Polskie Koleje Państwowe", "Polska Komunikacja Pociągowa", "Państwowe Koleje Pasażerskie", "Przewozy Kolejowe Publiczne"],
+    correct: 0,
+    hint: "To narodowy przewoźnik i zarządca infrastruktury, którego historia sięga 1926 roku.",
+    usefulness: "Znajomość struktury narodowego przewoźnika jest ważna dla orientacji w branży."
+  },
+  {
+    question: "Który element toru pozwala pociągowi przejść z jednego toru na drugi?",
+    options: ["Rozjazd (zwrotnica)", "Semafor", "Podkład", "Kozioł oporowy"],
+    correct: 0,
+    hint: "To właśnie tym urządzeniem sterujesz w tej grze!",
+    usefulness: "Budowa i konserwacja rozjazdów to kluczowy element kwalifikacji TKO.07."
+  },
+  {
+    question: "Co to jest 'czuwak aktywny'?",
+    options: ["Urządzenie kontrolujące czujność maszynisty", "Przycisk do otwierania drzwi", "System klimatyzacji", "Typ hamulca ręcznego"],
+    correct: 0,
+    hint: "Maszynista musi go naciskać w regularnych odstępach czasu, aby pociąg nie zahamował automatycznie.",
+    usefulness: "Zrozumienie systemów bezpieczeństwa czynnego w kabinie maszynisty."
+  },
+  {
+    question: "Jak nazywa się osoba odpowiedzialna za przygotowanie i odprawienie pociągu na stacji?",
+    options: ["Dyżurny ruchu", "Konduktor", "Toromistrz", "Rewident"],
+    correct: 0,
+    hint: "To kluczowe stanowisko w sterowaniu ruchem kolejowym.",
+    usefulness: "Dyżurny ruchu to jedna z głównych ścieżek kariery po Techniku Transportu Kolejowego."
+  },
+  {
+    question: "Z jaką maksymalną prędkością pociągi pasażerskie kursują obecnie w Polsce (np. Pendolino)?",
+    options: ["120 km/h", "160 km/h", "200 km/h", "300 km/h"],
+    correct: 2,
+    hint: "Taka prędkość osiągana jest na odcinkach Centralnej Magistrali Kolejowej.",
+    usefulness: "Wiedza o parametrach eksploatacyjnych linii kolejowych w kraju."
+  },
+  {
+    question: "Co to jest 'tabor kolejowy'?",
+    options: ["Wszystkie pojazdy poruszające się po szynach", "Tylko wagony towarowe", "Budynek dworca", "Zestaw narzędzi do naprawy torów"],
+    correct: 0,
+    hint: "Obejmuje lokomotywy, wagony, EZT-y i maszyny torowe.",
+    usefulness: "Podstawowa terminologia używana w kwalifikacji TKO.08."
   }
 ];
 
@@ -129,6 +171,7 @@ export default function TransportGame() {
   const [quizQuestion, setQuizQuestion] = useState(null);
   const [quizFeedback, setQuizFeedback] = useState(null);
   const [pendingDirection, setPendingDirection] = useState(null);
+  const [shuffledOptions, setShuffledOptions] = useState([]);
   const [showHint, setShowHint] = useState(false);
   const [showUsefulness, setShowUsefulness] = useState(false);
 
@@ -157,7 +200,14 @@ export default function TransportGame() {
 
   const startDirectionQuiz = (dir) => {
     setPendingDirection(dir);
-    setQuizQuestion(railwayQuestions[Math.floor(Math.random() * railwayQuestions.length)]);
+    const rawQuestion = railwayQuestions[Math.floor(Math.random() * railwayQuestions.length)];
+
+    const correctText = rawQuestion.options[rawQuestion.correct];
+    const shuffled = [...rawQuestion.options].sort(() => Math.random() - 0.5);
+    const newCorrectIdx = shuffled.indexOf(correctText);
+
+
+    setQuizQuestion({ ...rawQuestion, options: shuffled, correct: newCorrectIdx });
     setQuizFeedback(null);
     setShowHint(false);
     setShowUsefulness(false);
@@ -217,7 +267,7 @@ export default function TransportGame() {
   const autoMove = () => {
     if (!isGameStarted || gameOver || gameWon || isQuizActive) return;
 
-    const speed = 2;
+    const speed = 1.3;
     let dx = direction[0];
     let dy = direction[1];
 
@@ -463,11 +513,11 @@ export default function TransportGame() {
                         tile === "#"
                           ? "bg-slate-700 shadow-inner"
                           : tile === "E"
-                          ? "flex items-center justify-center"
+                          ? "flex items-center justify-center "
                           : tile === "P"
                           ? "flex items-center justify-center"
                           : isSwitch
-                          ? "cursor-pointer"
+                          ? "cursor-pointer transition-all border-4 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)] hover:scale-105 hover:shadow-[0_0_25px_rgba(245,158,11,0.8)] bg-amber-500/10"
                           : ""
                       }
                       style={{
