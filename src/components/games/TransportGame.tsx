@@ -571,11 +571,6 @@ export default function TransportGame() {
                       {/* 🔥 ANIMOWANY PUNKT */}
                       {tile === "P" && (
                           <div
-                              transition={{
-                                repeat: Infinity,
-                                duration: 2,
-                                ease: "easeInOut"
-                              }}
                               className="w-full h-full flex items-center justify-center absolute z-10 "
                           >
                             <div className="w-6 h-6 bg-primary rounded-full border-4 border-white shadow-[0_0_25px_rgba(59,130,246,0.8)] flex items-center justify-center">
