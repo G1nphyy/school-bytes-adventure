@@ -7,10 +7,11 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Train from "@/components/ui/train";
-import rails from "@/assets/graphics/train/rails.png";
+import rails from "@/assets/graphics/train/rail.png";
 import switchImg from "@/assets/graphics/train/switch.png";
 import switchToTop from "@/assets/graphics/train/switch_to_top.png";
 import switchToBottom from "@/assets/graphics/train/switch_to_bottom.png";
+import ground from "@/assets/graphics/train/ground.png";
 
 
 const cell = 85;
@@ -514,6 +515,19 @@ export default function TransportGame() {
                         userSelect: "none",
                       }}
                     >
+                      {tile === " " && (
+                        <img
+                          src={ground}
+                          alt="ground"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                            imageRendering: "pixelated",
+                            userSelect: "none",
+                          }}
+                        />
+                      )}
                       {/* 🔥 TOR */}
                       { (tile === "-" || tile === "P") && (
                         <img
