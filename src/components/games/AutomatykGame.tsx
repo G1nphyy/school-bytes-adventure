@@ -311,7 +311,7 @@ const AutomatykGame = () => {
                             variant="ghost"
                             size="sm"
                             onClick={() => setShowPractical(!showPractical)}
-                            className="w-full text-xs text-muted-foreground hover:text-primary mb-2"
+                            className="w-full text-xs text-muted-foreground hover:text-primary mb-2 h-auto py-3 whitespace-normal"
                         >
                           DO CZEGO MI SIĘ TO PRZYDA?
                         </Button>

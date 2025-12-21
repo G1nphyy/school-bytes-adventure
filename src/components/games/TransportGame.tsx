@@ -435,7 +435,7 @@ export default function TransportGame() {
                         size="sm"
                         onClick={() => setShowUsefulness(!showUsefulness)}
                         disabled={!!quizFeedback}
-                        className="rounded-xl border-2 h-12 text-[10px] font-black uppercase"
+                        className="rounded-xl border-2 text-[10px] font-black uppercase h-auto py-3 whitespace-normal"
                     >
                       <HelpCircle className="w-4 h-4 mr-2 text-blue-400" />
                       Zastosowanie

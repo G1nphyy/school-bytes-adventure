@@ -944,7 +944,7 @@ const InformatykGame = () => {
                 onClick={toggleUsefulness}
                 variant="outline"
                 size="sm"
-                className={`w-full border-2 ${showUsefulness ? 'border-primary/50 bg-primary/20' : 'border-border hover:border-primary/50'} text-foreground arcade-button hover:bg-primary/10 hover:text-primary-foreground`}
+                className={`w-full border-2 ${showUsefulness ? 'border-primary/50 bg-primary/20' : 'border-border hover:border-primary/50'} text-foreground arcade-button hover:bg-primary/10 hover:text-primary-foreground h-auto py-3 whitespace-normal`}
             >
               <Lightbulb className="w-4 h-4 mr-2" />
               DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
@@ -1157,7 +1157,7 @@ const InformatykGame = () => {
                 onClick={toggleUsefulness}
                 variant="outline"
                 size="sm"
-                className={`w-full border-2 ${showUsefulness ? 'border-primary/50 bg-primary/20' : 'border-border hover:border-primary/50'} text-foreground arcade-button hover:bg-primary/10 hover:text-primary-foreground`}
+                className={`w-full border-2 ${showUsefulness ? 'border-primary/50 bg-primary/20' : 'border-border hover:border-primary/50'} text-foreground arcade-button hover:bg-primary/10 hover:text-primary-foreground h-auto py-3 whitespace-normal`}
             >
               <Lightbulb className="w-4 h-4 mr-2" />
               DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
@@ -1464,7 +1464,7 @@ const InformatykGame = () => {
                     onClick={toggleUsefulness}
                     variant="outline"
                     size="sm"
-                    className={`w-full border-2 ${showUsefulness ? 'border-primary/50 bg-primary/20' : 'border-border hover:border-primary/50'} text-foreground arcade-button hover:bg-primary/10 hover:text-primary-foreground`}
+                    className={`w-full border-2 ${showUsefulness ? 'border-primary/50 bg-primary/20' : 'border-border hover:border-primary/50'} text-foreground arcade-button hover:bg-primary/10 hover:text-primary-foreground h-auto py-3 whitespace-normal`}
                 >
                   <Lightbulb className="w-4 h-4 mr-2" />
                   DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
