@@ -194,97 +194,148 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
         {/* LEWA: warsztat */}
         <div className="space-y-6">
           {/* MULTIMETR */}
-          <div className="bg-slate-900 rounded-2xl p-6 border-2 border-slate-700">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-mono text-muted-foreground">MULTIMETR</span>
-              <span className="text-2xl font-bold text-primary">{range}</span>
+          <div className="bg-slate-950 rounded-3xl p-8 border-4 border-slate-800 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-primary/60 tracking-widest uppercase">Digital Multimeter</span>
+                <span className="text-2xl font-mono font-bold text-primary drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]">
+                  {range === "OFF" ? "0.00" : range}
+                </span>
+              </div>
+              <div className="bg-black/50 px-4 py-2 rounded border border-primary/20">
+                <span className="text-3xl font-mono font-bold text-primary animate-pulse">
+                  {range === "OFF" ? "" : "⎓"}
+                </span>
+              </div>
             </div>
-            <div className="flex flex-wrap gap-3">
+
+            <div className="grid grid-cols-2 gap-2 mb-8">
               {RANGES.map((r) => (
-                <Button
-                  key={r}
-                  onClick={() => setRange(r)}
-                  variant={range === r ? "default" : "outline"}
-                  size="sm"
-                  className="font-bold"
-                >
-                  {r}
-                </Button>
+                  <Button
+                      key={r}
+                      onClick={() => setRange(r)}
+                      variant={range === r ? "default" : "outline"}
+                      size="sm"
+                      className={`font-bold transition-all ${range === r ? "scale-105 shadow-[0_0_15px_rgba(var(--primary),0.4)]" : "opacity-70"}`}
+                  >
+                    {r}
+                  </Button>
               ))}
             </div>
-            <div className="mt-6 grid grid-cols-3 gap-4 text-xs font-mono">
-              <div
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => { e.preventDefault(); if (e.dataTransfer.getData("wire") === "black") setBlackWire("COM"); }}
-                className={`h-16 flex flex-col items-center justify-center rounded-lg border-2 ${blackWire ? "bg-accent/20 border-accent" : "border-dashed border-border"}`}
-              >
-                COM<br />{blackWire ? "●" : "○"}
-              </div>
-              <div
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => { e.preventDefault(); if (e.dataTransfer.getData("wire") === "red") setRedWire("VΩmA"); }}
-                className={`h-16 flex flex-col items-center justify-center rounded-lg border-2 ${redWire === "VΩmA" ? "bg-accent/20 border-accent" : "border-dashed border-border"}`}
-              >
-                VΩmA<br />{redWire === "VΩmA" ? "●" : "○"}
-              </div>
-              <div
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => { e.preventDefault(); if (e.dataTransfer.getData("wire") === "red") setRedWire("10A"); }}
-                className={`h-16 flex flex-col items-center justify-center rounded-lg border-2 ${redWire === "10A" ? "bg-accent/20 border-accent" : "border-dashed border-border"}`}
-              >
-                10A<br />{redWire === "10A" ? "●" : "○"}
-              </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { id: "COM", label: "COM", color: "bg-zinc-800", wire: blackWire, expected: "black" },
+                { id: "VΩmA", label: "VΩmA", color: "bg-red-900/20", wire: redWire === "VΩmA" ? "red" : null, expected: "red" },
+                { id: "10A", label: "10A", color: "bg-red-900/20", wire: redWire === "10A" ? "red" : null, expected: "red" }
+              ].map((port) => (
+                  <div
+                      key={port.id}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        const wire = e.dataTransfer.getData("wire");
+                        if (wire === "black" && port.id === "COM") setBlackWire("COM");
+                        if (wire === "red") setRedWire(port.id);
+                      }}
+                      className={`group relative h-20 flex flex-col items-center justify-center rounded-xl border-2 transition-all ${
+                          port.wire
+                              ? "border-primary bg-primary/10 shadow-[0_0_10px_rgba(var(--primary),0.2)]"
+                              : "border-dashed border-slate-700 hover:border-primary/50"
+                      } ${port.color}`}
+                  >
+                    <span className="text-[10px] font-bold mb-1 text-slate-400">{port.label}</span>
+                    <div className={`w-8 h-8 rounded-full border-4 flex items-center justify-center transition-transform ${
+                        port.wire ? "scale-110 border-primary bg-slate-900" : "border-slate-800 bg-black"
+                    }`}>
+                      {port.wire && (
+                          <div className={`w-3 h-3 rounded-full shadow-inner ${port.wire === "black" ? "bg-zinc-400" : "bg-red-500"}`} />
+                      )}
+                    </div>
+                  </div>
+              ))}
             </div>
           </div>
 
           {/* PRZEWODY */}
-          <div className="bg-muted/50 rounded-2xl p-4 border-2 border-border">
-            <p className="text-sm mb-3 text-muted-foreground">Przeciągnij kable na gniazda:</p>
-            <div className="flex gap-6 justify-center">
+          <div className="bg-muted/30 rounded-2xl p-6 border-2 border-border backdrop-blur-sm">
+            <p className="text-xs font-bold uppercase tracking-wider mb-4 text-muted-foreground flex items-center">
+              <Zap className="w-3 h-3 mr-2" /> Wybierz przewody pomiarowe
+            </p>
+            <div className="flex gap-4">
               <div
-                draggable
-                onDragStart={(e) => e.dataTransfer.setData("wire", "black")}
-                className="cursor-grab active:cursor-grabbing bg-black text-white px-6 py-3 rounded-lg font-bold shadow-lg"
+                  draggable
+                  onDragStart={(e) => e.dataTransfer.setData("wire", "black")}
+                  className="flex-1 cursor-grab active:cursor-grabbing group"
               >
-                Czarny (COM)
+                <div className="bg-zinc-900 text-white p-3 rounded-xl border-2 border-zinc-700 group-hover:border-zinc-500 transition-all text-center font-bold text-sm shadow-md">
+                  Czarny (COM)
+                </div>
               </div>
               <div
-                draggable
-                onDragStart={(e) => e.dataTransfer.setData("wire", "red")}
-                className="cursor-grab active:cursor-grabbing bg-red-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg"
+                  draggable
+                  onDragStart={(e) => e.dataTransfer.setData("wire", "red")}
+                  className="flex-1 cursor-grab active:cursor-grabbing group"
               >
-                Czerwony
+                <div className="bg-red-600 text-white p-3 rounded-xl border-2 border-red-500 group-hover:border-red-400 transition-all text-center font-bold text-sm shadow-md">
+                  Czerwony (+)
+                </div>
               </div>
             </div>
           </div>
 
-          {/* ELEMENTY */}
-          <div className="bg-muted/50 rounded-2xl p-4 border-2 border-border">
-            <p className="text-sm mb-3 text-muted-foreground">Przeciągnij element na stanowisko:</p>
-            <div className="grid grid-cols-3 gap-4 mb-4">
+          {/* ELEMENTY I STANOWISKO */}
+          <div className="bg-muted/30 rounded-2xl p-6 border-2 border-border backdrop-blur-sm">
+            <p className="text-xs font-bold uppercase tracking-wider mb-4 text-muted-foreground flex items-center">
+              <Microchip className="w-3 h-3 mr-2" /> Komponenty do przetestowania
+            </p>
+            <div className="grid grid-cols-3 gap-3 mb-6">
               {Object.entries(ITEMS).map(([key, val]) => (
-                <div
-                  key={key}
-                  draggable={!done.includes(key)}
-                  onDragStart={(e) => e.dataTransfer.setData("item", key)}
-                  className={`cursor-grab p-4 rounded-lg border-2 text-center transition-all ${done.includes(key) ? "opacity-50 border-border" : "border-primary/50 hover:border-primary hover:shadow-lg hover:shadow-primary/20"} bg-card`}
-                >
-                  <val.icon className="w-10 h-10 mx-auto mb-2 text-primary" />
-                  <div className="text-xs font-bold">{val.name}</div>
-                </div>
+                  <div
+                      key={key}
+                      draggable={!done.includes(key)}
+                      onDragStart={(e) => e.dataTransfer.setData("item", key)}
+                      className={`group cursor-grab p-2 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center min-h-[100px] ${
+                          done.includes(key)
+                              ? "opacity-40 grayscale bg-slate-100 border-slate-200"
+                              : "bg-card border-primary/20 hover:border-primary hover:shadow-lg hover:shadow-primary/10"
+                      }`}
+                  >
+                    <val.icon className={`w-8 h-8 mx-auto mb-1 flex-shrink-0 ${done.includes(key) ? "text-slate-400" : "text-primary"}`} />
+                    <div className="text-[10px] font-bold leading-tight whitespace-normal break-words overflow-hidden">
+                      {val.name}
+                    </div>
+                  </div>
               ))}
             </div>
+
             <div
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => { e.preventDefault(); const item = e.dataTransfer.getData("item"); if (item && !done.includes(item)) setItemOnDesk(item); }}
-              className={`h-32 rounded-lg border-4 border-dashed flex items-center justify-center text-lg font-semibold ${itemOnDesk ? "border-primary bg-primary/10" : "border-border"}`}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const item = e.dataTransfer.getData("item");
+                  if (item && !done.includes(item)) setItemOnDesk(item);
+                }}
+                className={`h-32 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center ${
+                    itemOnDesk
+                        ? "border-primary bg-primary/5 shadow-inner"
+                        : "border-slate-300 bg-slate-50/50 hover:bg-slate-50"
+                }`}
             >
               {itemOnDesk ? (
-                <>
-                  {React.createElement(ITEMS[itemOnDesk as keyof typeof ITEMS].icon, { className: "w-10 h-10 mr-3 text-primary" })}
-                  {ITEMS[itemOnDesk as keyof typeof ITEMS].name}
-                </>
-              ) : "Upuść element tutaj"}
+                  <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="flex flex-col items-center">
+                    {React.createElement(ITEMS[itemOnDesk as keyof typeof ITEMS].icon, { className: "w-12 h-12 text-primary mb-2" })}
+                    <span className="text-sm font-bold text-primary">{ITEMS[itemOnDesk as keyof typeof ITEMS].name}</span>
+                  </motion.div>
+              ) : (
+                  <div className="text-slate-400 flex flex-col items-center">
+                    <div className="w-10 h-10 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center mb-2">
+                      <span className="text-xl">+</span>
+                    </div>
+                    <span className="text-[10px] font-medium uppercase tracking-tighter">Miejsce na komponent</span>
+                  </div>
+              )}
             </div>
           </div>
         </div>
@@ -300,7 +351,7 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
             </div>
 
             <div>
-              <p className="text-sm text-muted-foreground mb-2">Poprawnie zmierzone:</p>
+              <p className="text-sm text-muted-foreground mb-2">Oczekiwane wyniki:</p>
               <div className="flex flex-wrap gap-3">
                 {Object.entries(ITEMS).map(([k, v]) => (
                   <div key={k} className={`px-4 py-2 rounded-lg text-sm font-bold border-2 ${done.includes(k) ? "bg-accent/20 border-accent text-accent" : "border-border"}`}>
@@ -346,7 +397,9 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
 }
 
 /* ----------------- Plansza "Dlaczego warto być technikiem elektronikiem" ----------------- */
-function WhyWorthPanel({ totalScore }: { totalScore: number }) {
+function WhyWorthPanel({ totalScore, quizScore, workshopScore }: { totalScore: number; quizScore: number; workshopScore: number }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
   const reasons = [
     {
       title: "Gwarancja zatrudnienia",
@@ -376,30 +429,125 @@ function WhyWorthPanel({ totalScore }: { totalScore: number }) {
   ];
 
   return (
-    <Card className="p-8 max-w-5xl w-full mx-auto border-4 shadow-2xl bg-card text-card-foreground">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-black tracking-tight uppercase">DLACZEGO WARTO BYĆ TECHNIKIEM ELEKTRONIKIEM?</h2>
-        <p className="text-muted-foreground mt-2">Twoja przyszłość w nowoczesnej technologii</p>
-        <p className="text-2xl font-bold text-primary mt-4">Twój wynik: {totalScore} PKT</p>
-      </div>
+      <Card className="p-8 max-w-5xl w-full mx-auto border-4 shadow-2xl bg-card text-card-foreground">
+        <div className="text-center mb-6 mt-4">
+          <div className="relative inline-block">
+            <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-2 animate-bounce drop-shadow-md" />
+            {totalScore >= 80 && (
+                <div className="absolute top-8 -right-4 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-1 rounded-full animate-pulse">
+                  TOP EKSPERT!
+                </div>
+            )}
+          </div>
+          <h2 className="text-3xl font-black tracking-tight uppercase">GRATULACJE!</h2>
+          <p className="text-muted-foreground mt-2 uppercase tracking-widest text-sm">Ukończono ścieżkę Technika Elektronika</p>
+        </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {reasons.map((r, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="bg-primary/5 border-2 border-primary/20 rounded-xl p-6 text-center space-y-4 hover:bg-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all"
-          >
-            <r.icon className="w-16 h-16 text-primary mx-auto" />
-            <h3 className="text-xl font-bold">{r.title}</h3>
-            <p className="text-sm text-muted-foreground">{r.text}</p>
-          </motion.div>
-        ))}
-      </div>
+        {/* Baner z wynikiem głównym */}
+        <div className="bg-primary/5 border-2 border-primary/20 rounded-2xl p-6 text-center mb-8 relative overflow-hidden">
+          <div className="absolute inset-0 bg-primary/5 blur-xl" />
+          <span className="relative z-10 text-xs text-muted-foreground font-bold uppercase tracking-tighter">Twój Wynik Końcowy</span>
+          <div className="relative z-10 text-5xl font-black text-primary mt-2 drop-shadow-sm">
+            {totalScore} <span className="text-xl font-medium text-foreground/60">PKT</span>
+          </div>
+        </div>
 
-      <div className="mt-10 text-center">
+        {/* Szczegółowe statystyki */}
+        <div className="grid md:grid-cols-2 gap-4 mb-10">
+          <div className="flex items-center justify-between p-4 border border-border/50 rounded-xl bg-card hover:bg-accent/5 transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-500/10 rounded-md border border-blue-500/20">
+                <Cpu className="w-5 h-5 text-blue-500"/>
+              </div>
+              <div>
+                <p className="font-bold text-sm leading-none mb-1 text-left">Quiz Teoretyczny</p>
+                <p className="text-[10px] text-muted-foreground text-left">Podstawy elektroniki</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="font-bold text-foreground">{quizScore}</span>
+              <span className="text-xs text-muted-foreground"> / 70</span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between p-4 border border-border/50 rounded-xl bg-card hover:bg-accent/5 transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-orange-500/10 rounded-md border border-orange-500/20">
+                <Wrench className="w-5 h-5 text-orange-500"/>
+              </div>
+              <div>
+                <p className="font-bold text-sm leading-none mb-1 text-left">Warsztat Pomiarowy</p>
+                <p className="text-[10px] text-muted-foreground text-left">Pomiary multimetrem</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="font-bold text-foreground">{workshopScore}</span>
+              <span className="text-xs text-muted-foreground"> / 90</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-12 mb-10">
+          <h3 className="text-xl font-bold mb-8 flex items-center justify-center gap-2 text-primary">
+            <CheckCircle2 className="w-6 h-6" /> DLACZEGO ELEKTRONIKA TO STRZAŁ W DZIESIĄTKĘ?
+          </h3>
+
+          <div className="grid lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
+            {/* Lewa kolumna: Nawigacja (Ikony) */}
+            <div className="lg:col-span-2 space-y-2">
+              {reasons.map((r, i) => (
+                  <button
+                      key={i}
+                      onClick={() => setActiveIndex(i)}
+                      className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
+                          activeIndex === i
+                              ? "border-primary bg-primary/10 shadow-lg shadow-primary/10 scale-[1.02]"
+                              : "border-border/50 bg-card hover:border-primary/30"
+                      }`}
+                  >
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                        activeIndex === i ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                    }`}>
+                      <r.icon className="w-5 h-5" />
+                    </div>
+                    <span className={`text-sm font-bold uppercase tracking-tight ${
+                        activeIndex === i ? "text-primary" : "text-muted-foreground"
+                    }`}>
+                      {r.title}
+                    </span>
+                  </button>
+              ))}
+            </div>
+
+            {/* Prawa kolumna: Szczegółowy opis z animacją */}
+            <div className="lg:col-span-3 min-h-[250px] bg-primary/5 rounded-2xl border-2 border-primary/20 p-8 flex items-center relative overflow-hidden">
+              <AnimatePresence mode="wait">
+                <motion.div
+                    key={activeIndex}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
+                    className="relative z-10 space-y-4"
+                >
+                  <div className="flex items-center gap-3 text-primary">
+                    {React.createElement(reasons[activeIndex].icon, { className: "w-8 h-8" })}
+                    <h4 className="text-2xl font-black uppercase italic">{reasons[activeIndex].title}</h4>
+                  </div>
+                  <p className="text-lg text-muted-foreground leading-relaxed">
+                    {reasons[activeIndex].text}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+              {/* Dekoracyjne tło wewnątrz opisu */}
+              <div className="absolute -bottom-10 -right-10 opacity-5 pointer-events-none">
+                {React.createElement(reasons[activeIndex].icon, { className: "w-48 h-48" })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-10 text-center">
         <Button size="lg" className="h-14 text-lg font-bold shadow-lg" onClick={() => window.location.assign("/")}>
           WRÓĆ DO MENU GŁÓWNEGO
         </Button>
@@ -417,11 +565,13 @@ export default function ElectronicsGame() {
   const [answers, setAnswers] = useState<Record<number, any>>({});
   const [showResult, setShowResult] = useState(false);
   const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null);
-  const [totalScore, setTotalScore] = useState(0);
+  const [quizScore, setQuizScore] = useState(0);
+  const [workshopScore, setWorkshopScore] = useState(0);
   const [locked, setLocked] = useState(false);
   const [hintLevel, setHintLevel] = useState(0);
   const [showUsefulness, setShowUsefulness] = useState(false);
 
+  const totalScore = quizScore + workshopScore;
   const q = quizQuestions[qIndex];
 
   const updateAnswer = (val: any) => {
@@ -438,7 +588,7 @@ export default function ElectronicsGame() {
 
     const isCorrect = answerId === q.answers.find((x) => x.correct)?.id;
     if (isCorrect) {
-      setTotalScore((s) => s + 10);
+      setQuizScore((s) => s + 10);
       setFeedback({ ok: true, msg: "PRAWIDŁOWO! +10 PKT" });
     } else {
       setFeedback({ ok: false, msg: "BŁĄD!" });
@@ -464,7 +614,7 @@ export default function ElectronicsGame() {
     }
 
     if (ok) {
-      setTotalScore((s) => s + 10);
+      setQuizScore((s) => s + 10);
       setFeedback({ ok: true, msg: "PRAWIDŁOWO! +10 PKT" });
     } else {
       setFeedback({ ok: false, msg: "BŁĄD!" });
@@ -501,13 +651,22 @@ export default function ElectronicsGame() {
             const baseClasses = "w-full justify-start text-left arcade-button transition-all duration-200 cursor-pointer p-4 text-sm border h-auto border-2 rounded-xl whitespace-normal";
             let stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30";
 
-            if (showResult) {
-              if (showCorrect) stateClasses = "border-accent bg-accent/20 text-accent font-bold cursor-not-allowed";
-              else if (showWrong) stateClasses = "border-destructive bg-destructive/20 text-destructive font-bold cursor-not-allowed";
-              else if (isCorrectAnswer) stateClasses = "border-accent bg-accent/10 text-accent cursor-not-allowed";
-              else stateClasses = "border-border bg-background/50 text-muted-foreground opacity-60 cursor-not-allowed";
+            if(showResult) {
+              if (showCorrect) {
+                stateClasses = "border-accent bg-accent/20 text-accent font-bold cursor-not-allowed";
+              } else if (showWrong) {
+                stateClasses = "border-destructive bg-destructive/20 text-destructive font-bold cursor-not-allowed";
+              } else if (isCorrectAnswer) {
+                // Pokaż poprawną, jeśli użytkownik wybrał źle
+                stateClasses = "border-accent bg-accent/10 text-accent cursor-not-allowed";
+              } else {
+                stateClasses = "border-border bg-background/50 text-muted-foreground opacity-60 cursor-not-allowed";
+              }
             } else if (isSelected) {
               stateClasses = "border-primary bg-primary/20 text-primary font-bold";
+            } else {
+              // Default hover state
+              stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30 hover:bg-background/5 hover:text-foreground";
             }
 
             return (
@@ -540,7 +699,7 @@ export default function ElectronicsGame() {
             return (
               <div
                 key={a.id}
-                className={`flex items-center gap-3 p-4 border-2 rounded-xl arcade-button transition-all cursor-pointer h-auto whitespace-normal ${showResult ? "opacity-80 pointer-events-none" : ""} ${containerClass}`}
+                className={`flex items-center gap-3 p-4 border-2 rounded-xl arcade-button transition-all cursor-pointer h-auto whitespace-normal ${showResult ? 'opacity-80 pointer-events-none' : ''} ${containerClass}`}
                 onClick={() => {
                   if (showResult) return;
                   const arr = val || [];
@@ -591,12 +750,12 @@ export default function ElectronicsGame() {
 
           <div className="space-y-3 pt-4 border-t border-border/50">
             {hintLevel < q.hints.length && !showResult && (
-              <Button
-                onClick={() => {
-                  setHintLevel(h => h + 1);
-                  setTotalScore(s => s - 2);
-                }}
-                variant="outline"
+                <Button
+                    onClick={() => {
+                      setHintLevel(h => h + 1);
+                      setQuizScore(s => s - 2);
+                    }}
+                    variant="outline"
                 size="sm"
                 className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 arcade-button h-auto py-3"
               >
@@ -623,9 +782,10 @@ export default function ElectronicsGame() {
               </div>
 
               <Button
-                onClick={() => setShowUsefulness(!showUsefulness)}
-                variant="outline"
-                className="w-full border-2 arcade-button"
+                  onClick={() => setShowUsefulness(!showUsefulness)}
+                  variant="outline"
+                  size="sm"
+                  className={`w-full border-2 ${showUsefulness ? 'border-primary/50 bg-primary/20' : 'border-border hover:border-primary/50'} text-foreground arcade-button hover:bg-primary/10 hover:text-primary-foreground h-auto py-3 whitespace-normal`}
               >
                 <Lightbulb className="w-4 h-4 mr-2" />
                 DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
@@ -660,15 +820,15 @@ export default function ElectronicsGame() {
       )}
 
       {view === "workshop" && (
-        <div className="w-full">
-          <div className="text-center mb-6 bg-card p-4 rounded border-2 shadow-md mx-auto max-w-md">
-            <p className="text-lg font-bold text-primary">Wynik z quizu: {totalScore} PKT</p>
+          <div className="w-full">
+            <div className="text-center mb-6 bg-card p-4 rounded border-2 shadow-md mx-auto max-w-md">
+              <p className="text-lg font-bold text-primary">Wynik z quizu: {quizScore} PKT</p>
+            </div>
+            <MultimeterWorkshop onFinish={() => setView("whyWorth")} addScore={(p) => setWorkshopScore(s => s + p)} />
           </div>
-          <MultimeterWorkshop onFinish={() => setView("whyWorth")} addScore={(p) => setTotalScore(s => s + p)} />
-        </div>
       )}
 
-      {view === "whyWorth" && <WhyWorthPanel totalScore={totalScore} />}
+      {view === "whyWorth" && <WhyWorthPanel totalScore={totalScore} quizScore={quizScore} workshopScore={workshopScore} />}
     </div>
   );
 }
