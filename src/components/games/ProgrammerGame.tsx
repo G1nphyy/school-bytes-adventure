@@ -439,7 +439,7 @@ function MiniGameInner({ onFinish, addScore }: { onFinish: () => void, addScore:
   const placedCount = rows.filter(Boolean).length;
 
   return (
-      <Card className="p-6 border-4 space-y-4 max-w-3xl w-full mx-auto bg-card text-card-foreground">
+      <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto bg-card text-card-foreground">
         <div className="text-center mb-4">
           <Terminal className="w-10 h-10 text-primary mx-auto mb-2 animate-pixel-float" />
           <h2 className="text-lg font-bold">ETAP 2: MINI-GRA KODOWA</h2>
@@ -788,7 +788,7 @@ export default function ProgrammerGame() {
   return (
       <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
         {view === "quiz" && (
-            <Card className="p-6 border-4 space-y-4 max-w-3xl w-full mx-auto shadow-2xl bg-card text-card-foreground">
+            <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground">
               <div className="text-center mb-6">
                 <Code className="w-12 h-12 text-primary mx-auto mb-2 animate-pixel-float" />
                 <h2 className="text-xl font-bold tracking-tight">ETAP 1: QUIZ PROGRAMISTYCZNY</h2>

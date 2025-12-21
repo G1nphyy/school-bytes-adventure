@@ -782,13 +782,13 @@ const InformatykGame = () => {
 
     const percentage = (totalScore / estimatedMaxScore) * 100;
 
-
     return (
-        <Card className="h-screen w-[35%] fixed left-0 top-0 border-r bg-card text-card-foreground flex flex-col p-6 overflow-y-auto animate-fade-in">
-          {/* Header z Trofeum */}
-          <div className="text-center mb-6 mt-4">
-            <div className="relative inline-block">
-              <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-2 animate-bounce drop-shadow-md" />
+        <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+          <Card className="p-8 max-w-4xl w-full text-center space-y-6 border-4 shadow-2xl animate-fade-in bg-card text-card-foreground mx-auto">
+            {/* Header z Trofeum */}
+            <div className="text-center mb-6 mt-4">
+              <div className="relative inline-block">
+                <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-2 animate-bounce drop-shadow-md" />
               {percentage >= 70 && (
                   <div className="absolute -top-2 -right-4 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-1 rounded-full animate-pulse">
                     TOP WYNIK!
@@ -878,15 +878,16 @@ const InformatykGame = () => {
                     : "Początki bywają trudne. Informatyka wymaga precyzji i cierpliwości. Spróbuj jeszcze raz, zwracając większą uwagę na podpowiedzi!"}
           </div>
 
-          <div className="mt-auto">
-            <Button
-                onClick={handleRestart}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 text-sm uppercase tracking-wider font-bold shadow-lg shadow-primary/20"
-            >
-              Zagraj Ponownie
-            </Button>
-          </div>
-        </Card>
+            <div className="mt-auto">
+              <Button
+                  onClick={handleRestart}
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 text-sm uppercase tracking-wider font-bold shadow-lg shadow-primary/20"
+              >
+                Zagraj Ponownie
+              </Button>
+            </div>
+          </Card>
+        </div>
     );
   }
 
@@ -896,9 +897,10 @@ const InformatykGame = () => {
     const finalSlots = correctOrder;
 
     return (
-        <Card className="h-screen w-[35%] fixed left-0 top-0 border-r bg-card text-card-foreground flex flex-col p-6 overflow-y-auto animate-fade-in">
-          <div className="mb-6 text-center">
-            <Cable className={`w-12 h-12 ${rjCorrect ? "text-accent" : 'text-destructive' } mx-auto mb-4 animate-bounce`} />
+        <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+          <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
+            <div className="mb-6 text-center">
+              <Cable className={`w-12 h-12 ${rjCorrect ? "text-accent" : 'text-destructive' } mx-auto mb-4 animate-bounce`} />
             <h2 className="text-lg text-foreground mb-2">PODSUMOWANIE ETAPU RJ-45</h2>
             <p className={`text-xl font-bold ${rjCorrect ? 'text-accent' : 'text-destructive'}`}>
               {rjResultMsg}
@@ -980,17 +982,18 @@ const InformatykGame = () => {
             </div>
           </div>
 
-          <Button
-              onClick={() => {
-                setRjComplete(true);
-                setShowRjSummary(false);
-                setShowUsefulness(false);
-              }}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button"
-          >
-            PRZEJDŹ DO EKRANU KOŃCOWEGO
-          </Button>
-        </Card>
+            <Button
+                onClick={() => {
+                  setRjComplete(true);
+                  setShowRjSummary(false);
+                  setShowUsefulness(false);
+                }}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12"
+            >
+              PRZEJDŹ DO EKRANU KOŃCOWEGO
+            </Button>
+          </Card>
+        </div>
     );
   }
 
@@ -1001,9 +1004,10 @@ const InformatykGame = () => {
 
     return (
         <DndProvider backend={HTML5Backend}>
-          <Card className="h-screen w-[35%] fixed left-0 top-0 border-r bg-card text-card-foreground flex flex-col p-6 overflow-y-auto animate-fade-in">
-            <div className="mb-6 text-center">
-              <Cable className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
+          <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+            <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
+              <div className="mb-6 text-center">
+                <Cable className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
               <h2 className="text-lg text-foreground mb-2">ETAP 3: OKABLOWANIE RJ-45</h2>
               <p className="text-lg font-bold text-primary mb-2">Punkty: {totalScore}</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -1108,12 +1112,13 @@ const InformatykGame = () => {
               <Button
                   onClick={handleCheckRjOrder}
                   disabled={!isRjReady && canAttempt}
-                  className={`w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button ${!isRjReady && canAttempt ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 ${!isRjReady && canAttempt ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {rjCorrect ? "PRZEJDŹ DO PODSUMOWANIA " : (canAttempt ? "AKCEPTUJ KOLEJNOŚĆ" : "ZOBACZ PODSUMOWANIE ")}
               </Button>
             </div>
-          </Card>
+            </Card>
+          </div>
         </DndProvider>
     );
   }
@@ -1136,9 +1141,10 @@ const InformatykGame = () => {
     };
 
     return (
-        <Card className="h-screen w-[35%] fixed left-0 top-0 border-r bg-card text-card-foreground flex flex-col p-6 overflow-y-auto animate-fade-in">
-          <div className="mb-6 text-center">
-            <Cpu className={`w-12 h-12 ${isPerfect ? 'text-accent' : 'text-destructive'} mx-auto mb-4 animate-bounce`} />
+        <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+          <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
+            <div className="mb-6 text-center">
+              <Cpu className={`w-12 h-12 ${isPerfect ? 'text-accent' : 'text-destructive'} mx-auto mb-4 animate-bounce`} />
             <h2 className="text-lg text-foreground mb-2">PODSUMOWANIE MONTAŻU PC</h2>
             <p className={`text-xl font-bold ${isPerfect ? 'text-accent' : 'text-destructive'}`}>
               {assemblyResultMsg}
@@ -1187,17 +1193,18 @@ const InformatykGame = () => {
             </div>
           </div>
 
-          <Button
-              onClick={() => {
-                setAssemblyComplete(true);
-                setShowAssemblySummary(false);
-                setShowUsefulness(false);
-              }}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button"
-          >
-            PRZEJDŹ DO ETAPU RJ-45
-          </Button>
-        </Card>
+            <Button
+                onClick={() => {
+                  setAssemblyComplete(true);
+                  setShowAssemblySummary(false);
+                  setShowUsefulness(false);
+                }}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12"
+            >
+              PRZEJDŹ DO ETAPU RJ-45
+            </Button>
+          </Card>
+        </div>
     );
   }
 
@@ -1208,10 +1215,11 @@ const InformatykGame = () => {
     const assemblyHintsAvailable = assemblyHintsData.length;
 
     return (
-        <DndProvider backend={HTML5Backend}>
-          <Card className="h-screen w-[35%] fixed left-0 top-0 border-r bg-card text-card-foreground flex flex-col p-6 overflow-y-auto animate-fade-in">
-            <div className="mb-6 text-center">
-              <Cpu className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
+          <DndProvider backend={HTML5Backend}>
+            <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+              <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
+                <div className="mb-6 text-center">
+                  <Cpu className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
               <h2 className="text-lg text-foreground mb-2">ETAP 2: MONTAŻ PC</h2>
               <p className="text-lg font-bold text-primary mb-2">Punkty: {totalScore}</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -1322,22 +1330,24 @@ const InformatykGame = () => {
               <Button
                   onClick={checkAssembly}
                   disabled={!isAssemblyReady && canAttempt}
-                  className={`w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button`}
+                  className={`w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12`}
               >
                 {assemblyScore >= 25 ? "PRZEJDŹ DO PODSUMOWANIA " : (canAttempt ? "ZATWIERDŹ MONTAŻ" : "ZOBACZ PODSUMOWANIE ")}
               </Button>
             </div>
-          </Card>
-        </DndProvider>
-    );
-  }
+              </Card>
+            </div>
+          </DndProvider>
+          );
+      }
 
   // 6. QUIZ (główny etap - renderowany tylko, jeśli quiz nie jest zakończony)
 
   return (
-      <Card className="h-screen w-[35%] fixed left-0 top-0 border-r bg-card text-card-foreground flex flex-col p-6 overflow-y-auto">
-        <div className="mb-6 text-center">
-          <Shield className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
+      <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+        <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
+          <div className="mb-6 text-center">
+            <Shield className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
           <h2 className="text-lg text-foreground mb-2">ETAP 1: QUIZ BEZPIECZEŃSTWA</h2>
           <p className="text-lg font-bold text-primary mb-2">Punkty: {totalScore}</p>
           <p className="text-xs text-muted-foreground leading-relaxed">
@@ -1397,9 +1407,9 @@ const InformatykGame = () => {
           </div>
         </div>
 
-        <div className="space-y-4 animate-slide-in-up">
+          <div className="space-y-4 animate-slide-in-up">
 
-          {hintLevel < question.podpowiedzi.length && !showResult && (
+            {hintLevel < question.podpowiedzi.length && !showResult && (
               <Button
                   onClick={showQuizHint}
                   variant="outline"
@@ -1481,13 +1491,14 @@ const InformatykGame = () => {
                       setHintLevel(0);
                     }
                   }}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button"
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 text-md tracking-wider font-bold shadow-lg shadow-primary/20"
               >
                 {currentQuestion < securityQuestions.length - 1 ? "NASTĘPNE PYTANIE " : "ZACZNIJ MONTAŻ PC "}
               </Button>
           )}
-        </div>
-      </Card>
+          </div>
+        </Card>
+      </div>
   );
 };
 
