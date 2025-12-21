@@ -245,7 +245,7 @@ const KomunikacjaGame = () => {
             onClick={showHint}
             variant="outline"
             size="sm"
-            className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20"
+            className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 h-auto py-3 whitespace-normal"
           >
             💡 POKAŻ PODPOWIEDŹ ({hintLevel + 1}/{question.hints.length})
           </Button>
