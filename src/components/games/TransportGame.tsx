@@ -14,6 +14,8 @@ import point3 from "@/assets/graphics/train/point_3.png";
 import point4 from "@/assets/graphics/train/point_4.png";
 import point5 from "@/assets/graphics/train/point_5.png";
 import point6 from "@/assets/graphics/train/point_6.png";
+import switchToTop from "@/assets/graphics/train/switch_to_top.png";
+import switchToBottom from "@/assets/graphics/train/switch_to_bottom.png";
 
 const pointFrames = [point0, point1, point2, point3, point4, point5, point6];
 
@@ -464,7 +466,7 @@ export default function TransportGame() {
                           : tile === "P"
                           ? "flex items-center justify-center"
                           : isSwitch
-                          ? "cursor-pointer hover:scale-95 transition-all"
+                          ? "cursor-pointer hover:scale-95 transition-all border-2 border-amber-500/50 rounded-md"
                           : ""
                       }
                       style={{
@@ -476,10 +478,46 @@ export default function TransportGame() {
                       }}
                     >
                       {/* 🔥 TOR */}
-                      { (tile === "-" || tile === "T") && (
+                      { tile === "-" && (
                         <img
                           src={rails}
                           alt="rail"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                            imageRendering: "pixelated",
+                          }}
+                        />
+                      )}
+                      { isSwitch && switchState === "straight" && (
+                        <img
+                          src={rails}
+                          alt="rail"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                            imageRendering: "pixelated",
+                          }}
+                        />
+                      )}
+                      { isSwitch && switchState === "up" && (
+                        <img
+                          src={switchToTop}
+                          alt="switch_to_top"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                            imageRendering: "pixelated",
+                          }}
+                        />
+                      )}
+                      { isSwitch && switchState === "down" && (
+                        <img
+                          src={switchToBottom}
+                          alt="switch_to_bottom"
                           style={{
                             width: "100%",
                             height: "100%",
@@ -507,22 +545,6 @@ export default function TransportGame() {
                       {tile === "E" && (
                         <div className="text-emerald-400 font-black text-[10px]">CEL</div>
                       )}
-
-                      {/* 🔥 ZWROTNICA */}
-                      {isSwitch && (
-                        <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-amber-500 uppercase tracking-tighter text-center p-1">
-                          {switchState === "up"
-                            ? "↗ Góra"
-                            : switchState === "down"
-                            ? "↘ Dół"
-                            : "→ Prosto"}
-                        </div>
-                      )}
-                      {/* Aby dodać grafikę zakrętów, możesz zaimportować odpowiednie assety (np. curve_up.png, curve_down.png) */}
-                      {/* i warunkowo renderować je tutaj dla isSwitch, w zależności od switchState. */}
-                      {/* Na przykład: */}
-                      {/* if (isSwitch && switchState === 'up') <img src={curveUp} ... /> */}
-                      {/* Ponieważ zakręt spans multiple cells, rozważ dodanie overlay divów o większej szerokości dla segmentów krzywych. */}
                     </div>
                   );
                 })
