@@ -370,7 +370,7 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
                     addScore(-5);
                   }}
                   variant="outline"
-                  className="w-full border-2 border-secondary"
+                  className="w-full border-2 border-secondary h-auto py-3 whitespace-normal"
                 >
                   💡 PODPOWIEDŹ ({hintsVisible + 1}/{hints.length}) (-5 PKT)
                 </Button>
@@ -378,7 +378,7 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
               {hintsVisible > 0 && (
                 <div className="space-y-2">
                   {hints.slice(0, hintsVisible).map((h, i) => (
-                    <div key={i} className="p-3 bg-secondary/10 border-2 border-secondary rounded text-sm">
+                    <div key={i} className="p-3 bg-secondary/10 border-2 border-secondary rounded text-sm " >
                       <span className="font-bold">Podpowiedź {i + 1}:</span> {h}
                     </div>
                   ))}
@@ -757,7 +757,7 @@ export default function ElectronicsGame() {
                     }}
                     variant="outline"
                 size="sm"
-                className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 arcade-button h-auto py-3"
+                className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 arcade-button h-auto py-3 whitespace-normal"
               >
                 💡 POKAŻ PODPOWIEDŹ ({hintLevel + 1}/{q.hints.length}) (KOSZT: 2 PKT)
               </Button>
