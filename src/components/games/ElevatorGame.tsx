@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import stairs_to_left from "@/assets/graphics/stairs/stairs_to_left.png";
 import stairs_to_right from "@/assets/graphics/stairs/stairs_to_right.png";
 
-const cell = 85;
+const cell = 32;
 const mapWidthCells = 10; // Reduced to fit better
 const mapWidth = mapWidthCells * cell;
 const stairWidthRatio = 0.8;
@@ -50,6 +50,10 @@ for (let i = 0; i < totalSegments; i++) {
 }
 
 const totalHeight = (floors * segmentsPerFloor * stepsPerSegment) * heightPerStep + cell * 4; // extra padding
+
+// Define floor backgrounds and lines
+const floorHeight = heightPerSegment * segmentsPerFloor;
+const bgColors = ['#332F00', '#3D3800']; // dark yellowish, slightly different
 
 export default function ElevatorGame() {
   const [currentSegment, setCurrentSegment] = useState(0);
@@ -192,6 +196,45 @@ export default function ElevatorGame() {
                   height: totalHeight,
                 }}
             >
+              {/* Render floor backgrounds */}
+              {Array.from({ length: floors }).map((_, floorIdx) => {
+                const floorY = totalHeight - (floorIdx + 1) * floorHeight - cell * 2; // Adjust to position correctly
+                const bgColor = bgColors[floorIdx % 2];
+                return (
+                  <div
+                    key={`bg-${floorIdx}`}
+                    style={{
+                      position: 'absolute',
+                      top: floorY,
+                      left: 0,
+                      width: mapWidth,
+                      height: floorHeight,
+                      backgroundColor: bgColor,
+                      zIndex: -1,
+                    }}
+                  />
+                );
+              })}
+
+              {/* Render floor lines at the end of each floor (top of each background) */}
+              {Array.from({ length: floors }).map((_, floorIdx) => {
+                const lineY = totalHeight - (floorIdx + 1) * floorHeight - cell * 2 + floorHeight; // At the bottom of each floor bg
+                return (
+                  <div
+                    key={`line-${floorIdx}`}
+                    style={{
+                      position: 'absolute',
+                      top: lineY,
+                      left: 0,
+                      width: mapWidth,
+                      height: 5, // thin line
+                      backgroundColor: '#FFFFFF', // white line, adjust color as needed
+                      zIndex: 0,
+                    }}
+                  />
+                );
+              })}
+
               {/* Render schodów segments */}
               {segments.map((seg, idx) => (
                 <>
@@ -224,8 +267,8 @@ export default function ElevatorGame() {
                   initial={{ y: 0 }}
                   animate={{ y: [-30, 0] }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
-                  className="absolute w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-white font-bold z-50 shadow-lg"
-                  style={{ top: y - 28, left: x - 28 }} // Adjust for centering and jump offset
+                  className="absolute w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold z-50 shadow-lg"
+                  style={{ top: y - 16, left: x - 16 }} // Adjust for centering and jump offset
               >
                 🧑
               </motion.div>
