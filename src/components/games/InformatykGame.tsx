@@ -680,7 +680,7 @@ const InformatykGame = () => {
   };
 
   // -------------------------- PC ASSEMBLY LOGIC ---------------------------------
-  // TODO: Zrobić żeby było można dropnąć element na każdy slot, nie tylko poprawny 
+  // TODO: Zrobić żeby było można dropnąć element na każdy slot, nie tylko poprawny
   const handleAssemblyDrop = useCallback((componentId: number, targetSlotName: string, sourceSlotName: string | null) => {
     if (showAssemblyResult && assemblyAttempts >= 1) return;
 
