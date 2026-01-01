@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { 
-  TrainFront, Zap, CheckCircle2, XCircle, 
-  Trophy, Network, Info, Search, ChevronRight, 
-  Gauge, Activity, Settings, HardHat, Radio, AlertTriangle, Lightbulb
+import {
+  TrainFront, Zap, CheckCircle2, XCircle,
+  Trophy, Network, Info, Search, ChevronRight,
+  Gauge, HardHat, Lightbulb, Radio
 } from "lucide-react";
 
-/* ----------------- DANE QUIZOWE (7 PYTAŃ) ----------------- */
+/* ----------------- DANE QUIZOWE ----------------- */
 const quizQuestions = [
   {
     id: 1,
@@ -24,13 +24,16 @@ const quizQuestions = [
       { id: "c", text: "3000 V", correct: true },
       { id: "d", text: "25 000 V", correct: false },
     ],
-    hints: ["To standardowe napięcie zasilające pociągi w Polsce.", "Pamiętaj, że w sieci PKP PLK używamy prądu stałego."],
-    usefulness: ["Podstawa wiedzy o polskiej infrastrukturze kolejowej.", "Kluczowe dla bezpieczeństwa przy pracach serwisowych."]
+    hints: [
+      "To standardowe napięcie zasilające pociągi w Polsce.",
+      "Większość lokomotyw w Polsce (np. EU07) pracuje właśnie na 3kV DC."
+    ],
+    usefulness: ["Kluczowa wiedza dla bezpieczeństwa przy pracach serwisowych na kolei."]
   },
   {
     id: 2,
     type: "multiple",
-    questionText: "Które elementy wchodzą w skład 'taboru szynowego'? (Zaznacz poprawne)",
+    questionText: "Które elementy wchodzą w skład 'taboru szynowego'? (wszystkie poprawne)",
     answers: [
       { id: "a", text: "Lokomotywy elektryczne" },
       { id: "b", text: "Elektryczne Zespoły Trakcyjne (EZT)" },
@@ -38,8 +41,11 @@ const quizQuestions = [
       { id: "d", text: "Wagony pasażerskie i towarowe" },
     ],
     correct: ["a", "b", "d"],
-    hints: ["Tabor to pojazdy, a nie stała infrastruktura nad torami.", "Pomyśl o tym, co faktycznie się porusza."],
-    usefulness: ["Kwalifikacja TKO.06 dotyczy właśnie budowy i naprawy tych maszyn.", "Pozwala odróżnić infrastrukturę od taboru."]
+    hints: [
+      "Tabor to pojazdy, a nie stała infrastruktura nad torami.",
+      "Jeśli coś może samodzielnie lub w składzie jechać po szynach, jest taborem."
+    ],
+    usefulness: ["Kwalifikacja TKO.06 dotyczy budowy i naprawy tych konkretnych maszyn."]
   },
   {
     id: 3,
@@ -49,335 +55,379 @@ const quizQuestions = [
       { id: "a", text: "Sprzedaż biletów elektronicznych", correct: false },
       { id: "b", text: "Przetwarzanie prądu z sieci energetycznej na prąd trakcyjny", correct: true },
       { id: "c", text: "Produkcja szyn kolejowych", correct: false },
-      { id: "d", text: "Sterowanie ruchem pociągów towarowych", correct: false },
+      { id: "d", text: "Sterowanie ruchem pociągów", correct: false },
     ],
-    hints: ["To 'serce' zasilania, które zmienia parametry prądu zmiennego na stały.", "Bez tego pociągi elektryczne nie ruszą."],
-    usefulness: ["Zrozumiesz proces dystrybucji energii w transporcie.", "To podstawowy obiekt pracy elektroenergetyka."]
+    hints: [
+      "To 'serce' zasilania, które zmienia parametry prądu zmiennego na stały.",
+      "Podstacja obniża napięcie z sieci zawodowej i prostuje je do 3000V DC."
+    ],
+    usefulness: ["To podstawowy obiekt pracy elektroenergetyka transportu szynowego."]
   },
   {
     id: 4,
     type: "short",
-    questionText: "Zadanie proceduralne: Jako maszynista musisz zgłosić gotowość pociągu nr 405 do odjazdu przez radio. Uzupełnij pełną komendę: 'Pociąg cztery zero pięć...'",
+    questionText: "Zadanie proceduralne: Uzupełnij komendę radiową: 'Pociąg 405...'",
     correctText: "gotowy do odjazdu",
-    hints: ["Użyj dokładnie trzech słów.", "Pierwsze słowo to 'gotowy'.", "Pisz małymi literami bez kropek."],
-    usefulness: ["Komunikacja radiowa to krytyczny element bezpieczeństwa ruchu.", "Uczysz się dyscypliny frazeologii kolejowej."]
+    hints: [
+      "Użyj dokładnie trzech słów.",
+      "Pierwsze słowo to 'gotowy'. Frazeologia kolejowa musi być precyzyjna."
+    ],
+    usefulness: ["Komunikacja radiowa to krytyczny element bezpieczeństwa ruchu."]
   },
   {
     id: 5,
     type: "single",
-    questionText: "Jakie ważne uprawnienia zawodowe może zdobyć uczeń tego kierunku, niezbędne do pracy z prądem?",
+    questionText: "Jakie uprawnienia zawodowe uczeń może zdobyć w szkole, niezbędne do pracy z prądem?",
     answers: [
       { id: "a", text: "Prawo jazdy kat. C+E", correct: false },
       { id: "b", text: "Uprawnienia SEP (Stowarzyszenia Elektryków Polskich)", correct: true },
       { id: "c", text: "Certyfikat pilota drona", correct: false },
       { id: "d", text: "Licencję na sprzedaż nieruchomości", correct: false },
     ],
-    hints: ["Chodzi o uprawnienia eksploatacyjne (E) do 1kV lub więcej.", "To certyfikat honorowany w całej Unii Europejskiej."],
-    usefulness: ["SEP to 'bilet' do pracy przy wysokich napięciach.", "Zwiększa Twoją wartość rynkową już na starcie."]
-  },
-  {
-    id: 6,
-    type: "multiple",
-    questionText: "Jakie korzyści daje praca w tym zawodzie według prognoz rynku?",
-    answers: [
-      { id: "a", text: "Gwarantowane zatrudnienie (braki kadrowe)", correct: true },
-      { id: "b", text: "Możliwość darmowych lotów samolotem", correct: false },
-      { id: "c", text: "Praca przy ekologicznym transporcie przyszłości", correct: true },
-      { id: "d", text: "Stabilna ścieżka awansu w spółkach PKP", correct: true },
+    hints: [
+      "Chodzi o uprawnienia eksploatacyjne (E) do 1kV lub więcej.",
+      "To certyfikat honorowany w całej Unii Europejskiej."
     ],
-    correct: ["a", "c", "d"],
-    hints: ["Kolej to najbardziej 'zielony' środek transportu.", "Brakuje tysięcy specjalistów w całej Polsce."],
-    usefulness: ["Dowiesz się, dlaczego Koleje Wielkopolskie czekają na Ciebie.", "Planowanie stabilnej kariery długofalowej."]
+    usefulness: ["Uprawnienia SEP to Twój bilet do pracy przy wysokich napięciach."]
   },
-  {
-    id: 7,
-    type: "single",
-    questionText: "Co oznacza skrót UTK w branży kolejowej?",
-    answers: [
-      { id: "a", text: "Uniwersalny Tor Kolejowy", correct: false },
-      { id: "b", text: "Urząd Transportu Kolejowego", correct: true },
-      { id: "c", text: "Układ Trakcji Kołowej", correct: false },
-      { id: "d", text: "Urząd Techniki Kablowej", correct: false },
-    ],
-    hints: ["To regulator rynku, który wydaje m.in. licencje maszynisty.", "Odpowiada za nadzór nad bezpieczeństwem ruchu."],
-    usefulness: ["Znajomość organów nadzorczych jest wymagana na egzaminie.", "To tam będziesz załatwiać formalności zawodowe."]
-  }
-];
+] as const;
 
-/* ----------------- WARSZTAT: ZŁOŻONA ROZDZIELNIA ----------------- */
-
-function AdvancedPowerWorkshop({
-  onFinish,
-  addScore,
-}: {
-  onFinish: () => void;
-  addScore: (points: number) => void;
-}) {
-  const steps = [
-    { id: 1, label: "Sprawdź zabezpieczenia nadprądowe", icon: Search },
-    { id: 2, label: "Odłącz uszkodzoną sekcję zasilania", icon: AlertTriangle },
-    { id: 3, label: "Załącz zasilanie rezerwowe", icon: Zap },
-  ];
-
-  const correctOrder = [1, 2, 3];
-
+/* ----------------- WARSZTAT: DIAGNOSTYKA ----------------- */
+function PowerWorkshop({ onFinish, addScore }: { onFinish: () => void; addScore: (points: number) => void }) {
   const [userOrder, setUserOrder] = useState<number[]>([]);
-  const [failed, setFailed] = useState(false);
-  const [completed, setCompleted] = useState(false);
+  const [feedback, setFeedback] = useState<"none" | "error" | "success">("none");
+  const steps = [
+    { id: 1, label: "SPRAWDŹ ZABEZPIECZENIA", icon: Search },
+    { id: 2, label: "ODŁĄCZ USZKODZONĄ SEKCJĘ", icon: Zap },
+    { id: 3, label: "ZAŁĄCZ ZASILANIE REZERWOWE", icon: Gauge },
+  ];
+  const correct = [1, 2, 3];
 
-  useEffect(() => {
-    if (userOrder.length === 0) return;
+  const handleStep = (id: number) => {
+    if (feedback === "success") return;
+    const newOrder = [...userOrder, id];
+    setUserOrder(newOrder);
 
-    const currentIndex = userOrder.length - 1;
-    if (userOrder[currentIndex] !== correctOrder[currentIndex]) {
-      setFailed(true);
-      setTimeout(() => {
-        setUserOrder([]);
-        setFailed(false);
-      }, 2500);
+    if (newOrder[newOrder.length - 1] !== correct[newOrder.length - 1]) {
+      setFeedback("error");
+      setTimeout(() => { setUserOrder([]); setFeedback("none"); }, 1500);
+      return;
     }
 
-    if (userOrder.length === correctOrder.length) {
-      setCompleted(true);
-      addScore(80);
-      setTimeout(onFinish, 3000);
+    if (newOrder.length === correct.length) {
+      setFeedback("success");
+      addScore(50);
+      setTimeout(onFinish, 1500);
     }
-  }, [userOrder]);
+  };
 
   return (
-    <Card className="p-10 border-4 border-zinc-700 max-w-4xl w-full mx-auto bg-zinc-900 text-zinc-100 shadow-2xl relative overflow-hidden animate-in fade-in duration-500">
-      {failed && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="absolute inset-0 bg-red-600/70 backdrop-blur-md z-50 flex flex-col items-center justify-center"
-        >
-          <AlertTriangle size={120} className="mb-6 text-white animate-bounce" />
-          <h2 className="text-4xl font-black text-white uppercase">
-            BŁĘDNA PROCEDURA
-          </h2>
-          <p className="mt-4 text-sm font-bold uppercase tracking-widest text-white">
-            Zrzut napięcia i reset rozdzielni
-          </p>
-        </motion.div>
-      )}
+      <Card className="p-6 md:p-8 border-4 max-w-4xl w-full mx-auto bg-card shadow-2xl relative overflow-hidden">
+        <div className="text-center mb-8">
+          <Zap className="w-12 h-12 text-blue-500 mx-auto mb-2 animate-pixel-float" />
+          <h2 className="text-xl font-bold tracking-tight uppercase italic">ETAP 2: PROCEDURA AWARYJNA</h2>
+          <p className="text-xs text-muted-foreground uppercase tracking-widest">Uruchom zasilanie rezerwowe w poprawnej kolejności</p>
+        </div>
 
-      <div className="mb-10">
-        <h2 className="text-3xl font-black uppercase text-yellow-500 flex items-center gap-3 italic">
-          <Zap className="text-yellow-500" />
-          Diagnostyka Rozdzielni 3kV DC
-        </h2>
-        <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-2">
-          Zadanie: wykonaj poprawną kolejność działań po wykryciu usterki
-        </p>
-      </div>
+        <div className="grid md:grid-cols-3 gap-4 mb-8">
+          {steps.map((s) => (
+              <Button
+                  key={s.id}
+                  disabled={userOrder.includes(s.id) || feedback !== "none"}
+                  onClick={() => handleStep(s.id)}
+                  className={`h-24 flex flex-col gap-2 arcade-button border-2 transition-all ${
+                      userOrder.includes(s.id) ? "border-green-500 bg-green-500/10 text-green-600" : "border-border hover:border-blue-500 hover:shadow-md hover:shadow-blue-500/20"
+                  }`}
+              >
+                <s.icon size={24} />
+                <span className="text-[10px] font-black uppercase text-center">{s.label}</span>
+              </Button>
+          ))}
+        </div>
 
-      <div className="grid md:grid-cols-3 gap-6">
-        {steps.map((step) => {
-          const used = userOrder.includes(step.id);
-          return (
-            <Button
-              key={step.id}
-              disabled={used || completed}
-              onClick={() =>
-                setUserOrder((prev) => [...prev, step.id])
-              }
-              className={`h-24 flex flex-col gap-3 font-black text-sm border-2 transition-all ${
-                used
-                  ? "bg-green-500/20 border-green-500 text-green-400"
-                  : "bg-zinc-800 border-zinc-700 hover:border-yellow-500/50"
-              }`}
-            >
-              <step.icon size={28} />
-              <span className="text-center leading-tight">
-                {step.label}
-              </span>
-            </Button>
-          );
-        })}
-      </div>
-
-      <div className="mt-10 bg-black/40 p-6 rounded-2xl border border-zinc-800">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
-          Aktualny przebieg procedury:
-        </p>
-        <p className="font-mono text-sm text-yellow-500">
-          {userOrder.length === 0
-            ? "— oczekiwanie na decyzję operatora —"
-            : userOrder.map((id) => `#${id}`).join(" → ")}
-        </p>
-      </div>
-    </Card>
+        {feedback === "error" && (
+            <div className="p-4 bg-destructive/10 border-2 border-destructive text-destructive text-center font-bold animate-shake rounded-xl">
+              BŁĄD PROCEDURY! RESET SYSTEMU...
+            </div>
+        )}
+        {feedback === "success" && (
+            <div className="p-4 bg-green-500/10 border-2 border-green-500 text-green-600 text-center font-bold animate-pulse rounded-xl">
+              ZASILANIE PRZYWRÓCONE! +50 PKT
+            </div>
+        )}
+      </Card>
   );
 }
 
 
 /* ----------------- GŁÓWNY KOMPONENT ----------------- */
-export default function TransportSzynowyGame() {
-  const [view, setView] = useState<"quiz" | "workshop" | "summary">("quiz");
+export default function ElektroenergetykGame() {
+  const [view, setView] = useState<"quiz" | "workshop" | "finished">("quiz");
   const [qIndex, setQIndex] = useState(0);
   const [score, setScore] = useState(0);
-  const [workshopScore, setWorkshopScore] = useState(0);
+  const [answers, setAnswers] = useState<Record<number, any>>({});
   const [showResult, setShowResult] = useState(false);
-  const [feedback, setFeedback] = useState<boolean>(false);
-  const [multiSelect, setMultiSelect] = useState<string[]>([]);
+  const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [hintLevel, setHintLevel] = useState(0);
+  const [showUsefulness, setShowUsefulness] = useState(false);
+  const [locked, setLocked] = useState(false);
   const [summaryIndex, setSummaryIndex] = useState(0);
+
+  const reasons = [
+    { title: "Deficyt Specjalistów", text: "Brakuje tysięcy pracowników w sektorze energetycznym i kolejowym. To gwarancja stabilnej pracy i wysokich zarobków tuż po szkole.", icon: HardHat },
+    { title: "Współpraca z KW", text: "Szkoła współpracuje z Kolejami Wielkopolskimi. Najlepsi uczniowie mają szansę na stypendia i pewny start zawodowy w Poznaniu.", icon: TrainFront },
+    { title: "Uprawnienia SEP", text: "W ramach nauki zdobędziesz prestiżowe uprawnienia SEP uznawane w całej UE. To klucz do pracy przy wysokich napięciach.", icon: Zap },
+    { title: "Zielona Energia", text: "Kolej to najbardziej ekologiczny transport. Pracując tutaj, realnie dbasz o środowisko, budując infrastrukturę przyszłości.", icon: Gauge },
+  ];
 
   const q = quizQuestions[qIndex];
 
-  const reasons = [
-    { title: "Deficyt Specjalistów", text: "Urząd Transportu Kolejowego alarmuje: brakuje tysięcy pracowników. To gwarancja stabilnej pracy i wysokich zarobków tuż po szkole.", icon: HardHat },
-    { title: "Koleje Wielkopolskie", text: "Szkoła współpracuje z lokalnym przewoźnikiem. Najlepsi uczniowie mają szansę na stypendia i pewny start zawodowy w Poznaniu.", icon: TrainFront },
-    { title: "Uprawnienia SEP", text: "Nauka tutaj to nie tylko dyplom, ale też prestiżowe uprawnienia elektryczne (SEP) uznawane w całej Unii Europejskiej.", icon: Zap },
-    { title: "Nowoczesny Tabor", text: "Nie będziesz pracować tylko przy starych maszynach. Poznasz pociągi wodorowe i systemy ETCS oparte na AI.", icon: Network },
-    { title: "Transport Przyszłości", text: "Kolej to najbardziej ekologiczny sposób przemieszczania się. Inwestycje w ten sektor to fundament gospodarki przyszłości.", icon: Gauge },
-  ];
+  const handleSingleChoice = (answerId: string) => {
+    if (showResult || locked) return;
+    setAnswers(prev => ({ ...prev, [q.id]: answerId }));
+    setLocked(true);
+    setShowResult(true);
 
-  const check = (singleId?: string) => {
-    if (showResult) return;
+    const isCorrect = answerId === q.answers.find(a => a.correct)?.id;
+    if (isCorrect) {
+      setScore(s => s + 10);
+      setFeedback({ ok: true, msg: "AUTORYZACJA POPRAWNA! +10 PKT" });
+    } else {
+      setFeedback({ ok: false, msg: "BŁĄD SYSTEMU ZASILANIA!" });
+    }
+    setLocked(false);
+  };
+
+  const checkAction = () => {
+    if (showResult || locked) return;
+    const userVal = answers[q.id];
+    if (!userVal || (Array.isArray(userVal) && userVal.length === 0)) return;
+
+    setLocked(true);
+    setShowResult(true);
     let ok = false;
-    if (q.type === "single") {
-      ok = singleId === q.answers?.find(a => a.correct)?.id;
-      setMultiSelect([singleId!]);
+
+    if (q.type === "multiple") {
+      ok = JSON.stringify([...userVal].sort()) === JSON.stringify([...q.correct].sort());
     } else if (q.type === "short") {
-      const input = (document.getElementById('ans-in') as HTMLInputElement).value;
-      ok = input.toLowerCase().trim() === q.correctText.toLowerCase();
-    } else if (q.type === "multiple") {
-      const sortedCorrect = [...(q.correct || [])].sort();
-      const sortedUser = [...multiSelect].sort();
-      ok = JSON.stringify(sortedCorrect) === JSON.stringify(sortedUser);
+      ok = userVal.toLowerCase().trim() === q.correctText.toLowerCase();
     }
 
-    if (ok) setScore(s => s + 10);
-    setFeedback(ok);
-    setShowResult(true);
+    if (ok) {
+      setScore(s => s + 10);
+      setFeedback({ ok: true, msg: "PARAMETRY POPRAWNE! +10 PKT" });
+    } else {
+      setFeedback({ ok: false, msg: "NIEZGODNOŚĆ DANYCH!" });
+    }
+    setLocked(false);
+  };
+
+  const handleNext = () => {
+    setShowResult(false);
+    setFeedback(null);
+    setHintLevel(0);
+    setShowUsefulness(false);
+    if (qIndex < quizQuestions.length - 1) setQIndex(i => i + 1);
+    else setView("workshop");
   };
 
   return (
-    <div className="min-h-screen bg-[#09090b] p-6 flex items-center justify-center font-sans text-zinc-100 selection:bg-yellow-500/30">
-      <AnimatePresence mode="wait">
-        {view === "quiz" && (
-          <motion.div key="quiz" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -100 }} className="w-full max-w-3xl">
-            <Card className="p-10 border-4 border-zinc-800 bg-zinc-900 shadow-[0_0_60px_rgba(0,0,0,0.8)] relative overflow-hidden">
-              <div className="absolute -top-10 -right-10 opacity-5">
-                <TrainFront size={250} />
-              </div>
-
-              <div className="flex justify-between items-center mb-10 relative z-10">
-                <div className="flex flex-col gap-1">
-                  <div className="bg-yellow-600 text-black px-3 py-0.5 rounded-sm font-black text-[9px] uppercase tracking-widest w-fit">
-                    SEKTOR: ELEKTROENERGETYKA
+      <div className="p-4 md:p-6 min-h-[80vh] flex items-center justify-center">
+        <AnimatePresence mode="wait">
+          {view === "quiz" && (
+              <motion.div key="quiz" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, x: -20 }} className="w-full max-w-3xl">
+                <Card className="p-6 md:p-8 border-4 space-y-6 bg-card shadow-2xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                    <TrainFront size={120} />
                   </div>
-                  <div className="flex gap-1 mt-1">
-                    {quizQuestions.map((_, i) => (
-                      <div key={i} className={`h-1 w-6 rounded-full ${i <= qIndex ? 'bg-yellow-500' : 'bg-zinc-800'}`} />
-                    ))}
+
+                  <div className="text-center mb-4">
+                    <Zap className="w-12 h-12 text-blue-500 mx-auto mb-2 animate-pixel-float" />
+                    <h2 className="text-xl font-bold tracking-tight uppercase italic">SEKTOR: ELEKTROENERGETYKA</h2>
+                    <p className="text-lg font-black text-blue-600 font-mono">PUNKTY: {score}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Pytanie {qIndex + 1} / {quizQuestions.length}</p>
                   </div>
-                </div>
-                <div className="text-3xl font-mono font-black text-yellow-500 italic drop-shadow-md">XP: {score}</div>
-              </div>
 
-              <h3 className="text-2xl font-black mb-10 border-l-8 border-yellow-500 pl-6 uppercase tracking-tighter italic leading-tight relative z-10">
-                {q.questionText}
-              </h3>
-
-              <div className="grid gap-4 mb-10 relative z-10">
-                {(q.type === "single" || q.type === "multiple") && q.answers?.map(a => (
-                  <Button key={a.id} variant="outline" disabled={showResult}
-                    onClick={() => q.type === "single" ? check(a.id) : setMultiSelect(p => p.includes(a.id) ? p.filter(x => x !== a.id) : [...p, a.id])}
-                    className={`h-16 justify-start px-8 text-sm font-black border-2 transition-all duration-300 ${showResult && (q.type === "single" ? a.correct : q.correct?.includes(a.id)) ? 'border-green-500 bg-green-500/10 text-green-400' : showResult && multiSelect.includes(a.id) ? 'border-red-500 bg-red-500/10 text-red-400' : multiSelect.includes(a.id) ? 'border-yellow-500 bg-yellow-500/5 text-yellow-500' : 'bg-zinc-800 border-zinc-700 hover:border-yellow-500/50 hover:bg-zinc-800/80'}`}>
-                    <span className="w-8 h-8 rounded-lg bg-zinc-700 mr-6 flex items-center justify-center text-[10px] font-black uppercase shadow-inner">{a.id}</span>
-                    {a.text}
-                  </Button>
-                ))}
-
-                {q.type === "short" && !showResult && (
                   <div className="space-y-6">
-                    <Input id="ans-in" className="h-20 text-center text-2xl font-black bg-black border-2 border-zinc-800 text-yellow-500 uppercase tracking-widest rounded-2xl focus:border-yellow-500 transition-all" placeholder="KOMU..." />
-                    <div className="p-6 bg-blue-500/5 border-2 border-dashed border-blue-500/20 rounded-2xl flex items-center gap-4">
-                      <Radio className="text-blue-400 shrink-0" size={28} />
-                      <p className="text-[11px] text-blue-300/80 font-bold uppercase tracking-tight leading-relaxed italic">System radiołączności VHF: Wpisz pełną frazę zgłoszenia gotowości pociągu 405 (np. gotowy do...).</p>
+                    <h3 className="text-lg md:text-xl font-bold leading-tight border-l-4 border-blue-500 pl-4 uppercase italic">
+                      {q.questionText}
+                    </h3>
+
+                    <div className="grid gap-3">
+                      {q.type === "single" && q.answers.map(a => (
+                          <Button
+                              key={a.id}
+                              variant="outline"
+                              disabled={showResult}
+                              onClick={() => handleSingleChoice(a.id)}
+                              className={`h-auto p-4 justify-start text-left arcade-button border-2 transition-all hover:border-blue-500 hover:shadow-md hover:shadow-blue-500/20 ${
+                                  showResult && a.correct ? "border-accent bg-accent/20 text-accent font-bold" :
+                                      showResult && answers[q.id] === a.id ? "border-destructive bg-destructive/20 text-destructive" :
+                                          answers[q.id] === a.id ? "border-blue-500 bg-blue-500/20 text-blue-600 font-bold shadow-md shadow-blue-500/20" : "bg-background"
+                              }`}
+                          >
+                            <span className="mr-3 opacity-50 font-mono font-black">{a.id.toUpperCase()}.</span>
+                            {a.text}
+                          </Button>
+                      ))}
+
+                      {q.type === "multiple" && q.answers.map(a => (
+                          <div
+                              key={a.id}
+                              onClick={() => {
+                                if (showResult) return;
+                                const prev = answers[q.id] || [];
+                                setAnswers({ ...answers, [q.id]: prev.includes(a.id) ? prev.filter((x: any) => x !== a.id) : [...prev, a.id] });
+                              }}
+                              className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer arcade-button transition-all hover:border-blue-500 hover:shadow-md hover:shadow-blue-500/20 ${
+                                  (answers[q.id] || []).includes(a.id) ? "border-blue-500 bg-blue-500/10 shadow-md shadow-blue-500/20" : "border-border bg-background"
+                              } ${showResult ? "opacity-60 pointer-events-none" : ""}`}
+                          >
+                            <Checkbox checked={(answers[q.id] || []).includes(a.id)} onCheckedChange={() => {}} className="border-blue-500" />
+                            <span className="text-sm font-bold uppercase tracking-tight">{a.text}</span>
+                          </div>
+                      ))}
+
+                      {q.type === "short" && (
+                          <div className="space-y-4">
+                            <Input
+                                placeholder="WPISZ FRAZĘ..."
+                                disabled={showResult}
+                                className="h-16 text-xl font-black border-2 border-blue-500/50 text-center uppercase tracking-widest focus-visible:ring-0 focus-visible:border-blue-500"
+                                value={answers[q.id] || ""}
+                                onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                            />
+                            <div className="p-4 bg-blue-500/5 border-2 border-dashed border-blue-500/20 rounded-xl flex items-center gap-4">
+                              <Radio className="text-blue-500 animate-pulse" size={24} />
+                              <p className="text-[10px] text-blue-600 font-bold uppercase italic leading-tight">Zgłoś gotowość pociągu nr 405 przez radio...</p>
+                            </div>
+                          </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-3">
+                      {hintLevel < q.hints.length && !showResult && (
+                          <Button
+                              variant="outline" size="sm"
+                              onClick={() => { setHintLevel(h => h + 1); setScore(s => s - 2); }}
+                              className="w-full border-2 border-secondary text-secondary hover:bg-secondary/10 arcade-button py-4 font-black text-xs"
+                          >
+                            💡 ANALIZA TECHNICZNA ({hintLevel + 1}/{q.hints.length}) (KOSZT: 2 PKT)
+                          </Button>
+                      )}
+                      {hintLevel > 0 && !showResult && (
+                          <div className="p-4 border-2 border-secondary bg-secondary/10 text-secondary text-xs rounded-xl animate-slide-in-up font-medium italic">
+                            {q.hints.slice(0, hintLevel).map((h, i) => <p key={i} className="mb-1">• {h}</p>)}
+                          </div>
+                      )}
+                    </div>
+
+                    {showResult && (
+                        <div className="space-y-4 animate-slide-in-up">
+                          <div className={`p-4 border-4 text-center rounded-xl font-black uppercase ${feedback?.ok ? "border-accent bg-accent/20 text-accent" : "border-destructive bg-destructive/20 text-destructive"}`}>
+                            {feedback?.msg}
+                          </div>
+                          <Button
+                              variant="outline" className="w-full border-2 hover:bg-blue-500/10 arcade-button"
+                              onClick={() => setShowUsefulness(!showUsefulness)}
+                          >
+                            <Lightbulb className="w-4 h-4 mr-2" /> DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
+                          </Button>
+                          {showUsefulness && (
+                              <div className="p-4 border-2 border-blue-500/30 bg-blue-500/5 rounded-xl text-xs italic font-medium animate-fade-in text-muted-foreground">
+                                {q.usefulness}
+                              </div>
+                          )}
+                        </div>
+                    )}
+
+                    <div className="pt-2">
+                      {!showResult && q.type !== "single" && (
+                          <Button className="w-full h-14 arcade-button bg-blue-600 text-white font-black text-lg shadow-lg shadow-blue-600/20" onClick={checkAction}>
+                            ZATWIERDŹ DANE
+                          </Button>
+                      )}
+                      {showResult && (
+                          <Button className="w-full h-14 arcade-button bg-blue-600 text-white font-black text-lg shadow-lg shadow-blue-600/20" onClick={handleNext}>
+                            {qIndex < quizQuestions.length - 1 ? "NASTĘPNA INSTRUKCJA" : "PRZEJDŹ DO ETAPU 2"}
+                          </Button>
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
+                </Card>
+              </motion.div>
+          )}
 
-              {!showResult ? (
-                <div className="space-y-6 relative z-10">
-                  {q.type !== "single" && (
-                    <Button className="w-full h-16 bg-yellow-600 hover:bg-yellow-500 text-black font-black text-xl shadow-[0_8px_20px_rgba(202,138,4,0.3)] transition-all active:translate-y-1" onClick={() => check()} disabled={q.type === "multiple" && multiSelect.length === 0}>
-                      AUTORYZUJ ODPOWIEDŹ
-                    </Button>
-                  )}
-                  <div className="bg-zinc-800/40 p-5 rounded-2xl border border-zinc-700/50 flex gap-4">
-                    <Lightbulb className="text-yellow-500 shrink-0" />
-                    <div>
-                      <p className="text-[10px] text-zinc-500 uppercase font-black mb-1">Analiza techniczna:</p>
-                      <p className="text-xs text-zinc-300 italic leading-snug">{q.hints[0]}</p>
+          {view === "workshop" && <PowerWorkshop onFinish={() => setView("finished")} addScore={(p) => setScore(s => s + p)} />}
+
+          {view === "finished" && (
+              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-5xl mx-auto">
+                <Card className="p-6 md:p-10 border-4 shadow-2xl bg-card space-y-10 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-2 bg-blue-500 animate-pulse" />
+
+                  <div className="text-center">
+                    <Trophy size={64} className="mx-auto text-blue-500 mb-4 animate-bounce drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+                    <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic">System Zweryfikowany!</h2>
+                    <p className="text-muted-foreground uppercase tracking-[0.2em] text-sm font-bold">Technik Elektroenergetyk Transportu Szynowego</p>
+                  </div>
+
+                  <div className="bg-blue-500/10 border-2 border-blue-500/30 rounded-3xl p-8 text-center max-w-md mx-auto relative group">
+                    <p className="text-xs font-bold text-muted-foreground uppercase mb-2 italic">Twój Wynik Operacyjny</p>
+                    <div className="text-7xl font-black text-blue-600 drop-shadow-sm">{score} <span className="text-2xl font-medium text-foreground/60">PKT</span></div>
+                  </div>
+
+                  <div className="grid lg:grid-cols-2 gap-8 items-start pt-4">
+                    <div className="space-y-3">
+                      <h4 className="text-[10px] font-black uppercase text-muted-foreground mb-4 tracking-[0.2em] border-b border-border pb-2 flex items-center gap-2">
+                        <Info size={14} /> Perspektywy zawodowe:
+                      </h4>
+                      {reasons.map((r, i) => (
+                          <button
+                              key={i}
+                              onClick={() => setSummaryIndex(i)}
+                              className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left arcade-button ${
+                                  summaryIndex === i
+                                      ? "border-blue-500 bg-blue-500/10 shadow-md shadow-blue-500/20"
+                                      : "border-border hover:border-blue-500/50 hover:bg-muted/50"
+                              }`}
+                          >
+                            <r.icon className={`w-6 h-6 ${summaryIndex === i ? "text-blue-600" : "text-muted-foreground"}`} />
+                            <span className="text-[10px] font-black uppercase tracking-tight leading-none">{r.title}</span>
+                          </button>
+                      ))}
+                    </div>
+
+                    <div className="bg-background/50 rounded-2xl border-2 border-border p-8 min-h-[250px] flex flex-col justify-center shadow-inner relative animate-fade-in">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                            key={summaryIndex}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="space-y-4"
+                        >
+                          <h4 className="text-xl font-black uppercase text-blue-600 italic underline decoration-blue-500/30 underline-offset-8">
+                            {reasons[summaryIndex].title}
+                          </h4>
+                          <p className="text-lg text-muted-foreground leading-relaxed font-bold italic">
+                            {reasons[summaryIndex].text}
+                          </p>
+                        </motion.div>
+                      </AnimatePresence>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`p-8 rounded-3xl border-2 relative z-10 ${feedback ? 'bg-green-950/30 border-green-500 text-green-400' : 'bg-red-950/30 border-red-500 text-red-400'}`}>
-                   <div className="flex items-center gap-6 mb-6">
-                     <div className={`p-4 rounded-full ${feedback ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
-                        {feedback ? <CheckCircle2 size={40} /> : <XCircle size={40} />}
-                     </div>
-                     <div>
-                       <p className="font-black uppercase text-lg tracking-tight">{feedback ? "DANE POPRAWNE" : "BŁĄD DANYCH"}</p>
-                       <ul className="text-[10px] opacity-80 uppercase font-bold mt-1 list-disc ml-4">
-                         {q.usefulness.map((u, i) => <li key={i}>{u}</li>)}
-                       </ul>
-                     </div>
-                   </div>
-                   <Button className="w-full h-14 bg-white text-black font-black hover:bg-yellow-500 transition-all rounded-xl shadow-xl" onClick={() => {
-                     setShowResult(false); setMultiSelect([]);
-                     if (qIndex < quizQuestions.length - 1) setQIndex(qIndex + 1);
-                     else setView("workshop");
-                   }}>NASTĘPNA INSTRUKCJA <ChevronRight className="ml-2 inline" /></Button>
-                </motion.div>
-              )}
-            </Card>
-          </motion.div>
-        )}
 
-        {view === "workshop" && <AdvancedPowerWorkshop onFinish={() => setView("summary")} addScore={setWorkshopScore} />}
-
-        {view === "summary" && (
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-5xl">
-            <Card className="bg-zinc-900 p-12 border-[12px] border-yellow-600 rounded-[4rem] shadow-2xl relative overflow-hidden">
-               <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-transparent via-yellow-500 to-transparent animate-pulse" />
-               <div className="text-center mb-12">
-                 <Trophy size={100} className="mx-auto text-yellow-500 mb-6" />
-                 <h2 className="text-6xl font-black uppercase tracking-tighter text-white italic drop-shadow-xl">SYSTEM ZWERYFIKOWANY</h2>
-                 <div className="text-[150px] leading-none font-mono font-black text-yellow-500 my-6 drop-shadow-2xl">{score + workshopScore}</div>
-                 <p className="text-zinc-500 font-black uppercase tracking-[0.5em] mt-4">Poziom Kompetencji: EKSPERT</p>
-               </div>
-
-               <div className="grid lg:grid-cols-2 gap-10">
-                  <div className="space-y-4">
-                    {reasons.map((r, i) => (
-                      <button key={i} onClick={() => setSummaryIndex(i)}
-                        className={`w-full flex items-center gap-5 p-6 rounded-[2rem] border-2 transition-all text-left ${summaryIndex === i ? "border-yellow-500 bg-yellow-500/10 scale-[1.03] shadow-2xl" : "border-zinc-800 hover:border-zinc-700 bg-zinc-950/50"}`}>
-                        <div className={summaryIndex === i ? "text-yellow-500" : "text-zinc-600"}><r.icon size={32} /></div>
-                        <span className="text-[11px] font-black uppercase tracking-widest">{r.title}</span>
-                      </button>
-                    ))}
-                  </div>
-                  <div className="bg-black/80 rounded-[3rem] border-2 border-zinc-800 p-12 flex flex-col justify-center min-h-[400px] shadow-inner relative">
-                    <AnimatePresence mode="wait">
-                      <motion.div key={summaryIndex} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                        <h4 className="text-3xl font-black uppercase text-yellow-500 mb-8 italic border-b-4 border-yellow-500/20 pb-4 inline-block">{reasons[summaryIndex].title}</h4>
-                        <p className="text-2xl text-zinc-300 font-medium leading-relaxed tracking-tight">{reasons[summaryIndex].text}</p>
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
-               </div>
-               <Button size="lg" className="w-full h-24 text-3xl font-black bg-white text-black hover:bg-yellow-500 mt-14 rounded-3xl transition-all uppercase italic shadow-[0_15px_40px_rgba(255,255,255,0.1)] active:scale-95" onClick={() => window.location.reload()}>RESTART SYMULACJI</Button>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+                  <Button
+                      size="lg"
+                      className="w-full h-16 text-xl font-black arcade-button bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20"
+                      onClick={() => window.location.assign("/")}
+                  >
+                    POWRÓT DO CENTRUM DOWODZENIA
+                  </Button>
+                </Card>
+              </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
   );
 }

@@ -1,15 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
-  RadioTower, Signal, Settings2, CheckCircle2, XCircle,
-  Lightbulb, Trophy, Zap, Network, MonitorPlay, Info, Search,
-  ChevronRight, Wifi, Wrench, Cpu
+  RadioTower, Signal, CheckCircle2, XCircle,
+  Trophy, Info, Search, ChevronRight, Lightbulb, Network, Wrench, Cpu
 } from "lucide-react";
 
 /* ----------------- DANE QUIZOWE ----------------- */
@@ -24,7 +23,10 @@ const quizQuestions = [
       { id: "c", text: "Pisaniem artykułów do gazet", correct: false },
       { id: "d", text: "Sprzedażą telefonów w salonie", correct: false },
     ],
-    hints: ["Zwróć uwagę na człon 'szerokopasmowa' – dotyczy szybkich łączy danych."],
+    hints: [
+      "Zwróć uwagę na człon 'szerokopasmowa' – dotyczy szybkich łączy danych.",
+      "Technik ten buduje infrastrukturę, która pozwala Ci oglądać Netflixa czy grać online bez lagów."
+    ],
     usefulness: ["Zrozumiesz, że to zawód łączący elektronikę z nowoczesną telekomunikacją."]
   },
   {
@@ -37,13 +39,16 @@ const quizQuestions = [
       { id: "c", text: "Światłowód", correct: true },
       { id: "d", text: "Fale radiowe AM", correct: false },
     ],
-    hints: ["To medium wykorzystuje impulsy światła zamiast prądu elektrycznego."],
+    hints: [
+      "To medium wykorzystuje impulsy światła zamiast prądu elektrycznego.",
+      "Jest odporne na zakłócenia elektromagnetyczne i pozwala na przesył z prędkością światła."
+    ],
     usefulness: ["Technologia FTTH (Fiber to the Home) to obecnie standard w branży."]
   },
   {
     id: 3,
     type: "multiple",
-    questionText: "Jakie usługi przesyłane są w sieciach szerokopasmowych? (Zaznacz wszystkie poprawne)",
+    questionText: "Jakie usługi przesyłane są w sieciach szerokopasmowych? (wszystkie poprawne)",
     answers: [
       { id: "a", text: "Szybki Internet (protokół IP)" },
       { id: "b", text: "Telewizja cyfrowa (VOD, HD)" },
@@ -51,7 +56,10 @@ const quizQuestions = [
       { id: "d", text: "Przesył prądu o wysokim napięciu" },
     ],
     correct: ["a", "b", "c"],
-    hints: ["Szukaj usług cyfrowych. Sieci komunikacyjne nie służą do przesyłu energii energetycznej."],
+    hints: [
+      "Szukaj usług cyfrowych. Sieci komunikacyjne nie służą do przesyłu energii.",
+      "Zastanów się, co oferują operatorzy w pakietach 'wszystko w jednym' (Triple Play)."
+    ],
     usefulness: ["Technik konfiguruje tzw. pakiety Triple Play (Internet + TV + Telefon)."]
   },
   {
@@ -60,7 +68,10 @@ const quizQuestions = [
     questionText: "Podaj symbol popularnej wtyczki sieciowej (8-pinowej) używanej w sieciach LAN:",
     correctText: "RJ-45",
     acceptable: ["rj45", "RJ45", "rj-45"],
-    hints: ["Zaczyna się od liter 'RJ'. Ma 8 miedzianych styków."],
+    hints: [
+      "Zaczyna się od liter 'RJ'. Ma 8 miedzianych styków.",
+      "Z pewnością widzisz ją codziennie z tyłu swojego komputera lub routera."
+    ],
     usefulness: ["Zarabianie końcówek kabli to jedna z podstawowych czynności serwisowych."]
   },
   {
@@ -73,46 +84,22 @@ const quizQuestions = [
       { id: "c", text: "Odbijanie deszczu i śniegu", correct: false },
       { id: "d", text: "Służy jako ozdoba budynku", correct: false },
     ],
-    hints: ["Jej paraboliczny kształt działa jak soczewka skupiająca słabe sygnały z orbity."],
+    hints: [
+      "Jej paraboliczny kształt działa jak soczewka skupiająca sygnały.",
+      "Sama czasza to tylko reflektor – właściwy odbiór dzieje się w małym elemencie z przodu (konwerterze)."
+    ],
     usefulness: ["Poprawny montaż i geometria czaszy to fundament odbioru sygnału."]
-  },
-  {
-    id: 6,
-    type: "single",
-    questionText: "Co oznacza skrót IP w technologii sieciowej?",
-    answers: [
-      { id: "a", text: "Internet Protocol", correct: true },
-      { id: "b", text: "Internal Power", correct: false },
-      { id: "c", text: "Instalacja Przewodowa", correct: false },
-      { id: "d", text: "Input Process", correct: false },
-    ],
-    hints: ["To zestaw zasad (protokół) rządzący adresowaniem danych w internecie."],
-    usefulness: ["Wszystkie nowoczesne systemy komunikacji opierają się na warstwie IP."]
-  },
-  {
-    id: 7,
-    type: "multiple",
-    questionText: "Które elementy znajdują się w profesjonalnej szafie technicznej RACK? (Zaznacz poprawne)",
-    answers: [
-      { id: "a", text: "Switch (Przełącznik sieciowy)" },
-      { id: "b", text: "Patchpanel (Panel krosowy)" },
-      { id: "c", text: "Router" },
-      { id: "d", text: "Kocioł grzewczy" },
-    ],
-    correct: ["a", "b", "c"],
-    hints: ["Skup się na elementach służących do dystrybucji sygnału i krosowania kabli."],
-    usefulness: ["Organizacja szaf technicznych to wizytówka profesjonalnego technika."]
   },
 ] as const;
 
 /* ----------------- WARSZTAT SATELITARNY ----------------- */
 function SatelliteWorkshop({ onFinish, addScore }: { onFinish: () => void; addScore: (points: number) => void }) {
   const TARGET = { az: 180, el: 30, skew: -5 };
-  const [params, setParams] = useState({ az: 135, el: 12, skew: -25 });
-  const [signal, setSignal] = useState(0);
-  const [isLocked, setIsLocked] = useState(false);
+  const [params, setParams] = React.useState({ az: 135, el: 12, skew: -25 });
+  const [signal, setSignal] = React.useState(0);
+  const [isLocked, setIsLocked] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const azErr = Math.abs(params.az - TARGET.az);
     const elErr = Math.abs(params.el - TARGET.el);
     const skewErr = Math.abs(params.skew - TARGET.skew);
@@ -123,257 +110,331 @@ function SatelliteWorkshop({ onFinish, addScore }: { onFinish: () => void; addSc
   const handleFinish = () => {
     if (signal >= 96) {
       setIsLocked(true);
-      addScore(70);
-      setTimeout(onFinish, 2000);
+      addScore(50);
+      setTimeout(onFinish, 1500);
     }
   };
 
   return (
-    <Card className="p-8 border-4 border-slate-700 max-w-5xl w-full mx-auto bg-slate-900 text-slate-100 shadow-2xl">
-      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
-        <div className="text-center md:text-left">
-          <h2 className="text-3xl font-black uppercase tracking-tighter text-blue-400 flex items-center gap-2">
-            <RadioTower className="w-8 h-8" /> KALIBRATOR SATELITARNY
-          </h2>
-          <p className="text-xs font-bold text-slate-400 italic text-left tracking-wider">MODUŁ PRAKTYCZNY: KONFIGURACJA LNB</p>
+      <Card className="p-6 border-4 max-w-4xl w-full mx-auto bg-card text-card-foreground shadow-2xl">
+        <div className="text-center mb-6">
+          <RadioTower className="w-12 h-12 text-primary mx-auto mb-2 animate-pixel-float" />
+          <h2 className="text-xl font-bold tracking-tight uppercase">ETAP 2: KALIBRATOR SATELITARNY</h2>
+          <p className="text-xs text-muted-foreground italic">Ustaw antenę, aby uzyskać min. 96% sygnału.</p>
         </div>
-        <div className="bg-slate-800 p-4 rounded-xl border-2 border-slate-700 min-w-[160px] text-center">
-          <div className={`text-4xl font-mono font-black ${signal > 90 ? 'text-green-400' : signal > 50 ? 'text-yellow-400' : 'text-red-500'}`}>
-            {signal}%
+
+        <div className="grid md:grid-cols-2 gap-8 items-center">
+          <div className="bg-slate-950 rounded-xl p-8 border-2 border-slate-800 flex flex-col items-center justify-center relative overflow-hidden h-[300px] shadow-inner">
+            <div className="absolute inset-0 opacity-10 pointer-events-none" style={{backgroundImage: 'linear-gradient(#3b82f6 1px, transparent 1px), linear-gradient(90deg, #3b82f6 1px, transparent 1px)', backgroundSize: '20px 20px'}} />
+            <motion.div
+                animate={{ rotateY: (params.az - 180) / 2, rotateX: (params.el - 30) * -1, rotateZ: params.skew }}
+                transition={{ type: "spring", stiffness: 45 }}
+            >
+              <div className="w-32 h-32 rounded-full border-8 border-slate-600 bg-slate-700/50 flex items-center justify-center relative">
+                <div className="w-1 h-20 bg-slate-500 absolute bottom-1/2 origin-bottom rotate-6" />
+                <div className={`w-3 h-3 rounded-full ${signal > 90 ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
+              </div>
+            </motion.div>
+            <div className="absolute bottom-4 left-4 right-4 bg-black/60 p-2 rounded border border-white/10 text-center">
+              <span className="font-mono text-primary font-black text-2xl">{signal}%</span>
+            </div>
           </div>
-          <div className="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Jakość Sygnału</div>
+
+          <div className="space-y-6">
+            {[
+              { label: "Azymut", key: "az", min: 120, max: 240 },
+              { label: "Elewacja", key: "el", min: 0, max: 60 },
+              { label: "Skręt LNB", key: "skew", min: -45, max: 45 },
+            ].map((s) => (
+                <div key={s.key} className="space-y-2">
+                  <div className="flex justify-between text-xs font-bold uppercase">
+                    <span>{s.label}</span>
+                    <span className="text-primary font-mono">{params[s.key as keyof typeof params]}°</span>
+                  </div>
+                  <input
+                      type="range" min={s.min} max={s.max}
+                      value={params[s.key as keyof typeof params]}
+                      onChange={(e) => setParams({...params, [s.key]: parseInt(e.target.value)})}
+                      className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                  />
+                </div>
+            ))}
+            <Button
+                disabled={signal < 96 || isLocked}
+                onClick={handleFinish}
+                className="w-full h-14 arcade-button bg-primary text-primary-foreground font-bold"
+            >
+              {isLocked ? "POŁĄCZENIE USTALONE" : "ZATWIERDŹ POZYCJĘ"}
+            </Button>
+          </div>
         </div>
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-12">
-        <div className="bg-black rounded-3xl p-10 border-4 border-slate-800 flex flex-col items-center justify-center relative overflow-hidden shadow-inner h-[350px]">
-          <div className="absolute inset-0 opacity-20 pointer-events-none"
-               style={{backgroundImage: 'linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px)', backgroundSize: '30px 30px'}} />
-
-          <motion.div
-            animate={{ rotateY: (params.az - 180) / 2, rotateX: (params.el - 30) * -1, rotateZ: params.skew }}
-            transition={{ type: "spring", stiffness: 45 }}
-            className="relative"
-          >
-            <div className="w-44 h-44 rounded-full border-[12px] border-slate-500 bg-slate-400 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center">
-              <div className="w-1 h-28 bg-slate-700 absolute bottom-1/2 origin-bottom rotate-6" />
-              <div className="w-10 h-10 bg-slate-900 rounded-lg absolute -top-5 flex items-center justify-center border-2 border-slate-600">
-                 <div className="w-4 h-4 rounded-full bg-blue-500 animate-pulse shadow-[0_0_15px_rgba(59,130,246,0.8)]" />
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
-        <div className="space-y-8 flex flex-col justify-center">
-          {[
-            { label: "Azymut (Poziom)", key: "az", min: 120, max: 240 },
-            { label: "Elewacja (Pion)", key: "el", min: 0, max: 60 },
-            { label: "Skręt LNB (Skew)", key: "skew", min: -45, max: 45 },
-          ].map((s) => (
-            <div key={s.key} className="space-y-3">
-              <div className="flex justify-between text-xs font-black uppercase tracking-widest text-slate-300">
-                <span>{s.label}</span>
-                <span className="text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded font-mono">{params[s.key as keyof typeof params]}°</span>
-              </div>
-              <input
-                type="range" min={s.min} max={s.max}
-                value={params[s.key as keyof typeof params]}
-                onChange={(e) => setParams({...params, [s.key]: parseInt(e.target.value)})}
-                className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-              />
-            </div>
-          ))}
-
-          <Button
-            disabled={signal < 96 || isLocked}
-            onClick={handleFinish}
-            className={`h-20 text-xl font-black transition-all border-b-4 ${isLocked ? 'bg-green-600 border-green-800' : 'bg-blue-600 border-blue-800 hover:bg-blue-500 shadow-xl'}`}
-          >
-            {isLocked ? "POŁĄCZENIE USTALONE" : signal >= 96 ? "ZATWIERDŹ POZYCJĘ" : "SZUKANIE SATELITY..."}
-          </Button>
-        </div>
-      </div>
-    </Card>
+      </Card>
   );
 }
 
 /* ----------------- GŁÓWNY KOMPONENT ----------------- */
 export default function KomunikacjaGame() {
-  const [view, setView] = useState<"quiz" | "workshop" | "summary">("quiz");
+  const [view, setView] = useState<"quiz" | "workshop" | "finished">("quiz");
   const [qIndex, setQIndex] = useState(0);
   const [score, setScore] = useState(0);
-  const [workshopScore, setWorkshopScore] = useState(0);
+  const [answers, setAnswers] = useState<Record<number, any>>({});
   const [showResult, setShowResult] = useState(false);
-  const [feedback, setFeedback] = useState<boolean>(false);
-  const [showHints, setShowHints] = useState(false);
-  const [multiSelect, setMultiSelect] = useState<string[]>([]);
+  const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [hintLevel, setHintLevel] = useState(0);
+  const [showUsefulness, setShowUsefulness] = useState(false);
+  const [locked, setLocked] = useState(false);
   const [summaryIndex, setSummaryIndex] = useState(0);
+
+  const reasons = [
+    { title: "Gwarancja pracy", text: "Specjaliści od światłowodów i sieci 5G są poszukiwani u każdego operatora (Orange, Play, lokalni dostawcy). To zawód deficytowy.", icon: Trophy },
+    { title: "Nowoczesność", text: "Praca ze spawarkami światłowodowymi, systemami 5G i IoT. Budujesz cyfrowe fundamenty dla Sztucznej Inteligencji.", icon: Network },
+    { title: "Własna firma", text: "Kierunek idealnie przygotowuje do prowadzenia firmy instalacyjnej. Możesz pracować na własny rachunek jako certyfikowany instalator.", icon: Wrench },
+    { title: "Dalszy rozwój", text: "Dyplom technika otwiera drogę na wydziały Elektroniki i Telekomunikacji najlepszych politechnik w kraju.", icon: Cpu },
+  ];
 
   const q = quizQuestions[qIndex];
 
-  const reasons = [
-    { title: "Gwarancja pracy", text: "Według prognoz to zawód deficytowy – specjaliści od światłowodów i sieci są poszukiwani u każdego operatora.", icon: Trophy },
-    { title: "Nowoczesne technologie", text: "Praca ze spawarkami światłowodowymi, systemami 5G, IoT oraz profesjonalną telewizją cyfrową.", icon: Zap },
-    { title: "Infrastruktura przyszłości", text: "Będziesz budować cyfrowe fundamenty pod Sztuczną Inteligencję i inteligentne miasta (Smart City).", icon: Network },
-    { title: "Własny biznes", text: "Kierunek idealnie przygotowuje do prowadzenia własnej firmy instalacyjnej w branży teleinformatycznej.", icon: Wrench },
-    { title: "Prestiżowe studia", text: "Dyplom technika otwiera drogę na wydziały Elektroniki i Telekomunikacji najlepszych politechnik.", icon: Cpu },
-  ];
+  const handleSingleChoice = (answerId: string) => {
+    if (showResult || locked) return;
+    setAnswers(prev => ({ ...prev, [q.id]: answerId }));
+    setLocked(true);
+    setShowResult(true);
 
-  const handleMultipleChoice = (id: string) => {
-    if (showResult) return;
-    setMultiSelect(prev =>
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    );
+    const isCorrect = answerId === q.answers.find(a => a.correct)?.id;
+    if (isCorrect) {
+      setScore(s => s + 10);
+      setFeedback({ ok: true, msg: "PRAWIDŁOWO! +10 PKT" });
+    } else {
+      setFeedback({ ok: false, msg: "BŁĄD TRANSMISJI!" });
+    }
+    setLocked(false);
   };
 
-  const check = (singleId?: string) => {
-    if (showResult) return;
+  const checkMultipleOrShort = () => {
+    if (showResult || locked) return;
+    const userVal = answers[q.id];
+    if (!userVal || (Array.isArray(userVal) && userVal.length === 0)) return;
 
+    setLocked(true);
+    setShowResult(true);
     let ok = false;
-    if (q.type === "single") {
-        ok = singleId === q.answers.find(a => a.correct)?.id;
-        setMultiSelect([singleId!]);
+
+    if (q.type === "multiple") {
+      ok = JSON.stringify([...userVal].sort()) === JSON.stringify([...q.correct].sort());
     } else if (q.type === "short") {
-        const input = (document.getElementById('ans-in') as HTMLInputElement).value;
-        ok = [q.correctText, ...(q.acceptable || [])].map(s => s.toLowerCase()).includes(input.toLowerCase().trim());
-    } else if (q.type === "multiple") {
-        const sortedCorrect = [...q.correct].sort();
-        const sortedUser = [...multiSelect].sort();
-        ok = JSON.stringify(sortedCorrect) === JSON.stringify(sortedUser);
+      const accepted = [q.correctText, ...(q.acceptable || [])].map(v => v.toLowerCase().trim());
+      ok = accepted.includes(userVal.toLowerCase().trim());
     }
 
-    if (ok) setScore(s => s + 10);
-    setFeedback(ok);
-    setShowResult(true);
+    if (ok) {
+      setScore(s => s + 10);
+      setFeedback({ ok: true, msg: "PRAWIDŁOWO! +10 PKT" });
+    } else {
+      setFeedback({ ok: false, msg: "DANE USZKODZONE!" });
+    }
+    setLocked(false);
+  };
+
+  const handleNext = () => {
+    setShowResult(false);
+    setFeedback(null);
+    setHintLevel(0);
+    setShowUsefulness(false);
+    if (qIndex < quizQuestions.length - 1) setQIndex(i => i + 1);
+    else setView("workshop");
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f1a] p-6 flex items-center justify-center font-sans text-slate-100">
-      <AnimatePresence mode="wait">
-        {view === "quiz" && (
-          <motion.div key="quiz" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, x: -50 }} className="w-full max-w-3xl">
-            <Card className="p-8 border-4 border-slate-700 bg-slate-900 shadow-2xl relative overflow-hidden">
-              <div className="flex justify-between items-center mb-10">
-                <div className="bg-blue-600 text-white px-4 py-1 rounded text-[10px] font-black uppercase tracking-widest">
-                  STAGE 01: TEST TEORETYCZNY
-                </div>
-                <div className="text-2xl font-mono font-black text-blue-400 tracking-tighter">PUNKTY: {score}</div>
-              </div>
+      <div className="p-4 md:p-6 min-h-[80vh] flex items-center justify-center">
+        <AnimatePresence mode="wait">
+          {view === "quiz" && (
+              <motion.div key="quiz" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, x: -20 }} className="w-full max-w-3xl">
+                <Card className="p-6 md:p-8 border-4 space-y-6 bg-card shadow-2xl">
+                  <div className="text-center mb-4">
+                    <Signal className="w-12 h-12 text-primary mx-auto mb-2 animate-pixel-float" />
+                    <h2 className="text-xl font-bold tracking-tight">ETAP 1: TEST KOMUNIKACJI</h2>
+                    <p className="text-lg font-black text-primary font-mono">PUNKTY: {score}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Pytanie {qIndex + 1} / {quizQuestions.length}</p>
+                  </div>
 
-              <div className="mb-4 flex items-center gap-2 text-slate-500 text-xs font-bold uppercase tracking-widest">
-                <div className="flex gap-1">
-                  {quizQuestions.map((_, i) => (
-                    <div key={i} className={`h-1.5 w-6 rounded-full ${i <= qIndex ? 'bg-blue-500' : 'bg-slate-800'}`} />
-                  ))}
-                </div>
-                <span>Pytanie {qIndex + 1}</span>
-              </div>
+                  <div className="space-y-6">
+                    <h3 className="text-lg md:text-xl font-bold leading-tight border-l-4 border-primary pl-4">
+                      {q.questionText}
+                    </h3>
 
-              <h3 className="text-2xl font-black mb-10 leading-tight uppercase tracking-tighter border-l-8 border-blue-500 pl-6">
-                {q.questionText}
-              </h3>
+                    <div className="grid gap-3">
+                      {q.type === "single" && q.answers.map(a => (
+                          <Button
+                              key={a.id}
+                              variant="outline"
+                              disabled={showResult}
+                              onClick={() => handleSingleChoice(a.id)}
+                              className={`h-auto p-4 justify-start text-left arcade-button border-2 transition-all hover:border-primary hover:shadow-md hover:shadow-primary/30 ${
+                                  showResult && a.correct ? "border-accent bg-accent/20 text-accent font-bold" :
+                                      showResult && answers[q.id] === a.id ? "border-destructive bg-destructive/20 text-destructive" :
+                                          answers[q.id] === a.id ? "border-primary bg-primary/20 text-primary font-bold shadow-md shadow-primary/30" : "bg-background text-foreground"
+                              }`}
+                          >
+                            <span className="mr-3 opacity-50 font-mono">{a.id.toUpperCase()}.</span>
+                            {a.text}
+                          </Button>
+                      ))}
 
-              <div className="grid gap-3 mb-10">
-                {q.type === "single" && q.answers.map(a => (
-                  <Button key={a.id} variant="outline"
-                    disabled={showResult}
-                    onClick={() => check(a.id)}
-                    className={`h-16 justify-start px-6 text-sm font-bold border-2 transition-all ${showResult && a.correct ? 'border-green-500 bg-green-500/10 text-green-400' : showResult && multiSelect.includes(a.id) ? 'border-red-500 bg-red-500/10 text-red-400' : 'bg-slate-800/50 border-slate-700 hover:border-blue-500'}`}>
-                    <span className="w-8 h-8 rounded bg-slate-700 flex items-center justify-center mr-4 text-[10px]">{a.id.toUpperCase()}</span>
-                    {a.text}
+                      {q.type === "multiple" && q.answers.map(a => (
+                          <div
+                              key={a.id}
+                              onClick={() => {
+                                if (showResult) return;
+                                const prev = answers[q.id] || [];
+                                setAnswers({ ...answers, [q.id]: prev.includes(a.id) ? prev.filter((x: any) => x !== a.id) : [...prev, a.id] });
+                              }}
+                              className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer arcade-button transition-all hover:border-primary hover:shadow-md hover:shadow-primary/30 ${
+                                  (answers[q.id] || []).includes(a.id) ? "border-primary bg-primary/20 shadow-md shadow-primary/30" : "border-border bg-background"
+                              } ${showResult ? "opacity-60 pointer-events-none" : ""}`}
+                          >
+                            <Checkbox checked={(answers[q.id] || []).includes(a.id)} onCheckedChange={() => {}} className="border-primary" />
+                            <span className="text-sm font-medium">{a.text}</span>
+                          </div>
+                      ))}
+
+                      {q.type === "short" && (
+                          <Input
+                              placeholder="Wpisz odpowiedź..."
+                              disabled={showResult}
+                              className="h-14 text-lg font-bold border-2 border-primary/50 text-center uppercase focus-visible:ring-0 focus-visible:border-primary"
+                              value={answers[q.id] || ""}
+                              onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                          />
+                      )}
+                    </div>
+
+                    <div className="space-y-3">
+                      {hintLevel < q.hints.length && !showResult && (
+                          <Button
+                              variant="outline" size="sm"
+                              onClick={() => { setHintLevel(h => h + 1); setScore(s => s - 2); }}
+                              className="w-full border-2 border-secondary text-secondary hover:bg-secondary/10 arcade-button py-4"
+                          >
+                            💡 PODPOWIEDŹ ({hintLevel + 1}/{q.hints.length}) (KOSZT: 2 PKT)
+                          </Button>
+                      )}
+                      {hintLevel > 0 && !showResult && (
+                          <div className="p-3 border-2 border-secondary bg-secondary/10 text-secondary text-xs rounded-lg animate-slide-in-up">
+                            {q.hints.slice(0, hintLevel).map((h, i) => <p key={i}>• {h}</p>)}
+                          </div>
+                      )}
+                    </div>
+
+                    {showResult && feedback && (
+                        <div className="space-y-4 animate-slide-in-up">
+                          <div className={`p-4 border-4 text-center rounded-xl ${feedback.ok ? "border-accent bg-accent/20 text-accent" : "border-destructive bg-destructive/20 text-destructive"}`}>
+                            <div className="flex items-center justify-center gap-2 font-black">
+                              {feedback.ok ? <CheckCircle2 /> : <XCircle />}
+                              {feedback.msg}
+                            </div>
+                          </div>
+                          <Button
+                              variant="outline" className="w-full border-2 hover:bg-primary/10"
+                              onClick={() => setShowUsefulness(!showUsefulness)}
+                          >
+                            <Lightbulb className="w-4 h-4 mr-2" /> DO CZEGO MI SIĘ TO PRZYDA?
+                          </Button>
+                          {showUsefulness && (
+                              <div className="p-4 border-2 border-primary/30 bg-primary/5 rounded-xl text-xs italic animate-fade-in">
+                                {q.usefulness}
+                              </div>
+                          )}
+                        </div>
+                    )}
+
+                    <div className="pt-2">
+                      {!showResult && q.type !== "single" && (
+                          <Button className="w-full h-12 arcade-button bg-primary text-primary-foreground font-bold" onClick={checkMultipleOrShort}>
+                            SPRAWDŹ ODPOWIEDŹ
+                          </Button>
+                      )}
+                      {showResult && (
+                          <Button className="w-full h-12 arcade-button bg-primary text-primary-foreground font-bold shadow-lg" onClick={handleNext}>
+                            {qIndex < quizQuestions.length - 1 ? "NASTĘPNE PYTANIE" : "PRZEJDŹ DO ETAPU 2"}
+                          </Button>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+          )}
+
+          {view === "workshop" && <SatelliteWorkshop onFinish={() => setView("finished")} addScore={(p) => setScore(s => s + p)} />}
+
+          {view === "finished" && (
+              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-5xl mx-auto">
+                <Card className="p-6 md:p-10 border-4 shadow-2xl bg-card space-y-8 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-2 bg-primary animate-pulse" />
+
+                  <div className="text-center">
+                    <Trophy size={64} className="mx-auto text-yellow-500 mb-4 animate-bounce drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]" />
+                    <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic">Misja Ukończona!</h2>
+                    <p className="text-muted-foreground uppercase tracking-[0.2em] text-sm font-bold">Technik Komunikacji Elektronicznej</p>
+                  </div>
+
+                  <div className="bg-primary/10 border-2 border-primary/30 rounded-3xl p-8 text-center max-w-md mx-auto relative group">
+                    <div className="absolute inset-0 bg-primary/5 blur-xl group-hover:bg-primary/10 transition-colors rounded-full" />
+                    <p className="relative z-10 text-xs font-bold text-muted-foreground uppercase mb-2">Twój Wynik Końcowy</p>
+                    <div className="relative z-10 text-7xl font-black text-primary drop-shadow-sm">{score} <span className="text-2xl font-medium text-foreground/60">PKT</span></div>
+                  </div>
+
+                  <div className="grid lg:grid-cols-2 gap-8 items-start pt-4">
+                    <div className="space-y-3">
+                      <h4 className="text-[10px] font-black uppercase text-muted-foreground mb-4 tracking-[0.2em] border-b border-border pb-2 flex items-center gap-2">
+                        <Info size={14} /> Dlaczego warto wybrać ten zawód?
+                      </h4>
+                      {reasons.map((r, i) => (
+                          <button
+                              key={i}
+                              onClick={() => setSummaryIndex(i)}
+                              className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left arcade-button ${
+                                  summaryIndex === i
+                                      ? "border-primary bg-primary/10 shadow-md shadow-primary/20"
+                                      : "border-border hover:border-primary/50 hover:bg-muted/50"
+                              }`}
+                          >
+                            <r.icon className={`w-6 h-6 ${summaryIndex === i ? "text-primary" : "text-muted-foreground"}`} />
+                            <span className="text-xs font-bold uppercase tracking-tight">{r.title}</span>
+                          </button>
+                      ))}
+                    </div>
+
+                    <div className="bg-background/50 rounded-2xl border-2 border-border p-8 min-h-[250px] flex flex-col justify-center shadow-inner relative animate-fade-in">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                            key={summaryIndex}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="space-y-4"
+                        >
+                          <h4 className="text-xl font-black uppercase text-primary italic underline decoration-primary/30 underline-offset-8">
+                            {reasons[summaryIndex].title}
+                          </h4>
+                          <p className="text-lg text-muted-foreground leading-relaxed font-medium">
+                            {reasons[summaryIndex].text}
+                          </p>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+                  </div>
+
+                  <Button
+                      size="lg"
+                      className="w-full h-16 text-xl font-black arcade-button bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
+                      onClick={() => window.location.assign("/")}
+                  >
+                    WRÓĆ DO MENU GŁÓWNEGO
                   </Button>
-                ))}
-
-                {q.type === "multiple" && q.answers.map(a => (
-                  <div key={a.id}
-                    onClick={() => handleMultipleChoice(a.id)}
-                    className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${multiSelect.includes(a.id) ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700 bg-slate-800/30'} ${showResult ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                    <Checkbox checked={multiSelect.includes(a.id)} onCheckedChange={() => {}} disabled={showResult} />
-                    <label className="font-bold text-sm cursor-pointer flex-1">{a.text}</label>
-                  </div>
-                ))}
-
-                {q.type === "short" && !showResult && (
-                  <Input id="ans-in" className="h-16 text-xl font-bold bg-slate-800 border-2 border-slate-700 text-blue-400 text-center" placeholder="Wpisz odpowiedź..." />
-                )}
-              </div>
-
-              {!showResult ? (
-                <div className="space-y-4">
-                  {q.type !== "single" && (
-                    <Button className="w-full h-14 bg-blue-600 font-black text-lg shadow-lg hover:bg-blue-500" onClick={() => check()} disabled={q.type === "multiple" && multiSelect.length === 0}>
-                      SPRAWDŹ ODPOWIEDŹ
-                    </Button>
-                  )}
-                  <Button variant="ghost" className="w-full text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-blue-400" onClick={() => setShowHints(!showHints)}>
-                    <Search className="w-3 h-3 mr-2" /> {showHints ? "UKRYJ BAZĘ PODPOWIEDZI" : "DOSTĘP DO BAZY PODPOWIEDZI"}
-                  </Button>
-                  {showHints && (
-                    <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} className="p-4 bg-blue-500/5 rounded border border-blue-500/20">
-                      <ul className="text-[11px] font-bold text-blue-300 list-disc pl-4 space-y-1 uppercase tracking-tight">
-                        {q.hints.map((h, i) => <li key={i}>{h}</li>)}
-                      </ul>
-                    </motion.div>
-                  )}
-                </div>
-              ) : (
-                <div className={`p-6 rounded-xl border-2 animate-in zoom-in-95 ${feedback ? 'bg-green-900/20 border-green-500 text-green-400' : 'bg-red-900/20 border-red-500 text-red-400'}`}>
-                  <div className="flex items-center gap-3 font-black uppercase text-sm italic mb-4">
-                    {feedback ? <CheckCircle2 /> : <XCircle />}
-                    {feedback ? "SYGNAŁ POPRAWNY. +10 PKT" : "BŁĄD TRANSMISJI. DANE USZKODZONE"}
-                  </div>
-                  <Button className="w-full h-12 bg-white text-slate-900 font-black hover:bg-blue-50" onClick={() => {
-                    setShowResult(false);
-                    setShowHints(false);
-                    setMultiSelect([]);
-                    if (qIndex < quizQuestions.length - 1) setQIndex(qIndex + 1);
-                    else setView("workshop");
-                  }}>KONTYNUUJ <ChevronRight className="ml-2 w-4 h-4" /></Button>
-                </div>
-              )}
-            </Card>
-          </motion.div>
-        )}
-
-        {view === "workshop" && <SatelliteWorkshop onFinish={() => setView("summary")} addScore={setWorkshopScore} />}
-
-        {view === "summary" && (
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-5xl">
-             <Card className="bg-slate-900 p-10 border-8 border-blue-600 rounded-[2rem] shadow-2xl relative overflow-hidden">
-               <div className="text-center mb-10">
-                 <Trophy size={64} className="mx-auto text-yellow-500 mb-4 drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]" />
-                 <h2 className="text-4xl font-black uppercase tracking-tighter mb-2 italic">MODUŁ UKOŃCZONY</h2>
-                 <div className="text-7xl font-mono font-black text-blue-400 mb-4">{score + workshopScore} PKT</div>
-               </div>
-
-               <div className="grid lg:grid-cols-2 gap-8 items-start">
-                  <div className="space-y-3">
-                    <p className="text-xs font-black uppercase text-slate-500 mb-4 tracking-widest border-b border-slate-800 pb-2">Perspektywy zawodowe:</p>
-                    {reasons.map((r, i) => (
-                      <button key={i} onClick={() => setSummaryIndex(i)}
-                        className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${summaryIndex === i ? "border-blue-500 bg-blue-500/10 shadow-[0_0_15px_rgba(37,99,235,0.1)]" : "border-slate-800 hover:border-slate-700 hover:bg-slate-800/30"}`}>
-                        <r.icon className={`w-6 h-6 ${summaryIndex === i ? "text-blue-400" : "text-slate-600"}`} />
-                        <span className="text-xs font-bold uppercase tracking-tight">{r.title}</span>
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="bg-slate-800/50 rounded-2xl border-2 border-slate-700 p-8 min-h-[280px] flex flex-col justify-center shadow-inner relative">
-                    <div className="absolute top-4 right-4 text-blue-500/20"><Info size={40} /></div>
-                    <AnimatePresence mode="wait">
-                      <motion.div key={summaryIndex} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                        <h4 className="text-xl font-black uppercase text-blue-400 italic mb-4 tracking-tight underline decoration-blue-500/30 underline-offset-8">{reasons[summaryIndex].title}</h4>
-                        <p className="text-lg text-slate-300 leading-relaxed font-medium">{reasons[summaryIndex].text}</p>
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
-               </div>
-
-               <Button size="lg" className="w-full h-16 text-xl font-black bg-white text-slate-900 hover:bg-blue-100 mt-10 shadow-xl" onClick={() => window.location.reload()}>RESTART SYSTEMU</Button>
-             </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+                </Card>
+              </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
   );
 }
