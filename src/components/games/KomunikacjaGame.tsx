@@ -258,7 +258,7 @@ export default function KomunikacjaGame() {
                   </div>
 
                   <div className="space-y-6">
-                    <h3 className="text-lg md:text-xl font-bold leading-tight border-l-4 border-primary pl-4">
+                    <h3 className="text-lg md:text-xl font-bold leading-tight pl-4">
                       {q.questionText}
                     </h3>
 
@@ -269,13 +269,12 @@ export default function KomunikacjaGame() {
                               variant="outline"
                               disabled={showResult}
                               onClick={() => handleSingleChoice(a.id)}
-                              className={`h-auto p-4 justify-start text-left arcade-button border-2 transition-all hover:border-primary hover:shadow-md hover:shadow-primary/30 ${
+                              className={`h-auto p-4 justify-start text-left arcade-button border-2 transition-all hover:border-primary hover:shadow-md hover:shadow-primary/30 hover:bg-background hover:text-white ${
                                   showResult && a.correct ? "border-accent bg-accent/20 text-accent font-bold" :
                                       showResult && answers[q.id] === a.id ? "border-destructive bg-destructive/20 text-destructive" :
                                           answers[q.id] === a.id ? "border-primary bg-primary/20 text-primary font-bold shadow-md shadow-primary/30" : "bg-background text-foreground"
                               }`}
                           >
-                            <span className="mr-3 opacity-50 font-mono">{a.id.toUpperCase()}.</span>
                             {a.text}
                           </Button>
                       ))}
@@ -288,7 +287,7 @@ export default function KomunikacjaGame() {
                                 const prev = answers[q.id] || [];
                                 setAnswers({ ...answers, [q.id]: prev.includes(a.id) ? prev.filter((x: any) => x !== a.id) : [...prev, a.id] });
                               }}
-                              className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer arcade-button transition-all hover:border-primary hover:shadow-md hover:shadow-primary/30 ${
+                              className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer arcade-button transition-all hover:border-primary hover:shadow-md hover:shadow-primary/30 hover:bg-background ${
                                   (answers[q.id] || []).includes(a.id) ? "border-primary bg-primary/20 shadow-md shadow-primary/30" : "border-border bg-background"
                               } ${showResult ? "opacity-60 pointer-events-none" : ""}`}
                           >

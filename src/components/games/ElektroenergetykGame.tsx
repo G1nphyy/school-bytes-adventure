@@ -100,7 +100,8 @@ function PowerWorkshop({ onFinish, addScore }: { onFinish: () => void; addScore:
     { id: 1, label: "SPRAWDŹ ZABEZPIECZENIA", icon: Search },
     { id: 2, label: "ODŁĄCZ USZKODZONĄ SEKCJĘ", icon: Zap },
     { id: 3, label: "ZAŁĄCZ ZASILANIE REZERWOWE", icon: Gauge },
-  ];
+  ].sort(() => Math.random() - 0.5);
+
   const correct = [1, 2, 3];
 
   const handleStep = (id: number) => {
@@ -249,7 +250,7 @@ export default function ElektroenergetykGame() {
                   </div>
 
                   <div className="space-y-6">
-                    <h3 className="text-lg md:text-xl font-bold leading-tight border-l-4 border-blue-500 pl-4 uppercase italic">
+                    <h3 className="text-lg md:text-xl font-bold leading-tight pl-4">
                       {q.questionText}
                     </h3>
 
@@ -260,13 +261,12 @@ export default function ElektroenergetykGame() {
                               variant="outline"
                               disabled={showResult}
                               onClick={() => handleSingleChoice(a.id)}
-                              className={`h-auto p-4 justify-start text-left arcade-button border-2 transition-all hover:border-blue-500 hover:shadow-md hover:shadow-blue-500/20 ${
+                              className={`h-auto p-4 justify-start text-left arcade-button border-2 transition-all hover:border-blue-500 hover:shadow-md hover:shadow-blue-500/20 hover:bg-background hover:text-white text-wrap ${
                                   showResult && a.correct ? "border-accent bg-accent/20 text-accent font-bold" :
                                       showResult && answers[q.id] === a.id ? "border-destructive bg-destructive/20 text-destructive" :
                                           answers[q.id] === a.id ? "border-blue-500 bg-blue-500/20 text-blue-600 font-bold shadow-md shadow-blue-500/20" : "bg-background"
                               }`}
                           >
-                            <span className="mr-3 opacity-50 font-mono font-black">{a.id.toUpperCase()}.</span>
                             {a.text}
                           </Button>
                       ))}
