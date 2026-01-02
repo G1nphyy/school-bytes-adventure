@@ -163,7 +163,7 @@ export default function ElevatorGame() {
   const indicatorOffsetX = (heroWidth / 2) - (indicatorSize / 2);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-slate-950 font-sans text-slate-50">
+    <div className="relative w-full h-[80vh] overflow-hidden bg-slate-950 font-sans text-slate-50">
 
       {/* PANEL BOCZNY (UI) */}
       <Card className="h-screen w-[28%] fixed left-0 top-0 border-r border-white/5 bg-card/95 text-card-foreground flex flex-col p-6 overflow-hidden z-20">

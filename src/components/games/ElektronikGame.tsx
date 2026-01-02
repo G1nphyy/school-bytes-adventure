@@ -733,7 +733,7 @@ export default function ElectronicsGame() {
   }
 
   return (
-    <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+    <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
       {view === "quiz" && (
         <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground">
           <div className="text-center mb-6">

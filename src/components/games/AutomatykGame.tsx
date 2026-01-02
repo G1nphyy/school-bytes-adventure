@@ -225,7 +225,7 @@ const AutomatykGame = () => {
   };
 
   return (
-     <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+     <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
         <Card className="w-full max-w-4xl animate-fade-in flex flex-col">
         {/* Kontener treści, który pcha stopkę w dół */}
         <div className="flex-grow pt-12">

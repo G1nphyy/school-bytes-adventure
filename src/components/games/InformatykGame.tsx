@@ -783,7 +783,7 @@ const InformatykGame = () => {
     const percentage = (totalScore / estimatedMaxScore) * 100;
 
     return (
-        <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+        <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
           <Card className="p-8 max-w-4xl w-full text-center space-y-6 border-4 shadow-2xl animate-fade-in bg-card text-card-foreground mx-auto">
             {/* Header z Trofeum */}
             <div className="text-center mb-6 mt-4">
@@ -897,7 +897,7 @@ const InformatykGame = () => {
     const finalSlots = correctOrder;
 
     return (
-        <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+        <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
           <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
             <div className="mb-6 text-center">
               <Cable className={`w-12 h-12 ${rjCorrect ? "text-accent" : 'text-destructive' } mx-auto mb-4 animate-bounce`} />
@@ -1004,7 +1004,7 @@ const InformatykGame = () => {
 
     return (
         <DndProvider backend={HTML5Backend}>
-          <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+          <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
             <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
               <div className="mb-6 text-center">
                 <Cable className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
@@ -1141,7 +1141,7 @@ const InformatykGame = () => {
     };
 
     return (
-        <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+        <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
           <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
             <div className="mb-6 text-center">
               <Cpu className={`w-12 h-12 ${isPerfect ? 'text-accent' : 'text-destructive'} mx-auto mb-4 animate-bounce`} />
@@ -1216,7 +1216,7 @@ const InformatykGame = () => {
 
     return (
           <DndProvider backend={HTML5Backend}>
-            <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+            <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
               <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
                 <div className="mb-6 text-center">
                   <Cpu className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
@@ -1344,7 +1344,7 @@ const InformatykGame = () => {
   // 6. QUIZ (główny etap - renderowany tylko, jeśli quiz nie jest zakończony)
 
   return (
-      <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+      <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
         <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
           <div className="mb-6 text-center">
             <Shield className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />

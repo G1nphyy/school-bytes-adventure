@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,8 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   TrainFront, Zap, CheckCircle2, XCircle,
-  Trophy, Network, Info, Search, ChevronRight,
-  Gauge, HardHat, Lightbulb, Radio
+  Trophy, Info, Search, Gauge, HardHat, Lightbulb,
+  Radio, Power, Activity, CableCar, ZapOff, Calculator
 } from "lucide-react";
 
 /* ----------------- DANE QUIZOWE ----------------- */
@@ -92,78 +92,154 @@ const quizQuestions = [
   },
 ] as const;
 
-/* ----------------- WARSZTAT: DIAGNOSTYKA ----------------- */
-function PowerWorkshop({ onFinish, addScore }: { onFinish: () => void; addScore: (points: number) => void }) {
-  const [userOrder, setUserOrder] = useState<number[]>([]);
-  const [feedback, setFeedback] = useState<"none" | "error" | "success">("none");
-  const steps = [
-    { id: 1, label: "SPRAWDŹ ZABEZPIECZENIA", icon: Search },
-    { id: 2, label: "ODŁĄCZ USZKODZONĄ SEKCJĘ", icon: Zap },
-    { id: 3, label: "ZAŁĄCZ ZASILANIE REZERWOWE", icon: Gauge },
-  ].sort(() => Math.random() - 0.5);
+/* ----------------- ETAP 2: DIAGNOSTYKA OBWODU (PRAWIE OHMA) ----------------- */
+function DiagnosticMathGame({ onFinish, addScore }: { onFinish: () => void; addScore: (points: number) => void }) {
+  const [maxStagePoints, setMaxStagePoints] = useState(80);
+  const [userInput, setUserInput] = useState("");
+  const [status, setStatus] = useState<"idle" | "error" | "success">("idle");
 
-  const correct = [1, 2, 3];
+  // Zadanie: Oblicz R (Rezystancję) jeśli U=3000V i I=500A (R = U/I = 6 Ohm)
+  const targetValue = "6";
 
-  const handleStep = (id: number) => {
-    if (feedback === "success") return;
-    const newOrder = [...userOrder, id];
-    setUserOrder(newOrder);
-
-    if (newOrder[newOrder.length - 1] !== correct[newOrder.length - 1]) {
-      setFeedback("error");
-      setTimeout(() => { setUserOrder([]); setFeedback("none"); }, 1500);
-      return;
+  const handleVerify = () => {
+    if (userInput === targetValue) {
+      setStatus("success");
+      addScore(maxStagePoints);
+      setTimeout(onFinish, 2000);
+    } else {
+      setStatus("error");
+      setMaxStagePoints(prev => Math.max(10, prev - 15));
+      setTimeout(() => {
+        setStatus("idle");
+        setUserInput("");
+      }, 1500);
     }
+  };
 
-    if (newOrder.length === correct.length) {
-      setFeedback("success");
-      addScore(50);
-      setTimeout(onFinish, 1500);
+  return (
+      <Card className="p-6 md:p-8 border-4 max-w-4xl w-full mx-auto bg-card shadow-2xl relative">
+        <div className="text-center mb-6">
+          <Calculator className="w-12 h-12 text-blue-500 mx-auto mb-2 animate-pulse" />
+          <h2 className="text-xl font-bold italic uppercase tracking-tight">ETAP 2: DIAGNOSTYKA OBWODU</h2>
+          <p className="text-[10px] text-muted-foreground uppercase font-black">Oblicz wymaganą rezystancję opornika rozruchowego</p>
+        </div>
+
+        <div className="bg-muted/50 p-6 rounded-2xl border-2 border-dashed border-blue-500/30 mb-6 font-mono space-y-4">
+          <div className="flex justify-between items-center text-sm">
+            <span>Napięcie (U):</span>
+            <span className="text-blue-600 font-black">3000 V</span>
+          </div>
+          <div className="flex justify-between items-center text-sm">
+            <span>Natężenie (I):</span>
+            <span className="text-blue-600 font-black">500 A</span>
+          </div>
+          <div className="h-px bg-border w-full" />
+          <div className="flex justify-between items-center text-lg font-black italic">
+            <span>Wymagana Rezystancja (R):</span>
+            <span className="animate-pulse">? Ω</span>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <Input
+              type="number"
+              placeholder="WPISZ WYNIK (Ω)..."
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              className="h-16 text-center text-2xl font-black border-4 border-blue-500/50"
+          />
+          <Button onClick={handleVerify} disabled={status !== "idle"} className="w-full h-14 arcade-button bg-blue-600 text-white font-black uppercase">
+            Zatwierdź obliczenia
+          </Button>
+        </div>
+
+        <div className="mt-4 flex justify-between items-center text-[10px] font-bold uppercase text-muted-foreground">
+          <span>Możliwe punkty: {maxStagePoints}</span>
+          {status === "error" && <span className="text-destructive animate-bounce">BŁĘDNY WYNIK! (-15 PKT)</span>}
+          {status === "success" && <span className="text-green-500">PARAMETRY POPRAWNE!</span>}
+        </div>
+      </Card>
+  );
+}
+
+/* ----------------- ETAP 3: URUCHOMIENIE TRAKCJI (LOSOWY) ----------------- */
+function ShuffledTrakcjaGame({ onFinish, addScore }: { onFinish: () => void; addScore: (points: number) => void }) {
+  const [maxPoints, setMaxPoints] = useState(100);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [status, setStatus] = useState<"idle" | "success" | "failure">("idle");
+  const [activatedIds, setActivatedIds] = useState<number[]>([]);
+
+  const correctOrder = [1, 2, 3, 4];
+  const elements = [
+    { id: 1, name: "Podstacja trakcyjna", icon: Power },
+    { id: 2, name: "Sieć zasilająca", icon: Activity },
+    { id: 3, name: "Sieć trakcyjna", icon: CableCar },
+    { id: 4, name: "Pociąg", icon: TrainFront },
+  ];
+
+  // Losowa kolejność przycisków na ekranie
+  const shuffledButtons = useMemo(() => [...elements].sort(() => Math.random() - 0.5), []);
+
+  const handleElementClick = (id: number) => {
+    if (status !== "idle" || activatedIds.includes(id)) return;
+
+    if (id === correctOrder[currentStep]) {
+      const newActivated = [...activatedIds, id];
+      setActivatedIds(newActivated);
+      if (newActivated.length === elements.length) {
+        setStatus("success");
+        addScore(maxPoints);
+        setTimeout(onFinish, 2000);
+      } else {
+        setCurrentStep(prev => prev + 1);
+      }
+    } else {
+      setStatus("failure");
+      setMaxPoints(prev => Math.max(10, prev - 20));
+      setTimeout(() => {
+        setActivatedIds([]);
+        setCurrentStep(0);
+        setStatus("idle");
+      }, 1500);
     }
   };
 
   return (
       <Card className="p-6 md:p-8 border-4 max-w-4xl w-full mx-auto bg-card shadow-2xl relative overflow-hidden">
         <div className="text-center mb-8">
-          <Zap className="w-12 h-12 text-blue-500 mx-auto mb-2 animate-pixel-float" />
-          <h2 className="text-xl font-bold tracking-tight uppercase italic">ETAP 2: PROCEDURA AWARYJNA</h2>
-          <p className="text-xs text-muted-foreground uppercase tracking-widest">Uruchom zasilanie rezerwowe w poprawnej kolejności</p>
+          <Zap className={`w-12 h-12 mx-auto mb-2 ${status === "success" ? "text-green-500 animate-bounce" : "text-blue-500"}`} />
+          <h2 className="text-xl font-bold tracking-tight uppercase italic">ETAP 3: URUCHOMIENIE TRAKCJI</h2>
+          <p className="text-xs text-muted-foreground uppercase tracking-widest">Uwaga: Elementy są przemieszane!</p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
-          {steps.map((s) => (
-              <Button
-                  key={s.id}
-                  disabled={userOrder.includes(s.id) || feedback !== "none"}
-                  onClick={() => handleStep(s.id)}
-                  className={`h-24 flex flex-col gap-2 arcade-button border-2 transition-all ${
-                      userOrder.includes(s.id) ? "border-green-500 bg-green-500/10 text-green-600" : "border-border hover:border-blue-500 hover:shadow-md hover:shadow-blue-500/20"
-                  }`}
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          {shuffledButtons.map((el) => (
+              <button
+                  key={el.id}
+                  onClick={() => handleElementClick(el.id)}
+                  className={`relative p-6 rounded-xl border-4 transition-all flex flex-col items-center gap-3 arcade-button
+              ${activatedIds.includes(el.id) ? "border-green-500 bg-green-500/20 text-green-600" : "border-border bg-background hover:border-blue-500"}
+              ${status === "failure" && !activatedIds.includes(el.id) ? "opacity-50" : "opacity-100"}
+            `}
               >
-                <s.icon size={24} />
-                <span className="text-[10px] font-black uppercase text-center">{s.label}</span>
-              </Button>
+                <el.icon size={32} />
+                <span className="text-[9px] font-black uppercase text-center leading-tight">{el.name}</span>
+              </button>
           ))}
         </div>
 
-        {feedback === "error" && (
-            <div className="p-4 bg-destructive/10 border-2 border-destructive text-destructive text-center font-bold animate-shake rounded-xl">
-              BŁĄD PROCEDURY! RESET SYSTEMU...
-            </div>
-        )}
-        {feedback === "success" && (
-            <div className="p-4 bg-green-500/10 border-2 border-green-500 text-green-600 text-center font-bold animate-pulse rounded-xl">
-              ZASILANIE PRZYWRÓCONE! +50 PKT
-            </div>
-        )}
+        <div className="h-12 flex items-center justify-between text-[10px] font-bold uppercase">
+          <span className="text-muted-foreground">Krok: {currentStep + 1}/4</span>
+          <span className="text-blue-600">Dostępne punkty: {maxPoints}</span>
+          {status === "failure" && <span className="text-destructive animate-shake">BŁĄD! (-20 PKT)</span>}
+        </div>
       </Card>
   );
 }
 
-
 /* ----------------- GŁÓWNY KOMPONENT ----------------- */
 export default function ElektroenergetykGame() {
-  const [view, setView] = useState<"quiz" | "workshop" | "finished">("quiz");
+  const [view, setView] = useState<"quiz" | "diagnostic" | "trakcja" | "finished">("quiz");
   const [qIndex, setQIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [answers, setAnswers] = useState<Record<number, any>>({});
@@ -229,7 +305,7 @@ export default function ElektroenergetykGame() {
     setHintLevel(0);
     setShowUsefulness(false);
     if (qIndex < quizQuestions.length - 1) setQIndex(i => i + 1);
-    else setView("workshop");
+    else setView("diagnostic");
   };
 
   return (
@@ -244,7 +320,7 @@ export default function ElektroenergetykGame() {
 
                   <div className="text-center mb-4">
                     <Zap className="w-12 h-12 text-blue-500 mx-auto mb-2 animate-pixel-float" />
-                    <h2 className="text-xl font-bold tracking-tight uppercase italic">SEKTOR: ELEKTROENERGETYKA</h2>
+                    <h2 className="text-xl font-bold tracking-tight uppercase italic">ELEKTROENERGETYKA</h2>
                     <p className="text-lg font-black text-blue-600 font-mono">PUNKTY: {score}</p>
                     <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Pytanie {qIndex + 1} / {quizQuestions.length}</p>
                   </div>
@@ -358,7 +434,9 @@ export default function ElektroenergetykGame() {
               </motion.div>
           )}
 
-          {view === "workshop" && <PowerWorkshop onFinish={() => setView("finished")} addScore={(p) => setScore(s => s + p)} />}
+          {view === "diagnostic" && <DiagnosticMathGame onFinish={() => setView("trakcja")} addScore={(p) => setScore(s => s + p)} />}
+
+          {view === "trakcja" && <ShuffledTrakcjaGame onFinish={() => setView("finished")} addScore={(p) => setScore(s => s + p)} />}
 
           {view === "finished" && (
               <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-5xl mx-auto">
