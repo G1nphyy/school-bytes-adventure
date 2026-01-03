@@ -1,3 +1,4 @@
+/* Plik konfiguracyjny Vite - deklaracja z jakiego portu będzie odpalany projekt*/
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";

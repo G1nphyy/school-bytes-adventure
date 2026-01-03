@@ -1,3 +1,5 @@
+/** Logika powiadomień (Toast): zarządza stanem, kolejkowaniem i automatycznym usuwaniem komunikatów wyświetlanych użytkownikowi.*/
+
 import * as React from "react";
 
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast";

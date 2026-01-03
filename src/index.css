@@ -1,14 +1,12 @@
+/** Główne style arkusza: definiuje system kolorów HSL, czcionkę pixel-art, efekty wizualneoraz animacje typowe dla gier retro. */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    /* Pixel-art gaming theme - retro tech colors */
+    /* Styl Pixel Art / retro tech */
     --background: 220 25% 8%;
     --foreground: 180 100% 95%;
 
@@ -18,22 +16,22 @@ All colors MUST be HSL.
     --popover: 220 25% 10%;
     --popover-foreground: 180 100% 95%;
 
-    /* Tech blue primary */
+    /* Blue first color */
     --primary: 214 100% 50%;
     --primary-foreground: 0 0% 100%;
-    
-    /* Electric cyan secondary */
+
+    /* Cyan secondary color */
     --secondary: 188 100% 50%;
     --secondary-foreground: 220 25% 8%;
 
     --muted: 220 15% 20%;
     --muted-foreground: 180 20% 70%;
 
-    /* Code green accent */
+    /* Zielony kod w grach */
     --accent: 150 100% 50%;
     --accent-foreground: 220 25% 8%;
 
-    /* Warning orange */
+    /* Orange do warningów */
     --destructive: 15 100% 60%;
     --destructive-foreground: 0 0% 100%;
 
@@ -43,17 +41,17 @@ All colors MUST be HSL.
 
     --radius: 0rem;
 
-    /* Pixel-art specific colors */
+    /* Kolory w Pixel Art */
     --pixel-glow: 214 100% 70%;
     --scanline: 220 25% 8%;
     --arcade-red: 0 100% 60%;
     --arcade-yellow: 45 100% 55%;
-    
-    /* Gradients */
+
+    /* Gradienty */
     --gradient-tech: linear-gradient(135deg, hsl(214 100% 50%), hsl(188 100% 50%));
     --gradient-neon: linear-gradient(90deg, hsl(214 100% 50%), hsl(150 100% 50%), hsl(188 100% 50%));
-    
-    /* Animations */
+
+    /* Animacje */
     --transition-pixel: all 0.1s steps(3);
     --glow-shadow: 0 0 20px hsl(214 100% 50% / 0.5);
   }
@@ -72,8 +70,8 @@ All colors MUST be HSL.
     font-family: 'Press Start 2P', cursive;
     overflow-x: hidden;
   }
-  
-  /* Pixel-art scanline effect */
+
+  /* Efekt 'scanlince' w czcionce */
   body::before {
     content: '';
     position: fixed;
@@ -91,8 +89,8 @@ All colors MUST be HSL.
     pointer-events: none;
     z-index: 9999;
   }
-  
-  /* Smooth text rendering for pixel font */
+
+  /* Gładkie renderowanie pixel czcionki */
   h1, h2, h3, h4, h5, h6, p, span, button {
     -webkit-font-smoothing: none;
     -moz-osx-font-smoothing: grayscale;
@@ -100,15 +98,15 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
-  /* Pixel-art specific utilities */
+  /* Pixel art utils */
   .pixel-border {
-    box-shadow: 
+    box-shadow:
       0 -4px 0 0 hsl(var(--border)),
       0 4px 0 0 hsl(var(--border)),
       -4px 0 0 0 hsl(var(--border)),
       4px 0 0 0 hsl(var(--border));
   }
-  
+
   .pixel-glow {
     box-shadow: var(--glow-shadow);
     animation: pulse-glow 2s ease-in-out infinite;
@@ -116,22 +114,22 @@ All colors MUST be HSL.
   .logo{
     animation: rotates 3s linear infinite;
   }
-  
+
   .arcade-button {
     transition: var(--transition-pixel);
     transform-origin: center;
   }
-  
+
   .arcade-button:hover {
     transform: scale(1.05);
     filter: brightness(1.2);
   }
-  
+
   .arcade-button:active {
     transform: scale(0.95);
     filter: brightness(0.9);
   }
-  
+
   @keyframes pulse-glow {
     0%, 100% {
       box-shadow: 0 0 20px hsl(214 100% 50% / 0.5);
@@ -148,7 +146,7 @@ All colors MUST be HSL.
       transform: rotate(360deg);
     }
   }
-  
+
   @keyframes glitch {
     0% {
       transform: translate(0);
@@ -169,7 +167,7 @@ All colors MUST be HSL.
       transform: translate(0);
     }
   }
-  
+
   .glitch-effect {
     animation: glitch 0.3s ease-in-out;
   }

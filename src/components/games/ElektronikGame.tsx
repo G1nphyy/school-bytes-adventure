@@ -9,6 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Cpu, CheckCircle2, XCircle, Lightbulb, Trophy, Battery, Zap, Microchip, Wrench } from "lucide-react";
 
 /* ----------------- dane quizowe (7 pytań) ----------------- */
+// Obsługuje trzy typy zadań:
+// - 'single': wybór jednej poprawnej odpowiedzi
+// - 'multi': wybór wielu poprawnych odpowiedzi
+// - 'input': wpisanie konkretnej wartości liczbowej
 const quizQuestions = [
   {
     id: 1,
@@ -152,7 +156,8 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
     "Do pomiaru rezystancji ustaw Ω – polarność nie ma znaczenia.",
     "Zawsze najpierw ustaw zakres, potem podłącz element.",
   ];
-
+  // Sprawdza poprawność przeprowadzenia pomiaru
+  // Gracz musi wybrać odpowiedni zakres i podłączyć sondy do komponentu
   const handleMeasure = () => {
     setAttempts(a => a + 1);
     if (!blackWire || !redWire || !itemOnDesk || range === "OFF") {
@@ -397,6 +402,7 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
 }
 
 /* ----------------- Plansza "Dlaczego warto być technikiem elektronikiem" ----------------- */
+// Widok podsumowuje korzyści z wyboru kierunku w ZSK
 function WhyWorthPanel({ totalScore, quizScore, workshopScore }: { totalScore: number; quizScore: number; workshopScore: number }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -556,11 +562,11 @@ function WhyWorthPanel({ totalScore, quizScore, workshopScore }: { totalScore: n
   );
 }
 
-/* ==================================================================== */
 /* ===================== GŁÓWNY KOMPONENT ============================= */
-/* ==================================================================== */
 export default function ElectronicsGame() {
+    // Kontrola widoku: quiz -> warsztat -> podsumowanie
   const [view, setView] = useState<View>("quiz");
+  // Logika quizu: numer pytania, punkty, blokada po odpowiedzi
   const [qIndex, setQIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, any>>({});
   const [showResult, setShowResult] = useState(false);
@@ -606,9 +612,12 @@ export default function ElectronicsGame() {
     setShowUsefulness(false);
 
     let ok = false;
+    // Logika sprawdzania zależy od typu pytania zdefiniowanego w obiekcie
     if (q.type === "multiple") {
+        // Porównanie zaznaczonych checkboxów z poprawnymi odpowiedziami
       ok = JSON.stringify((user || []).sort()) === JSON.stringify(q.correct?.sort());
     } else if (q.type === "short") {
+        // Porównanie wpisanej wartości tekstowej (ignoruje wielkość liter)
       const accepted = [q.correctText, ...(q.acceptable || [])].map((x) => x.toLowerCase().trim());
       ok = accepted.includes((user || "").toLowerCase().trim());
     }
@@ -665,7 +674,7 @@ export default function ElectronicsGame() {
             } else if (isSelected) {
               stateClasses = "border-primary bg-primary/20 text-primary font-bold";
             } else {
-              // Default hover state
+                //defaultowo
               stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30 hover:bg-background/5 hover:text-foreground";
             }
 

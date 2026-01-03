@@ -1,3 +1,7 @@
+/** * Custom Hook wykrywający urządzenia mobilne.
+ * Śledzi szerokość okna przeglądarki i zwraca true, jeśli użytkownik korzysta z telefonu (max 768px).
+ */
+
 import * as React from "react";
 
 const MOBILE_BREAKPOINT = 768;

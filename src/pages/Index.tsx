@@ -1,3 +1,5 @@
+/** * Strona główna (Lobby): wyświetla siatkę dostępnych kierunków kształcenia jako interaktywne karty prowadzące do poszczególnych mini-gier. */
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
