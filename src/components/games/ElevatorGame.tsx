@@ -1,608 +1,374 @@
 import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Activity, Target, Clock, MapPin as MapPinIcon } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  GraduationCap,
+  Map as MapIcon, ShieldCheck
+} from "lucide-react";
+import { motion } from "framer-motion";
 import stairs_to_left from "@/assets/graphics/stairs/stairs_to_left.png";
 import stairs_to_right from "@/assets/graphics/stairs/stairs_to_right.png";
 import user_to_left from "@/assets/graphics/stairs/user_to_left.png";
 import user_to_right from "@/assets/graphics/stairs/user_to_right.png";
-import npc0_left from "@/assets/graphics/stairs/npc0_left.png";
-import npc0_right from "@/assets/graphics/stairs/npc0_right.png";
-import npc1_left from "@/assets/graphics/stairs/npc1_left.png";
-import npc1_right from "@/assets/graphics/stairs/npc1_right.png";
-import npc2_left from "@/assets/graphics/stairs/npc2_left.png";
-import npc2_right from "@/assets/graphics/stairs/npc2_right.png";
-import pinImg from "@/assets/graphics/stairs/pin.png";
-import starImg from "@/assets/graphics/stairs/star.png";
+
 const originalCell = 32;
-const stairWidthRatio = 0.5;
+const cell = 128;
+const scale = cell / originalCell;
+const mapWidthCells = 10;
+const mapWidth = mapWidthCells * cell;
+const stairWidthRatio = 0.8;
+const stairWidth = stairWidthRatio * mapWidth;
+const centerX = mapWidth / 2;
 const segmentsPerFloor = 2;
 const stepsPerSegment = 8;
 const floors = 6;
-const stepsPerFloor = stepsPerSegment * segmentsPerFloor;
 const totalSegments = floors * segmentsPerFloor;
-const visualShiftX = 32;
-const visualShiftY = 16;
-const minMapWidth = 2048;
-const npcGraphics: Record<number, { left: string, right: string }> = {
-  0: { left: npc0_left, right: npc0_right },
-  1: { left: npc1_left, right: npc1_right },
-  2: { left: npc2_left, right: npc2_right },
-};
-const getPosForStep = (globalStepIndex: number, segments: any[]) => {
-  if (!segments || segments.length === 0) return { x: 0, y: 0, isLeft: false };
-  let segIdx = Math.floor(globalStepIndex / stepsPerSegment);
-  if (segIdx >= segments.length) segIdx = segments.length - 1;
-  const seg = segments[segIdx];
-  const stepInSeg = globalStepIndex % stepsPerSegment;
-  const fraction = (stepInSeg + 0.5) / stepsPerSegment;
-  return {
-    x: seg.startX + fraction * seg.dirX * seg.length,
-    y: seg.startY + fraction * seg.dirY * seg.length,
-    isLeft: seg.isLeft
-  };
-};
+const heightPerStep = cell;
+const heightPerSegment = stepsPerSegment * heightPerStep;
+
+// Proceduralne generowanie segmentów (logika bez zmian)
+const segments: any[] = [];
+let currentX = centerX + stairWidth / 2;
+let currentY = (floors * segmentsPerFloor * stepsPerSegment) * heightPerStep + cell * 2; // start at bottom
+let directionLeft = true;
+
+for (let i = 0; i < totalSegments; i++) {
+  const dirX = directionLeft ? -stairWidth : stairWidth;
+  const dirY = -heightPerSegment;
+  const length = Math.sqrt(dirX ** 2 + dirY ** 2);
+  const unitDirX = dirX / length;
+  const unitDirY = dirY / length;
+
+  segments.push({
+    startX: currentX,
+    startY: currentY,
+    dirX: unitDirX,
+    dirY: unitDirY,
+    length,
+    isLeft: directionLeft,
+  });
+
+  currentX += dirX;
+  currentY += dirY;
+  directionLeft = !directionLeft;
+}
+
+const totalHeight = (floors * segmentsPerFloor * stepsPerSegment) * heightPerStep + cell * 4;
+
+// --- KONFIGURACJA KOLORÓW TŁA ---
+// 3 zestawy kolorów, które będą się powtarzać.
+// Każdy zestaw ma 'light' (1. półpiętro) i 'dark' (2. półpiętro)
+const segmentPalette = [
+  // Zestaw 1: Bardzo jasny żółty (kremowy)
+  { light: '#FEFCE8', dark: '#FEF9C3' },
+  // Zestaw 2: Bardziej nasycony żółty
+  { light: '#FDE047', dark: '#FACC15' },
+  // Zestaw 3: Wpadający w złoto/pomarańcz
+  { light: '#FFEDD5', dark: '#FED7AA' },
+];
+
 export default function ElevatorGame() {
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
-  const [mapWidth, setMapWidth] = useState(0);
-  const [virtualMapWidth, setVirtualMapWidth] = useState(0);
-  const [userStep, setUserStep] = useState(0);
-  const [x, setX] = useState(0);
-  const [y, setY] = useState(0);
+  const [currentSegment, setCurrentSegment] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [x, setX] = useState(segments[0].startX);
+  const [y, setY] = useState(segments[0].startY);
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
-  const [timeOut, setTimeOut] = useState(false);
   const [isGameStarted, setIsGameStarted] = useState(false);
-  const [timerActive, setTimerActive] = useState(false);
   const [jumpKey, setJumpKey] = useState(0);
   const [canJump, setCanJump] = useState(true);
   const [isReady, setIsReady] = useState(false);
-  const [hasMoved, setHasMoved] = useState(false);
-  const [npcs, setNpcs] = useState<any[]>([]);
-  const [initialSpawnDone, setInitialSpawnDone] = useState(false);
-  const [segments, setSegments] = useState<any[]>([]);
-  const [trafficJam, setTrafficJam] = useState(false);
-  const [targetFloor, setTargetFloor] = useState(5);
-  const [starStep, setStarStep] = useState(0);
-  const [starCollected, setStarCollected] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(120);
-  const [isFinishing, setIsFinishing] = useState(false);
-  const [triggeredFloors, setTriggeredFloors] = useState<number[]>([]);
-  const [randomJamCount, setRandomJamCount] = useState(0);
-  const [lastUserMoveTime, setLastUserMoveTime] = useState(Date.now());
-  const [spawnedFloor1, setSpawnedFloor1] = useState(false);
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const npcIdRef = useRef(0);
-  const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isPaused = !isGameStarted || gameOver || gameWon || timeOut || isFinishing;
-  // RESIZE HANDLING
+
+  // Kamera podąża za bohaterem
   useEffect(() => {
-    const updateDimensions = () => {
-      if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current);
-      resizeTimeoutRef.current = setTimeout(() => {
-        if (scrollContainerRef.current) {
-          const newWidth = scrollContainerRef.current.clientWidth;
-          setMapWidth(newWidth);
-          setIsMobile(window.innerWidth < 768);
-        }
-      }, 50);
-    };
-    updateDimensions();
-    window.addEventListener('resize', updateDimensions);
-    return () => {
-      window.removeEventListener('resize', updateDimensions);
-      if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current);
-    };
-  }, []);
-  useEffect(() => {
-    if (mapWidth > 0) {
-        setVirtualMapWidth(minMapWidth);
-    }
-  }, [mapWidth, isMobile]);
-  const cell = 128;
-  const scale = cell / originalCell;
-  const heightPerStep = cell;
-  const heightPerSegment = stepsPerSegment * heightPerStep;
-  const totalHeight = (floors * segmentsPerFloor * stepsPerSegment) * heightPerStep + cell * 4;
-  const heroWidth = originalCell * scale;
-  const heroHeight = 2 * originalCell * scale;
-  const visualShiftXScaled = visualShiftX * scale;
-  const visualShiftYScaled = visualShiftY * scale;
-  // Recalculate positions immediately
-  useEffect(() => {
-    if (segments.length > 0) {
-      const p = getPosForStep(userStep, segments);
-      setX(p.x); setY(p.y);
-      setNpcs(prev => prev.map(n => {
-        const np = getPosForStep(n.currentStep, segments);
-        return { ...n, x: np.x, y: np.y, isLeft: np.isLeft };
-      }));
-    }
-  }, [virtualMapWidth, segments, userStep]);
-  useEffect(() => {
-    if (virtualMapWidth > 0) {
-      const stairWidth = stairWidthRatio * virtualMapWidth;
-      const centerX = virtualMapWidth / 2;
-      const segs: any[] = [];
-      let currentX = centerX + stairWidth / 2;
-      let currentY = (floors * segmentsPerFloor * stepsPerSegment) * heightPerStep + cell * 2;
-      let directionLeft = true;
-      for (let i = 0; i < totalSegments; i++) {
-        const dirX = directionLeft ? -stairWidth : stairWidth;
-        const dirY = -heightPerSegment;
-        const length = Math.sqrt(dirX ** 2 + dirY ** 2);
-        const isLastSegment = i === totalSegments - 1;
-        segs.push({
-            startX: currentX,
-            startY: currentY,
-            dirX: dirX / length,
-            dirY: dirY / length,
-            length,
-            isLeft: directionLeft,
-            isHidden: isLastSegment
-        });
-        currentX += dirX; currentY += dirY; directionLeft = !directionLeft;
-      }
-      setSegments(segs);
-      setStarStep(5 * stepsPerFloor);
-    }
-  }, [virtualMapWidth, cell]);
-  // Traffic Jam Logic
-  useEffect(() => {
-    if (isPaused || !hasMoved) return;
-    const currentFloor = Math.floor(userStep / stepsPerFloor);
-    if ((currentFloor === 2 || currentFloor === 4) && !triggeredFloors.includes(currentFloor)) {
-      setTrafficJam(true);
-      setTriggeredFloors(prev => [...prev, currentFloor]);
-      setTimeout(() => setTrafficJam(false), 5000);
-    }
-    if (randomJamCount < 2 && !trafficJam && Math.random() < 0.005) {
-      setTrafficJam(true);
-      setRandomJamCount(prev => prev + 1);
-      setTimeout(() => setTrafficJam(false), 3000 + Math.random() * 2000);
-    }
-  }, [userStep, isPaused, hasMoved, trafficJam]);
-  useEffect(() => {
-    if (!timerActive || isPaused) return;
-    if (timeLeft <= 0) { setTimeOut(true); return; }
-    const t = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-    return () => clearInterval(t);
-  }, [timerActive, isPaused, timeLeft]);
-  // Camera follow
-  useEffect(() => {
-    if (contentRef.current && scrollContainerRef.current && isGameStarted) {
-      const viewW = scrollContainerRef.current.clientWidth;
+    if (scrollContainerRef.current && isGameStarted) {
       const viewH = scrollContainerRef.current.clientHeight;
-      const targetLeft = x - viewW / 2;
-      const targetTop = y - viewH / 2;
-      contentRef.current.style.transform = `translate3d(${-targetLeft}px, ${-targetTop}px, 0)`;
-      if (!isReady && y > 0) {
-        setTimeout(() => setIsReady(true), 1000);
-      }
+      const targetScroll = Math.max(0, y - viewH * 0.75 + cell / 2);
+      scrollContainerRef.current.scrollTo({ top: targetScroll, behavior: 'smooth' });
     }
-  }, [x, y, isGameStarted, cell, isMobile, virtualMapWidth]);
-  const handleJump = () => {
-    if (isGameStarted && isReady && canJump && !isPaused) {
-      if (!timerActive) setTimerActive(true);
-      if (!hasMoved) setHasMoved(true);
-      const nextStep = userStep + 1;
-      if (nextStep >= starStep) {
-        const p = getPosForStep(nextStep, segments);
-        setX(p.x); setY(p.y); setUserStep(nextStep);
-        setStarCollected(true); setIsFinishing(true);
-        setTimeout(() => setGameWon(true), 800);
-        return;
-      }
-      if (npcs.some(n => n.currentStep === nextStep && !n.isFinishing && !n.isGhost)) { setGameOver(true); return; }
-      const nextPos = getPosForStep(nextStep, segments);
-      setUserStep(nextStep); setX(nextPos.x); setY(nextPos.y);
-      setJumpKey(prev => prev + 1); setCanJump(false);
-      setLastUserMoveTime(Date.now());
-      setTimeout(() => setCanJump(true), 400);
+  }, [y, isGameStarted]);
+
+  useEffect(() => {
+    if (isGameStarted) {
+      const timer = setTimeout(() => {
+        setIsReady(true);
+      }, 1000);
+      return () => clearTimeout(timer);
     }
-  };
+  }, [isGameStarted]);
+
+  const stepSize = segments[0].length / stepsPerSegment;
+  const jumpDuration = 0.4;
+  const extraDelay = 0.05;
+  const jumpInterval = (jumpDuration + extraDelay) * 1000;
+
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.code === 'Space') handleJump();
+    if (e.code === 'Space' && isGameStarted && isReady && canJump && !gameOver && !gameWon) {
+      const newProgress = progress + stepSize;
+
+      if (newProgress >= segments[currentSegment].length - 1e-6) {
+        if (currentSegment + 1 >= totalSegments) {
+          setGameWon(true);
+          return;
+        }
+        setCurrentSegment(currentSegment + 1);
+        setProgress(0);
+        setX(segments[currentSegment + 1].startX);
+        setY(segments[currentSegment + 1].startY);
+      } else {
+        setProgress(newProgress);
+        const seg = segments[currentSegment];
+        setX(seg.startX + seg.dirX * newProgress);
+        setY(seg.startY + seg.dirY * newProgress);
+      }
+
+      setJumpKey(prev => prev + 1);
+      setCanJump(false);
+      setTimeout(() => {
+        setCanJump(true);
+      }, jumpInterval);
+    }
   };
+
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [userStep, isGameStarted, isReady, canJump, isPaused, npcs, segments, starStep, timerActive]);
-  useEffect(() => {
-    const handleTouchStart = (e: TouchEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('.game-area')) {
-          e.preventDefault();
-          handleJump();
-      }
-    };
-    const gameElement = document.getElementById('game-touch-area');
-    if (gameElement) {
-        gameElement.addEventListener('touchstart', handleTouchStart, { passive: false });
-        return () => gameElement.removeEventListener('touchstart', handleTouchStart);
-    }
-  }, [handleJump]);
-  useEffect(() => {
-    if (isPaused || !hasMoved) return;
-    const moveInterval = setInterval(() => {
-      setNpcs(prev => {
-        const occupied = new Set(prev.map(n => n.currentStep));
-        occupied.add(userStep);
-        const now = Date.now();
-        const lastRoundNpcs = prev.filter(n => n.exitStep === stepsPerFloor * 5 && !n.isFinishing);
-        let avgLastRoundStep = 0;
-        if (lastRoundNpcs.length > 0) {
-          avgLastRoundStep = lastRoundNpcs.reduce((sum, n) => sum + n.currentStep, 0) / lastRoundNpcs.length;
-        }
-        return prev.map(npc => {
-          const isLastRound = npc.exitStep === stepsPerFloor * 5;
-          const isBoosted = isLastRound && !trafficJam && npc.currentStep < avgLastRoundStep - 3;
-          const effectiveSpeed = isBoosted ? 400 : npc.speed;
-          if (npc.isFinishing) return npc;
-          if (now - npc.lastMoveTime < effectiveSpeed) return npc;
-          const nextStep = npc.currentStep + 1;
-          const isAtExit = npc.currentStep >= npc.exitStep;
-          const isNextStepFree = !occupied.has(nextStep);
-          if (trafficJam && !isAtExit && isNextStepFree) return { ...npc, sayingSorry: true };
-          if (isAtExit) return { ...npc, isFinishing: true, sayingSorry: false };
-          if (isNextStepFree) {
-            const pos = getPosForStep(nextStep, segments);
-            return { ...npc, currentStep: nextStep, x: pos.x, y: pos.y, isLeft: pos.isLeft, jumpKey: npc.jumpKey + 1, lastMoveTime: now, sayingSorry: false };
-          }
-          return { ...npc, sayingSorry: false };
-        }).filter(npc => {
-          if (npc.isFinishing && !npc.finishTime) npc.finishTime = now;
-          return !(npc.isFinishing && now - (npc.finishTime || 0) > 800);
-        });
-      });
-    }, 100);
-    return () => clearInterval(moveInterval);
-  }, [isPaused, hasMoved, trafficJam, userStep, segments]);
-  useEffect(() => {
-    if (isGameStarted && !initialSpawnDone && segments.length > 0) {
-      const newNpcs = [];
-      let lastType = -1;
-      const createNpc = (i: number, exitStep: number) => {
-        const pos = getPosForStep(i, segments);
-        let npcType = Math.floor(Math.random() * 3);
-        while (npcType === lastType) { npcType = Math.floor(Math.random() * 3); }
-        lastType = npcType;
-        return {
-          id: npcIdRef.current++, currentStep: i, x: pos.x, y: pos.y, isLeft: pos.isLeft,
-          exitStep: exitStep, speed: 600 + Math.random() * 400,
-          lastMoveTime: Date.now(), jumpKey: 0, isFinishing: false, isGhost: false, sayingSorry: false,
-          npcType: npcType
-        };
-      };
-      [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].forEach(i => newNpcs.push(createNpc(i, stepsPerFloor * 4)));
-      [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29].forEach(i => newNpcs.push(createNpc(i, stepsPerFloor * 3)));
-      [32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45].forEach(i => newNpcs.push(createNpc(i, stepsPerFloor * 4)));
-      [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61].forEach(i => newNpcs.push(createNpc(i, stepsPerFloor * 5)));
-      setNpcs(newNpcs);
-      setInitialSpawnDone(true);
-    }
-  }, [isGameStarted, initialSpawnDone, segments]);
-  useEffect(() => {
-    if (isPaused || !hasMoved || spawnedFloor1) return;
-    if (userStep >= stepsPerFloor * 2) {
-      setNpcs(prev => {
-        const newNpcs = [...prev];
-        let lastType = -1;
-        [stepsPerFloor + 1, stepsPerFloor + 3, stepsPerFloor + 5, stepsPerFloor + 7, stepsPerFloor + 9, stepsPerFloor + 11].forEach(i => {
-           const pos = getPosForStep(i, segments);
-           let npcType = Math.floor(Math.random() * 3);
-           while (npcType === lastType) { npcType = Math.floor(Math.random() * 3); }
-           lastType = npcType;
-           newNpcs.push({
-            id: npcIdRef.current++, currentStep: i, x: pos.x, y: pos.y, isLeft: pos.isLeft,
-            exitStep: stepsPerFloor * 4, speed: 600 + Math.random() * 400,
-            lastMoveTime: Date.now(), jumpKey: 0, isFinishing: false, isGhost: false, sayingSorry: false, npcType
-           });
-        });
-        return newNpcs;
-      });
-      setSpawnedFloor1(true);
-    }
-  }, [userStep, isPaused, hasMoved, spawnedFloor1, segments]);
+  }, [currentSegment, progress, isGameStarted, isReady, canJump, gameOver, gameWon]);
+
   const resetGame = () => {
-    const startPos = getPosForStep(0, segments);
-    setUserStep(0); setX(startPos.x); setY(startPos.y);
-    setGameOver(false); setGameWon(false); setTimeOut(false); setIsFinishing(false);
-    setJumpKey(0); setNpcs([]); setInitialSpawnDone(false);
-    setIsReady(false); setHasMoved(false); setStarCollected(false); setTimeLeft(120);
-    setTimerActive(false); setTriggeredFloors([]); setRandomJamCount(0);
-    setTrafficJam(false); setLastUserMoveTime(Date.now());
-    setSpawnedFloor1(false);
-    if (contentRef.current) contentRef.current.style.transform = 'translate3d(0px, 0px, 0px)';
+    setCurrentSegment(0);
+    setProgress(0);
+    setX(segments[0].startX);
+    setY(segments[0].startY);
+    setGameOver(false);
+    setGameWon(false);
+    setJumpKey(0);
+    setCanJump(true);
+    setIsReady(false);
+    if (scrollContainerRef.current) {
+      const viewH = scrollContainerRef.current.clientHeight;
+      scrollContainerRef.current.scrollTo({ top: totalHeight - viewH, behavior: 'smooth' });
+    }
   };
-  const currentFloor = Math.floor(userStep / stepsPerFloor);
-  const currentFloorDisplay = currentFloor === 0 ? "PARTER" : currentFloor;
-  const starPoint = segments.length > 0 ? getPosForStep(starStep, segments) : null;
-  const centerX = virtualMapWidth / 2;
-  const stairWidth = stairWidthRatio * virtualMapWidth;
-  const leftWallX = centerX - stairWidth / 2 - 100;
-  const rightWallX = centerX + stairWidth / 2 + 100;
+
+  const offsetValue = 8 * scale;
+  const offset = segments[currentSegment].isLeft ? offsetValue : -offsetValue;
+  const heroWidth = originalCell * scale;
+  const heroHeight = 2 * originalCell * scale;
+  const jumpAmount = -30 * scale;
+  const indicatorSize = 20 * scale;
+  const indicatorOffsetY = -indicatorSize - 10 * scale;
+  const indicatorOffsetX = (heroWidth / 2) - (indicatorSize / 2);
+
   return (
     <div className="relative w-full h-screen overflow-hidden bg-slate-950 font-sans text-slate-50">
-      {!isMobile && (
-        <Card className="h-screen w-[28%] fixed left-0 top-0 border-r border-white/10 bg-slate-900/95 flex flex-col p-6 z-50">
-          <div className="pt-8">
-            <div className="mb-6 text-center bg-primary/10 p-4 rounded-2xl border border-primary/20">
-              <GraduationCap className="w-10 h-10 text-primary mx-auto mb-1 animate-bounce" />
-              <h2 className="text-lg font-black uppercase italic tracking-tighter">Podczas Przerwy...</h2>
-            </div>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className={`p-4 rounded-xl border-2 flex flex-col items-center justify-center transition-all ${isPaused ? 'bg-slate-800 border-white/10' : (trafficJam ? 'bg-red-500/20 border-red-500' : 'bg-green-500/20 border-green-500')}`}>
-                  <Activity className={`w-5 h-5 mb-1 ${trafficJam ? 'text-red-500' : 'text-green-500'}`} />
-                  <span className="text-[10px] uppercase font-bold opacity-70">Status</span>
-                  <div className="font-black text-sm">{isPaused ? "POZA GRĄ" : (trafficJam ? "ZATOR" : "PŁYNNIE")}</div>
-                </div>
-                <div className="p-4 rounded-xl border-2 border-primary/40 bg-primary/10 flex flex-col items-center justify-center">
-                  <Target className="w-5 h-5 mb-1 text-primary" />
-                  <span className="text-[10px] uppercase font-bold opacity-70">Cel</span>
-                  <div className="font-black text-sm">PIĘTRO {targetFloor}</div>
-                </div>
-              </div>
-              <div className="p-4 rounded-xl border-2 border-purple-500/40 bg-purple-500/10 flex flex-col items-center justify-center">
-                <MapPinIcon className="w-5 h-5 mb-1 text-purple-500" />
-                <span className="text-[10px] uppercase font-bold opacity-70">Aktualne Piętro</span>
-                <div className="font-black text-sm">{currentFloorDisplay}</div>
-              </div>
-              <div className="bg-white/5 p-5 rounded-2xl border border-white/10 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Clock className={`w-8 h-8 ${timeLeft < 20 ? 'text-red-500 animate-pulse' : 'text-primary'}`} />
-                  <div>
-                    <span className="text-[10px] uppercase font-bold opacity-50 block">Timer (2:00)</span>
-                    <div className="text-3xl font-black tabular-nums">{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white/5 p-5 rounded-2xl border border-white/10 text-sm opacity-80">
-                Zostały Ci tylko 2 minuty przerwy, a Twoja pracownia jest na samej górze. Musisz dotrzeć do gwiazdy na 5. piętrze, zanim zadzwoni dzwonek! Przebijaj się przez tłum uczniów (użyj Spacji, by skakać), ale uważaj - jeden zły ruch i zaliczasz krasę. Pilnuj czasu i miej oko na zatory, bo korytarze potrafią się nagle zablokować!
-              </div>
-            </div>
+
+      {/* PANEL BOCZNY (UI) */}
+      <Card className="h-screen w-[28%] fixed left-0 top-0 border-r border-white/5 bg-card/95 text-card-foreground flex flex-col p-6 overflow-hidden z-20">
+        <div className="pt-12 flex-1 overflow-y-auto custom-scrollbar">
+          <div className="mb-8 text-center bg-primary/5 p-6 rounded-3xl border border-primary/10">
+            <GraduationCap className="w-14 h-14 text-primary mx-auto mb-4 animate-bounce" />
+            <h2 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2 text-foreground">Gra o Schodach</h2>
+            <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest opacity-70">Symulator Wspinaczki</p>
           </div>
-        </Card>
-      )}
-      {/* GAME AREA */}
-      <Card className={`h-screen fixed top-0 border-l border-white/10 bg-slate-900 overflow-hidden ${isMobile ? 'w-full left-0' : 'w-[72%] right-0'}`}>
-        <div ref={scrollContainerRef} id="game-touch-area" className="relative h-full overflow-hidden game-area touch-none">
-          <div ref={contentRef} className="absolute top-0 left-0 will-change-transform" style={{ width: virtualMapWidth, height: totalHeight }}>
-            {/* ODSUNIĘTE ŚCIANY / TŁO PO BOKACH */}
-            <div style={{ position: 'absolute', right: '100%', width: 2000, top: 0, bottom: 0, background: '#0f172a', zIndex: 5 }} />
-            <div style={{ position: 'absolute', left: '100%', width: 2000, top: 0, bottom: 0, background: '#0f172a', zIndex: 5 }} />
-            {/* STAIRS */}
+
+          <div className="space-y-6">
+            <section className="space-y-3">
+              <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2">
+                <MapIcon size={14} /> Nawigacja Trasy
+              </h4>
+              <div className="grid grid-cols-2 gap-2 text-foreground">
+                <div className="bg-slate-900/50 p-3 rounded-xl border border-white/5">
+                  <span className="block text-[9px] font-bold text-muted-foreground mb-1">PIĘTRO:</span>
+                  <span className="text-lg font-black">{Math.floor(currentSegment / 2) + 1} / {floors}</span>
+                </div>
+                <div className="bg-slate-900/50 p-3 rounded-xl border border-white/5">
+                  <span className="block text-[9px] font-bold text-muted-foreground mb-1">STATUS:</span>
+                  <span className="text-[10px] font-black text-emerald-500 uppercase flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Wspinaczka
+                  </span>
+                </div>
+              </div>
+            </section>
+
+            <section className="bg-amber-500/5 p-4 rounded-2xl border border-amber-500/20">
+              <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-widest flex items-center gap-2 mb-2">
+                <ShieldCheck size={14} /> Procedura Wspinaczki
+              </h4>
+              <p className="text-[11px] leading-relaxed text-slate-400 font-medium">
+                Naciśnij SPACJĘ, aby skoczyć po schodach. Kamera podąża za bohaterem.
+              </p>
+            </section>
+          </div>
+        </div>
+      </Card>
+
+      {/* MAPA */}
+      <Card className="h-screen w-[72%] fixed right-0 top-0 border-l border-white/5 bg-slate-900 flex flex-col overflow-hidden shadow-2xl">
+        <div
+          ref={scrollContainerRef}
+          className={`relative flex-1 pointer-events-none custom-scrollbar overflow-auto flex justify-center scrollbar-hide`}
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
+        >
+          <style jsx>{`
+              .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
+          <div
+            className="relative bg-slate-800 shadow-inner rounded-sm overflow-hidden"
+            style={{
+              width: mapWidth,
+              height: totalHeight,
+            }}
+          >
+            {/* NOWY SYSTEM TŁA:
+              Renderujemy tło dla każdego segmentu (półpiętra) osobno.
+            */}
+            {segments.map((_, idx) => {
+              // 1. Obliczanie pozycji Y diva (top-down)
+              // idx = 0 to pierwszy segment na dole
+              // top = totalHeight - padding - (idx+1)*height
+              const segmentTopY = totalHeight - (cell * 2) - ((idx + 1) * heightPerSegment);
+
+              // 2. Obliczanie kolorów
+              const floorIndex = Math.floor(idx / segmentsPerFloor);
+              const isFirstHalf = idx % 2 === 0;
+              const paletteIndex = floorIndex % segmentPalette.length;
+              const colors = segmentPalette[paletteIndex];
+              const bgColor = isFirstHalf ? colors.light : colors.dark;
+
+              // 3. Linie oddzielające (opcjonalne, dla estetyki)
+              const borderStyle = isFirstHalf
+                ? 'none' // Brak linii między 1 a 2 półpiętrem tego samego piętra (lub delikatna)
+                : '2px solid rgba(255,255,255,0.3)'; // Linia oddzielająca piętra
+
+              return (
+                <div
+                  key={`bg-segment-${idx}`}
+                  style={{
+                    position: 'absolute',
+                    top: segmentTopY,
+                    left: 0,
+                    width: mapWidth,
+                    height: heightPerSegment,
+                    backgroundColor: bgColor,
+                    borderTop: borderStyle,
+                    zIndex: 0, // Za schodami
+                  }}
+                />
+              );
+            })}
+
+            {/* Render schodów (na wierzchu teł) */}
             {segments.map((seg, idx) => (
-              <div key={idx} className="z-10 relative">
+              <div key={`stairs-cont-${idx}`} style={{ zIndex: 10 }}>
                 {Array.from({ length: stepsPerSegment }).map((_, j) => {
-                  const currentGlobalStep = idx * stepsPerSegment + j;
-                  if (currentGlobalStep >= starStep) return null;
-                  const pos = getPosForStep(currentGlobalStep, segments);
-                  if (seg.isHidden) return null;
-                  return <img key={j} src={seg.isLeft ? stairs_to_left : stairs_to_right} alt="stair" style={{ position: 'absolute', left: pos.x - (cell/2), top: pos.y - (cell/2), width: cell, height: cell }} />;
+                  const fraction = (j + 0.5) / stepsPerSegment;
+                  const posX = seg.startX + fraction * seg.dirX * seg.length - (cell / 2);
+                  const posY = seg.startY + fraction * seg.dirY * seg.length - (cell / 2);
+                  const src = seg.isLeft ? stairs_to_left : stairs_to_right;
+                  return (
+                    <img
+                      key={`${idx}-${j}`}
+                      src={src}
+                      alt="stair step"
+                      style={{
+                        position: 'absolute',
+                        left: posX,
+                        top: posY,
+                        width: cell,
+                        height: cell,
+                        zIndex: 10
+                      }}
+                    />
+                  );
                 })}
               </div>
             ))}
-            {Array.from({ length: floors }).map((_, f) => {
-              const stepFull = (f + 1) * stepsPerFloor;
-              const posFull = getPosForStep(stepFull, segments);
-              const floorTop = posFull.y + cell / 2;
-              const floorWidth = virtualMapWidth;
-              const wallWidth = 24;
-              const wallHeight = '200%';
-              const wallColor = '#020617';
-              const floorColor = '#c2c1a8';
-              return (
-                <div key={`floor-full-${f}`}>
-                  {/* PODŁOGA */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: 0,
-                      top: floorTop,
-                      width: floorWidth,
-                      height: cell,
-                      background: floorColor,
-                      zIndex: 1,
-                    }}
-                  />
-                  {!isMobile && (
-                    <>
-                      {/* LEWA ŚCIANA */}
-                      <div
-                        style={{
-                          position: 'absolute',
-                          left: 0,
-                          top: floorTop - wallHeight,
-                          width: wallWidth,
-                          height: wallHeight,
-                          background: wallColor,
-                          zIndex: 999,
-                        }}
-                      />
-                      {/* PRAWA ŚCIANA */}
-                      <div
-                        style={{
-                          position: 'absolute',
-                          left: floorWidth - wallWidth,
-                          top: floorTop - wallHeight,
-                          width: wallWidth,
-                          height: wallHeight,
-                          background: wallColor,
-                          zIndex: 1,
-                        }}
-                      />
-                    </>
-                  )}
-                </div>
-              );
-            })}
-            {/* PODŁOGA PÓŁPIĘTER */}
-            {segments.length > 0 &&
-              Array.from({ length: floors - 1 }).map((_, f) => {
-                const stepHalf = (f + 1) * stepsPerFloor - stepsPerSegment;
-                const posHalf = getPosForStep(stepHalf, segments);
 
-                const smallWidth = virtualMapWidth * 0.4;
-                const floorOffsetX = 60;
-                const floorLeft = posHalf.x - smallWidth + floorOffsetX;
-
-                return (
-                  <div
-                    key={`half-${f}`}
-                    style={{
-                      position: "absolute",
-                      left: floorLeft,
-                      top: posHalf.y + cell / 2,
-                      width: smallWidth,
-                      height: cell,
-                      background: "#c2c1a8",
-                      zIndex: 2,
-                    }}
-                  />
-                );
-              })}
-
-            {/* PODŁOGA STARTOWA */}
-            {segments.length > 0 && (() => {
-              const startPos = getPosForStep(0, segments);
-              const floorTop = startPos.y + cell / 2;
-              return (
-                <div key="start-floor">
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      top: floorTop,
-                      width: virtualMapWidth,
-                      height: '100%',
-                      background: "linear-gradient(to bottom, #111827, #020617)",
-                      zIndex: 2,
-                    }}
-                  />
-                </div>
-              );
-            })()}
-            {/* PODŁOGA NA OSTATNIM PIĘTRZE */}
-            {segments.length > 0 && (() => {
-              const lastPos = getPosForStep(starStep, segments);
-              const floorTop = lastPos.y + cell / 2;
-              return (
-                <div key="last-floor">
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      top: floorTop,
-                      width: isMobile ? '100%' : '200%',
-                      height: cell,
-                      background: '#020617',
-                      zIndex: 1,
-                    }}
-                  />
-                </div>
-              );
-            })()}
-            {/* STAR */}
-            <AnimatePresence>
-              {starPoint && !starCollected && (
-                <motion.img
-                  src={starImg} className="absolute z-20"
-                  style={{ left: starPoint.x - 40, top: starPoint.y - 120, width: 80, height: 'auto' }}
-                  animate={{ y: [0, -20, 0], scale: [1, 1.2, 1], filter: ["drop-shadow(0 0 10px gold)"] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  exit={{ scale: 0, opacity: 0 }}
-                />
-              )}
-            </AnimatePresence>
-            {/* PLAYER - SKOK Z KODU B */}
+            {/* Bohater */}
             <motion.div
-              key={`hero-${jumpKey}`}
+              key={jumpKey}
+              initial={{ y: 0 }}
+              animate={{ y: [jumpAmount, 0] }}
+              transition={{ duration: jumpDuration, ease: "easeOut" }}
               className="absolute z-50"
               style={{
-                  top: y - heroHeight + visualShiftYScaled,
-                  left: x - (heroWidth / 2) + (segments[Math.floor(userStep/stepsPerSegment)]?.isLeft ? visualShiftXScaled : -visualShiftXScaled)
+                top: y - heroHeight,
+                left: x - (heroWidth / 2) + offset,
               }}
-              animate={isFinishing ? { x: 150, opacity: 0 } : { y: [-30, 0] }}
-              transition={isFinishing ? { duration: 0.8, ease: "easeIn" } : { duration: 0.4, ease: "easeInOut" }}
             >
-              <motion.img
-                src={pinImg}
-                className="absolute -top-28 left-1/2 -translate-x-1/2 w-12 h-12 pointer-events-none"
-                animate={{ y: [0, -15, 0], scale: [1, 1.1, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                style={{ left: 'calc(50% - 8px)' }}
-              />
-              <img src={isFinishing ? user_to_right : (segments[Math.floor(userStep/stepsPerSegment)]?.isLeft ? user_to_left : user_to_right)} alt="hero" style={{ width: heroWidth, height: heroHeight }} />
-            </motion.div>
-            {/* NPCs - SKOK Z KODU B */}
-            {npcs.map((npc) => (
-              <motion.div
-                key={`npc-container-${npc.id}-${npc.jumpKey}`}
-                className="absolute z-40"
+              <img
+                src={segments[currentSegment].isLeft ? user_to_left : user_to_right}
+                alt="hero"
                 style={{
-                  top: npc.y - heroHeight + visualShiftYScaled,
-                  left: npc.x - (heroWidth / 2) + (npc.isLeft ? visualShiftXScaled : -visualShiftXScaled),
+                  width: heroWidth,
+                  height: heroHeight
                 }}
-                animate={npc.isFinishing ? { x: 150, opacity: 0 } : { y: [-30, 0] }}
-                transition={npc.isFinishing ? { duration: 0.8, ease: "easeIn" } : { duration: 0.4, ease: "easeInOut" }}
-              >
-                <img
-                  src={npc.isFinishing
-                    ? npcGraphics[npc.npcType].right
-                    : (npc.isLeft ? npcGraphics[npc.npcType].left : npcGraphics[npc.npcType].right)
-                  }
-                  alt="npc"
-                  style={{ width: heroWidth, height: heroHeight }}
-                />
-              </motion.div>
-            ))}
+              />
+              <motion.div
+                style={{
+                  position: 'absolute',
+                  top: indicatorOffsetY,
+                  left: indicatorOffsetX,
+                  width: indicatorSize,
+                  height: indicatorSize,
+                  borderRadius: '50%',
+                  backgroundColor: '#FFFF00',
+                }}
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [1, 0.7, 1],
+                }}
+                transition={{
+                  duration: 1,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                }}
+              />
+            </motion.div>
           </div>
         </div>
+
         {!isGameStarted && (
-          <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-[100]">
-            {isMobile ? (
-              <Card className="w-4/5 max-w-md p-6 bg-slate-800/90 border border-primary/30 rounded-2xl shadow-2xl">
-                <h2 className="text-2xl font-black uppercase italic tracking-tighter text-primary mb-4 text-center">Podczas przerwy...</h2>
-                <p className="text-white/90 mb-6 text-center">Zostały Ci tylko 2 minuty przerwy, a Twoja pracownia jest na samej górze. Musisz dotrzeć do gwiazdy na 5. piętrze, zanim zadzwoni dzwonek! Przebijaj się przez tłum uczniów (użyj Spacji, by skakać), ale uważaj - jeden zły ruch i zaliczasz krasę. Pilnuj czasu i miej oko na zatory, bo korytarze potrafią się nagle zablokować!</p>
-                <Button onClick={() => setIsGameStarted(true)} className="w-full h-12 bg-primary text-xl font-black uppercase italic tracking-tighter">Graj</Button>
-              </Card>
-            ) : (
-              <Button onClick={() => setIsGameStarted(true)} className="h-24 px-16 bg-primary text-3xl font-black uppercase italic tracking-tighter">Graj</Button>
-            )}
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
+            <Button
+              onClick={() => setIsGameStarted(true)}
+              className="h-24 px-16 bg-primary hover:bg-primary/90 text-3xl font-black arcade-button shadow-[0_0_50px_rgba(59,130,246,0.4)] uppercase tracking-tighter italic"
+            >
+              Start
+            </Button>
           </div>
         )}
       </Card>
-      {/* MOBILE BOTTOM UI */}
-      {isMobile && (
-        <div className="fixed bottom-0 left-0 w-full bg-slate-900/95 border-t border-white/10 z-50 p-4 flex justify-around items-center text-sm">
-          <div className="flex flex-col items-center">
-            <Activity className={`w-5 h-5 ${trafficJam ? 'text-red-500' : 'text-green-500'}`} />
-            <span className="font-bold">{trafficJam ? "ZATOR" : "PŁYNNIE"}</span>
+
+      {/* GAME OVER / WON */}
+      {(gameOver || gameWon) && (
+        <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-950/95 text-white z-[200] backdrop-blur-2xl p-12 text-center">
+          <div className="max-w-2xl w-full">
+            <h2 className="text-8xl font-black uppercase tracking-tighter mb-4 italic">
+              {gameWon ? "Szczyt Osiągnięty!" : "Upadek!"}
+            </h2>
+            <div className="bg-primary/10 border-2 border-primary/30 p-8 rounded-3xl mb-12">
+              <p className="text-xl text-muted-foreground uppercase tracking-widest mb-2 font-bold">Raport Końcowy:</p>
+              <div className="text-6xl font-black text-primary italic drop-shadow-sm">Sukces</div>
+            </div>
+            <Button
+              onClick={() => {
+                resetGame();
+                setIsGameStarted(false);
+              }}
+              className="h-24 px-16 bg-primary hover:bg-primary/90 text-3xl font-black arcade-button shadow-[0_0_50px_rgba(59,130,246,0.4)] uppercase tracking-tighter italic"
+            >
+              Spróbuj Ponownie
+            </Button>
           </div>
-          <div className="flex flex-col items-center">
-            <Target className="w-5 h-5 text-primary" />
-            <span className="font-bold">Cel: {targetFloor}</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <MapPinIcon className="w-5 h-5 text-purple-500" />
-            <span className="font-bold">Piętro: {currentFloorDisplay}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock className={`w-5 h-5 ${timeLeft < 20 ? 'text-red-500 animate-pulse' : 'text-primary'}`} />
-            <span className="font-black">{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
-          </div>
-        </div>
-      )}
-      {(gameOver || gameWon || timeOut) && (
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-950/95 text-white z-[200] p-4 sm:p-12 text-center">
-          <motion.h2 initial={{ scale: 0.5 }} animate={{ scale: 1 }} className={`text-5xl sm:text-9xl font-black italic uppercase tracking-tighter mb-4 ${gameWon ? 'text-yellow-400' : 'text-red-500'}`}>
-            {gameWon ? "WYGRANA" : (timeOut ? "CZAS MINĄŁ" : "KRAKSA")}
-          </motion.h2>
-          <Button onClick={resetGame} className="h-16 px-8 text-xl sm:h-20 sm:px-16 sm:text-2xl bg-white text-black font-black uppercase italic hover:bg-yellow-400 transition-colors">Ponów</Button>
         </div>
       )}
     </div>

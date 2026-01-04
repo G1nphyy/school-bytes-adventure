@@ -1,73 +1,124 @@
-# Welcome to your Lovable project
+# ZESPÓŁ SZKÓŁ KOMUNIKACJI - GRA EDUKACYJNA
+**Opis projektu:**
+Aplikacja została stworzona, aby zaprezentować uczniom szkół podstawowych wszystkie kierunki kształcenia Zespołu Szkół Komunikacji w roku szkolnym 2026/27 i zachęcić ich do wyboru naszej szkoły.  
+Gra za pomocą krótkich quizów oraz zadania otwartego pokazuje zainteresowanym czego mogą nauczyć się na danym kierunku oraz pozwala im określić czy posiadają już podstawowe umiejętności związane z wybranym kierunkiem
 
-## Project info
+## Cele projektu:
+* zapoznanie uczniów szkół podstawowych z kierunkami kształcenia ZSK,
+* przedstawienie praktycznych aspektów nauki na poszczególnych kierunkach,
+* wsparcie uczniów w wyborze przyszłej szkoły,
+* nauka poprzez interakcję i elementy grywalizacji.
 
-**URL**: https://lovable.dev/projects/69eb8c17-2ec4-400e-a270-8c2da816e801
+## Grupa docelowa:
+* uczniowie klas 7–8 szkół podstawowych,
+* kandydaci do Zespołu Szkół Komunikacji,
+* osoby zainteresowane kierunkami technicznymi.
 
-## How can I edit this code?
+## Główne funkcjonalności:
+Gracz ma do wyboru siedem kafelków pod którymi znajduje się dwuetapowe gra edukacyjna oraz dwa kafelki z grami nawiązującymi do codziennego życia w szkole
 
-There are several ways of editing your application.
+* Interaktywne, w pełni działające menu przekierowujące do poszczególnych sekcji
+* Przekierowywanie do neutralnych stron w razie wystąpienia błędów (404 Page not found)
+* Gry związane z kierunkami
+    * Quiz z 7 pytaniami (jednokrotny wybór, wielkrotny wybór, króka odpowiedź)
+    * System podpowiedzi
+    * Przy każdym pytaniu informacja _Do czego przyda ci się ta wiedza?_
+    * Zadanie złożone otwarte spersonalalizowane pod kątem kierunku kształcenia
+        * __Technik automatyk:__ Gra logiczna, w której gracz musi włączyć do działania wszystkie komponenty zgodnie z instrukcją
+        * __Technik elektronik:__ Gra związana z Multimetrem - gracz musi dokonać pomiarów trzech elementów
+        * __Technik szerokopasmowej komunikacji elektronicznej:__ gracz musi skalibrować satelitę, aby uzyskań min. 96% sygnału
+        * __Technik informatyk:__ Gracz musi złożyć komputer z części za pomocą drag & drop elementów
+        * __Technik programista:__ Gracz musi złożyć kod funkcji wyszukującej największy element tablicy z rozsypnaych linii kodu za pomocą drag & drop
+        * __Technik elektroenergetyk transportu szynowego:__ (Borys tekst)
+        * __Technik transportu kolejowego:__ Gracz musi przeprowadzić pociąg do celu, zmieniając tory jazdy, odpowiadając przy tym na pytania z quizu
 
-**Use Lovable**
+* Gry związane z życiem codziennym w szkole
+    * Gra _Schody_
+        * Gracz wciela się w ucznia, który musi pokonać zatłoczone schody w czasie 5 minutowej przerwy
+        * Steruje tylko spacją
+        * Gre wygrywa przechodząc z szatni na 6 piętro w czasie 5 minut
+    * Gra _DSD_
+        * (Maksym tekst)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/69eb8c17-2ec4-400e-a270-8c2da816e801) and start prompting.
+## Wykorzystane technologie:
+* React + TypeScript
+* Vite
+* Tailwind CSS
+* shadcn/ui
+* HTML / CSS / JavaScript
 
-Changes made via Lovable will be committed automatically to this repo.
+## Użyte biblioteki
 
-**Use your preferred IDE**
+#### Framework i logika:
+* React, React DOM
+* React Router DOM
+* React Query
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+#### Formularze i walidacja:
+* React Hook Form + Zod
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+#### UI i komponenty:
+* Radix UI primitives
+* Tailwind CSS i narzędzia utility
+* Framer Motion, Recharts, Day Picker
 
-Follow these steps:
+#### Narzędzia deweloperskie:
+* Vite, TypeScript, ESLint
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Wymagania systemowe
+**Do uruchomienia projektu potrzebne są:**
+* Node.js (zalecane ≥ 18)
+* npm / yarn / pnpm
+* Nowoczesna przeglądarka (Chrome, Edge, Firefox)
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+## Instrukcja uruchomienia
+Do uruchomienia będzie potrzebna konsola (cmd) oraz adres folderu z projektem
+```
+cmd
+npm install
 npm run dev
 ```
+Gra występuję pod adresem `http://localhost:8080`
 
-**Edit a file directly in GitHub**
+## Struktura projektu
+```
+src/
+ ├─ assets/            # grafiki, dźwięki, zasoby statyczne
+ ├─ components/        # komponenty wielokrotnego użytku (UI)
+ ├─ games/             # logika i widoki gier
+ ├─ pages/             # strony aplikacji (menu, wybór gry itp.)
+ ├─ data/              # pytania quizowe i dane statyczne
+ ├─ hooks/             # własne hooki React
+ ├─ utils/             # funkcje pomocnicze
+ ├─ styles/            # style globalne
+ ├─ App.tsx            # główny komponent aplikacji
+ └─ main.tsx           # punkt wejścia aplikacji
+```
+## Dostępność i UX
+Aplikacja została zaprojektowana z myślą o uczniach klas 7–8 szkół podstawowych.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+* Zastosowane rozwiązania UX i dostępności:
+* proste i czytelne menu kafelkowe,
+* intuicyjna nawigacja bez konieczności rejestracji,
+* możliwość obsługi klawiaturą (np. gra Schody),
+* czytelne komunikaty i jasne instrukcje,
+* kontrastowe kolory i duże przyciski,
+* język dostosowany do młodszych użytkowników.
 
-**Use GitHub Codespaces**
+## Obsługa błędów
+Projekt zawiera mechanizmy zapobiegające nieoczekiwanym błędom.
+* dedykowana strona 404 - Page not found
+* bezpieczne przekierowanie w przypadku nieprawidłowych adresów
+* zabezpieczenie przed niepoprawnym przebiegiem gry
+* komunikaty informujące użytkownika o błędach lub zakończeniu gry
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Kierunki rozwoju
+Projekt przez swoją strukturę jest łatwy w aktualizacji, można bez problemu dodawać/usuwać kierunki i przystosowywać go do nowych rekrutacji. Możliwa jest również rozbudowa bazy pytań oraz aktualizacja pytań otwartych względem wymagań dla danego kierunku.
 
-## What technologies are used for this project?
+## Autorzy
+**Autorzy projektu:**
+* Jan Sammler (gry kierunkowe, dokumentacja)
+* Borys Kędziora (oprawa graficzna, gry kierunkowe)
+* Maksym Demchenko (Grafiki, gry związane z codziennością w szkole)
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/69eb8c17-2ec4-400e-a270-8c2da816e801) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+**Rok szkolny: 2025/26**

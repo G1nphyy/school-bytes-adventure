@@ -1,3 +1,7 @@
+/**
+ Główna konfiguracja ESLint, obsługę składnie TypeScript oraz wsparcie dla React (Hooks i Fast Refresh).
+ **/
+
 import js from "@eslint/js";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";

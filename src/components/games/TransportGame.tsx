@@ -329,7 +329,7 @@ export default function TransportGame() {
   }, [x, y, direction, switchDirs, transitioning, targetDir, gameOver, gameWon, levelIndex, isQuizActive, isGameStarted]);
 
   return (
-      <div className="relative w-full h-screen overflow-hidden bg-slate-950 font-sans text-slate-50">
+      <div className="relative w-full h-[80vh] overflow-hidden bg-slate-950 font-sans text-slate-50">
 
         {/* HUD: Punkty */}
         <div className="fixed top-4 left-[64%] -translate-x-1/2 z-[100] pointer-events-none">

@@ -1,3 +1,4 @@
+/** Główny komponent aplikacji: konfiguruje dostawców danych (QueryClient), system powiadomień, podpowiedzi oraz definiuje trasy między stroną główną a widokiem gier. */
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";

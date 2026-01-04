@@ -1,3 +1,5 @@
+/** Kontroler widoku gry: dynamicznie ładuje odpowiednią mini-grę na podstawie parametru URL oraz zarządza interaktywnym, animowanym nagłówkiem menu. */
+
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ChevronDown } from "lucide-react";
@@ -18,10 +20,10 @@ const careerGames: Record<string, { name: string; component: React.ComponentType
   programista: { name: "Technik programista", component: ProgrammerGame },
   automatyk: { name: "Technik automatyk", component: AutomatykGame },
   elektronik: { name: "Technik elektronik", component: ElektronikGame },
-  komunikacja: { name: "Technik komunikacji", component: KomunikacjaGame },
+  komunikacja: { name: "Technik szerokopasmowej komunikacji elektronicznej", component: KomunikacjaGame },
   informatyk: { name: "Technik informatyk", component: InformatykGame },
-  elektroenergetyk: { name: "Technik elektroenergetyk", component: ElektroenergetykGame },
-  transport: { name: "Technik transportu", component: TransportGame },
+  elektroenergetyk: { name: "Technik elektroenergetyk transportu szynowego", component: ElektroenergetykGame },
+  transport: { name: "Technik transportu kolejowego", component: TransportGame },
   schody: { name: "Podczas przerwy", component: ElevatorGame },
   niemiecki: { name: "DSD", component: DsdGame },
 };

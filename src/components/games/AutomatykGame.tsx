@@ -18,6 +18,9 @@ import {
 } from "lucide-react";
 
 // --- IMPORTY OBRAZÓW ---
+// Zdjęcia do zadań przechowywane w folderze assets, importowane jako moduły
+// Baza pytań quizowych (Etap 1).
+// Każde pytanie zawiera treść, podpowiedź, informację praktyczną oraz zestaw odpowiedzi.
 import question4img from '@/assets/AutomatykZad4.png';
 import question5img from '@/assets/AutomatykZad5.png';
 import question6img from '@/assets/AutomatykZad6.png';
@@ -122,6 +125,7 @@ const quizQuestions = [
   },
 ];
 
+// Konfiguracja kontrolek (lampek) wizualizujących stan sterownika PLC.
 const LAMPS_CONFIG = [
   { id: 1, color: "text-blue-400", label: "ZASILANIE" },
   { id: 2, color: "text-cyan-400", label: "CHŁODZENIE" },
@@ -131,6 +135,7 @@ const LAMPS_CONFIG = [
 ];
 
 const AutomatykGame = () => {
+    // --- STAN APLIKACJI ---
   const [gameState, setGameState] = useState<'quiz' | 'lore' | 'logic' | 'finish'>('quiz');
   const [switches, setSwitches] = useState(new Array(12).fill(false));
   const [activeLamps, setActiveLamps] = useState<number[]>([]);
@@ -140,7 +145,7 @@ const AutomatykGame = () => {
   const [logicStartTime, setLogicStartTime] = useState<number>(0);
 
 
-  // --- STATE QUIZU ---
+  // Stan pomocniczy dla Quizu
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showHint, setShowHint] = useState(false);
@@ -148,6 +153,9 @@ const AutomatykGame = () => {
   const [showResult, setShowResult] = useState(false);
   const [showPractical, setShowPractical] = useState(false);
 
+    // --- LOGIKA GENEROWANIA ZAGADKI PLC ---
+    // Funkcja tworzy losowe, ale zawsze możliwe do rozwiązania równania logiczne.
+    // Wykorzystuje bramki AND oraz OR na 12 dostępnych przełącznikach.
   const generateSolvableLogic = useCallback(() => {
     const targetState = new Array(12).fill(0).map(() => Math.random() > 0.5);
     const newLogic = LAMPS_CONFIG.map((lamp, idx) => {
@@ -158,12 +166,14 @@ const AutomatykGame = () => {
       const isP2 = targetState[p2];
       const isP3 = targetState[p3];
       const op = Math.random() > 0.5 ? "&" : "|";
+      // Funkcja sprawdzająca, czy dany zestaw przełączników spełnia warunek
       const condition = (sw: boolean[]) => {
         const v1 = isP1 ? sw[p1] : !sw[p1];
         const v2 = isP2 ? sw[p2] : !sw[p2];
         const v3 = isP3 ? sw[p3] : !sw[p3];
         return op === "&" ? (v1 && v2 && v3) : (v1 || (v2 && v3));
       };
+  // Tekstowa reprezentacja bramki logicznej wyświetlana graczowi
       const text = `L${idx+1} [${lamp.label}]: ${isP1 ? '' : '!' }P${p1+1} ${op} ${isP2 ? '' : '!' }P${p2+1} ${op === '&' ? '&' : '|'} ${isP3 ? '' : '!' }P${p3+1}`;
       return { label: lamp.label, condition, text };
     });
@@ -171,6 +181,8 @@ const AutomatykGame = () => {
     setSwitches(new Array(12).fill(false));
   }, []);
 
+   // EFFECT: Reaguje na każdą zmianę stanu przełączników.
+   // Przelicza, które lampki powinny się zapalić na podstawie wygenerowanej logiki.
   useEffect(() => {
     if (generatedLogic.length > 0) {
       const active = generatedLogic
@@ -180,6 +192,9 @@ const AutomatykGame = () => {
     }
   }, [switches, generatedLogic]);
 
+    // --- HANDLERY ZDARZEŃ ---
+
+    // Obsługa kliknięcia odpowiedzi w quizie
   const handleQuizAnswer = (ansId: string, isCorrect: boolean) => {
     if (showResult) return;
     setSelectedAnswer(ansId);
@@ -197,11 +212,15 @@ const AutomatykGame = () => {
     }
   };
 
+  // Uruchomienie etapu logiki z pomiarem czasu
   const handleStartLogic = () => {
     setGameState('logic');
     setLogicStartTime(Date.now());
   };
 
+    // --- SYSTEM PUNKTACJI ---
+    // Nagradza gracza za poprawne odpowiedzi w quizie (+10 pkt)
+    // oraz za szybkość rozwiązania zagadki technicznej (bonus czasowy).
   const handleFinishLogic = () => {
     // Bonus za czas w logice (max 50 pkt, maleje z czasem)
     const timeTaken = (Date.now() - logicStartTime) / 1000;
@@ -225,13 +244,16 @@ const AutomatykGame = () => {
   };
 
   return (
-     <div className="p-6 min-h-screen flex items-center justify-center bg-background/95">
+     <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
         <Card className="w-full max-w-4xl animate-fade-in flex flex-col">
         {/* Kontener treści, który pcha stopkę w dół */}
         <div className="flex-grow pt-12">
 
+        {/* RENDEROWANIE WARUNKOWE: Wyświetla odpowiedni etap gry w zależności od gameState */}
+
           {/* --- ETAP 1: QUIZ --- */}
           {gameState === 'quiz' && (
+              /* Sekcja Quizu: Wykorzystuje standardowe mapowanie tablicy na przyciski */
               <div className="flex flex-col h-full animate-fade-in">
                 <div className="mb-6 text-center">
                   <Cpu className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
@@ -331,14 +353,14 @@ const AutomatykGame = () => {
               </div>
           )}
 
-          {/* --- ETAP 2: LORE --- */}
+          {/* --- ETAP 2: WPROWADZENIE DO ZADANIA OTWARTEGO --- */}
           {gameState === 'lore' && (
               <div className="flex flex-col h-full justify-center text-center animate-in zoom-in-95 px-4 mb-8">
                 <div className="relative mb-8">
                   <Factory className="w-24 h-24 mx-auto text-primary" />
                   <div className="absolute top-0 right-1/4 w-4 h-4 bg-destructive rounded-full animate-ping"></div>
                 </div>
-                <h2 className="text-4xl font-black mb-4 tracking-tighter text-foreground uppercase">System Halted</h2>
+                <h2 className="text-4xl font-black mb-4 tracking-tighter text-foreground uppercase">Fabryka stoi!</h2>
                 <div className="bg-slate-900 text-blue-100 p-8 rounded-3xl text-sm italic mb-10 border-b-8 border-primary shadow-2xl relative">
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-[10px] px-3 py-1 rounded-full font-bold not-italic tracking-widest uppercase">KRYTYCZNE POWIADOMIENIE</div>
                   "Teoria opanowana, ale linia produkcyjna właśnie przestała odpowiadać. Musisz ręcznie zrekonfigurować 12 węzłów logicznych w sterowniku PLC, aby przywrócić zasilanie i komunikację."
@@ -349,8 +371,9 @@ const AutomatykGame = () => {
               </div>
           )}
 
-          {/* --- ETAP 3: LOGIKA --- */}
+          {/* --- ETAP 3: ZADANIE OTWARTE - LOGIKA --- */}
           {gameState === 'logic' && (
+              /* Sekcja PLC: Interaktywny pulpit z logiką bramek */
               <div className="animate-in fade-in slide-in-from-right-4 mb-8 px-6">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-sm font-black flex items-center gap-2 text-primary uppercase tracking-widest"><Settings2 size={18}/> PLC Logic Core v2.1</h3>
@@ -393,6 +416,7 @@ const AutomatykGame = () => {
                   })}
                 </div>
 
+                {/* Grid przełączników: Każdy przycisk zmienia stan w tablicy switches */}
                 <div className="grid grid-cols-2 gap-3 mb-8">
                   {switches.map((val, i) => (
                       <button

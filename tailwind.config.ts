@@ -1,3 +1,4 @@
+/** Konfiguracja Tailwind CSS – definiuje motyw wizualny projektu, w tym kolory interfejsu, czcionkę retro (pixel-art) oraz niestandardowe animacje dla gry. **/
 import type { Config } from "tailwindcss";
 
 export default {

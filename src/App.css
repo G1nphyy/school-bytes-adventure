@@ -1,3 +1,5 @@
+/** Podstawowe style CSS: definiuje globalne centrowanie aplikacji, parametry wyświetlania logo oraz standardowe animacje obrotowe (Vite).*/
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
