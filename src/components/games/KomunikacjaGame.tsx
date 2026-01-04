@@ -90,6 +90,22 @@ const quizQuestions = [
     ],
     usefulness: ["Poprawny montaż i geometria czaszy to fundament odbioru sygnału."]
   },
+  {
+    id: 6,
+    type: "single",
+    questionText: "Które z poniższych urządzeń służy do trwałego łączenia włókien światłowodowych?",
+    answers: [
+      { id: "a", text: "Zaciskarka RJ-45", correct: false },
+      { id: "b", text: "Spawarka światłowodowa", correct: true },
+      { id: "c", text: "Lutownica transformatorowa", correct: false },
+      { id: "d", text: "Router Wi-Fi", correct: false },
+    ],
+    hints: [
+      "To urządzenie wykorzystuje łuk elektryczny do stopienia szkła.",
+      "Nazwa procesu przypomina łączenie metali, ale odbywa się w mikroskali.",
+    ],
+    usefulness: "Umiejętność obsługi spawarki światłowodowej to jedna z najwyżej płatnych i najbardziej pożądanych kompetencji technika sieci szerokopasmowych."
+  },
 ] as const;
 
 /* ----------------- WARSZTAT SATELITARNY ----------------- */
@@ -173,6 +189,8 @@ function SatelliteWorkshop({ onFinish, addScore }: { onFinish: () => void; addSc
 }
 
 /* ----------------- GŁÓWNY KOMPONENT ----------------- */
+// Komponent zarządza dynamicznym procesem quizu, obsługując 3 typy interakcji:
+// 'single', 'multiple' oraz 'short').
 export default function KomunikacjaGame() {
   const [view, setView] = useState<"quiz" | "workshop" | "finished">("quiz");
   const [qIndex, setQIndex] = useState(0);
@@ -194,12 +212,13 @@ export default function KomunikacjaGame() {
 
   const q = quizQuestions[qIndex];
 
+// Polimorficzna walidacja odpowiedzi w zależności od typu pytania
   const handleSingleChoice = (answerId: string) => {
     if (showResult || locked) return;
     setAnswers(prev => ({ ...prev, [q.id]: answerId }));
     setLocked(true);
     setShowResult(true);
-
+    // Sprawdzenie, czy jedyny wybrany ID jest oznaczony jako poprawny w bazie
     const isCorrect = answerId === q.answers.find(a => a.correct)?.id;
     if (isCorrect) {
       setScore(s => s + 10);
@@ -220,8 +239,11 @@ export default function KomunikacjaGame() {
     let ok = false;
 
     if (q.type === "multiple") {
+        // Logika dla wielokrotnego wyboru: ilość zaznaczonych musi się zgadzać
+        // z ilością poprawnych i każdy zaznaczony musi być poprawny.
       ok = JSON.stringify([...userVal].sort()) === JSON.stringify([...q.correct].sort());
     } else if (q.type === "short") {
+        // Walidacja tekstowa: ignorowanie wielkości liter i zbędnych spacji
       const accepted = [q.correctText, ...(q.acceptable || [])].map(v => v.toLowerCase().trim());
       ok = accepted.includes(userVal.toLowerCase().trim());
     }
@@ -246,6 +268,10 @@ export default function KomunikacjaGame() {
 
   return (
       <div className="p-4 md:p-6 min-h-[80vh] flex items-center justify-center">
+      {/* AnimatePresence z mode="wait" zapewnia, że poprzednie pytanie całkowicie
+        zniknie zanim nowe zacznie się pojawiać.
+        Zapobiega to "skakaniu" layoutu podczas zmiany pytań.
+      */}
         <AnimatePresence mode="wait">
           {view === "quiz" && (
               <motion.div key="quiz" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, x: -20 }} className="w-full max-w-3xl">

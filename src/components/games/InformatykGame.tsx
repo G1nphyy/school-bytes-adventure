@@ -48,18 +48,18 @@ const ItemTypes = {
 const securityQuestions = [
   {
     id: 1,
-    question: "Które hasło jest najbezpieczniejsze?",
+    question: "Which password is the most secure??",
     options: ["password123", "P@ssw0rd!", "Tr3$#mK9@pL2", "qwerty"],
     correctAnswer: 2,
     explanation:
-        "Silne hasło zawiera wielkie i małe litery, cyfry, znaki specjalne i ma co najmniej 12 znaków. Tr3$#mK9@pL2 spełnia te kryteria.",
+        "A strong password contains uppercase and lowercase letters, numbers, special characters, and is at least 12 characters long. Tr3$#mK9@pL2 meets these criteria.",
     podpowiedzi: [
-      "Najdłuższe hasło zwykle jest najbezpieczniejsze",
-      "Powinno zawierać wielkie litery, cyfry i znaki specjalne",
-      "Szukaj najdłuższego i najbardziej złożonego ciągu znaków",
+      "The longest password is usually the most secure",
+      "It should contain capital letters, numbers and special characters.",
+      "Search for the longest and most complex string",
     ],
     usefulness:
-        "Wiedza o tworzeniu silnych haseł jest kluczowa w każdej pracy związanej z IT, a także w codziennym życiu, aby chronić dane klientów i własne systemy.",
+        "Knowing how to create strong passwords is crucial in any IT-related job, as well as in everyday life, to protect customer data and your own systems.",
   },
   {
     id: 2,
@@ -83,22 +83,22 @@ const securityQuestions = [
   },
   {
     id: 3,
-    question: "Co oznacza 'https' w adresie strony?",
+    question: "What does 'https' mean in a website address?",
     options: [
       "High Transfer Protocol System",
-      "Połączenie jest szyfrowane",
-      "Strona jest szybsza",
-      "Strona wymaga logowania",
+      "The connection is encrypted",
+      "The website is faster",
+      "The website requires login",
     ],
     correctAnswer: 1,
-    explanation: "HTTPS oznacza, że połączenie jest szyfrowane i bezpieczne (HTTP + SSL/TLS), chroniąc dane przesyłane między użytkownikiem a serwerem.",
+    explanation: "HTTPS means that the connection is encrypted and secure (HTTP + SSL/TLS), protecting data transmitted between the user and the server.",
     podpowiedzi: [
-      "'S' na końcu oznacza 'Secure'",
-      "Dotyczy szyfrowania połączenia w przeglądarce",
-      "Połączenie jest szyfrowane",
+      "The 'S' at the end stands for 'Secure'",
+      "Applies to browser connection encryption",
+      "The connection is encrypted",
     ],
     usefulness:
-        "Będziesz wykorzystywać tę wiedzę podczas projektowania bezpiecznych stron internetowych (np. w INF.03) oraz przy konfiguracji serwerów. Gwarantuje to poufność danych przesyłanych między klientem a serwerem.",
+        "You'll use this knowledge when designing secure websites (e.g., in INF.03) and configuring servers. This ensures the confidentiality of data transferred between client and server.",
   },
   {
     id: 4,
@@ -121,23 +121,23 @@ const securityQuestions = [
   },
   {
     id: 5,
-    question: "Jak często należy aktualizować oprogramowanie?",
+    question: "How often should I update my software?",
     options: [
-      "Raz w roku",
-      "Tylko gdy przestaje działać",
-      "Regularnie, gdy są dostępne aktualizacje",
-      "Nigdy, to zbędne",
+      "Once a year",
+      "Only when it stops working",
+      "Regularly, when updates are available",
+      "Never, it's unnecessary",
     ],
     correctAnswer: 2,
     explanation:
-        "Regularne aktualizacje są kluczowe dla bezpieczeństwa - łatają wykryte luki i dodają nowe zabezpieczenia, chroniąc przed atakami.",
+        "Regular updates are crucial for security - they patch detected vulnerabilities and add new security features, protecting against attacks.",
     podpowiedzi: [
-      "Bezpieczeństwo wymaga aktualnego oprogramowania",
-      "Aktualizacje zawierają poprawki bezpieczeństwa",
-      "Należy aktualizować regularnie",
+      "Security requires up-to-date software",
+      "Updates include security patches",
+      "It should be updated regularly",
     ],
     usefulness:
-        "Zarządzanie łatkami bezpieczeństwa (patch management) to standardowa procedura w każdej firmie IT. W kursie na technika informatyka dowiesz się, jak tworzyć polityki aktualizacji i utrzymywać systemy bez luk.",
+        "Patch management is standard procedure in every IT organization. In this IT technician course, you'll learn how to create patch policies and maintain systems without vulnerabilities.",
   },
   {
     id: 6,
@@ -471,8 +471,9 @@ const ComponentDropZone: React.FC<ComponentDropZoneProps> = ({ slotName, slotDat
 
 
 // -------------------------- GŁÓWNY KOMPONENT GRY ---------------------------------
-
-
+// Zarządzanie stanem gry
+// Każdy etap ma własną logikę punktacji, system podpowiedzi z karami punktowymi
+// oraz flagi ukończenia.
 const InformatykGame = () => {
 
   // QUIZ STATES
@@ -569,7 +570,7 @@ const InformatykGame = () => {
     setShowUsefulness(false);
   };
 
-  // -------------------------- QUIZ LOGIC (UPROSZCZONA) ---------------------------------
+  // -------------------------- QUIZ LOGIC ---------------------------------
 
   // ZMIENIONA: Sprawdza odpowiedź od razu po kliknięciu
   const handleAnswerClick = (index: number) => {
@@ -595,13 +596,16 @@ const InformatykGame = () => {
     }
   };
 
-  // -------------------------- RJ GAME LOGIC ---------------------------------
-
+  // -------------------------- RJ LOGIKA GRY ---------------------------------
+  // Logika Drag & Drop dla kabli RJ-45
   const handleRjDrop = useCallback((cableId: number, targetSlotIndex: number, sourceSlotIndex: number) => {
+    // Zapobiegaj zmianom po zakończeniu prób (blokada stanu)
     if (showRjResult && !rjCorrect && rjAttempts >= 3) return;
 
     setCableSlots(prevSlots => {
       const newSlots = [...prevSlots];
+      // Obsługa mechanizmu zamiany (swap): jeśli przeciągamy kabel z jednego slotu
+      // do drugiego, który jest już zajęty, zamień je miejscami.
       if (sourceSlotIndex !== -1 && sourceSlotIndex !== targetSlotIndex) {
         const targetCableId = newSlots[targetSlotIndex];
         if (targetCableId !== null) {
@@ -611,6 +615,7 @@ const InformatykGame = () => {
           newSlots[sourceSlotIndex] = null;
           newSlots[targetSlotIndex] = cableId;
         }
+    // Jeśli przeciągamy nowy kabel z palety wyboru (sourceSlotIndex === -1)
       } else if (sourceSlotIndex === -1) {
         if (newSlots[targetSlotIndex] === null) {
           newSlots[targetSlotIndex] = cableId;
@@ -622,6 +627,8 @@ const InformatykGame = () => {
     setShowUsefulness(false);
   }, [showRjResult, rjCorrect, rjAttempts]);
 
+// Użycie useCallback zapobiega niepotrzebnemu renderowaniu komponentów dzieci
+// przy każdej zmianie stanu w głównym komponencie gry.
   const handleRemoveCable = useCallback((cableId: number, slotIndex: number) => {
     if (showRjResult && !rjCorrect && rjAttempts >= 3) return;
     setCableSlots(prevSlots => {
@@ -679,7 +686,7 @@ const InformatykGame = () => {
     }
   };
 
-  // -------------------------- PC ASSEMBLY LOGIC ---------------------------------
+  // -------------------------- LOGIKA SKŁADANIA KOMPUTERA ---------------------------------
   // TODO: Zrobić żeby było można dropnąć element na każdy slot, nie tylko poprawny
   const handleAssemblyDrop = useCallback((componentId: number, targetSlotName: string, sourceSlotName: string | null) => {
     if (showAssemblyResult && assemblyAttempts >= 1) return;
@@ -730,7 +737,10 @@ const InformatykGame = () => {
 
     setAssemblyAttempts(prev => prev + 1);
 
-    // Weryfikacja (CPU, GPU, dwie różne kości RAM, COOLER na CPU)
+    // Weryfikacja poprawności montażu zgodnie z logiką techniczną:
+      // 1. Sprawdzenie zgodności ID procesora z gniazdem.
+      // 2. Walidacja trybu Dual-Channel (czy użyto dwóch różnych kości RAM w odpowiednich slotach).
+      // 3. Logika zależności: Chłodzenie (Cooler) jest uznane za poprawne tylko, gdy procesor jest już w gnieździe.
     const isCpuCorrect = componentSlots.CPU === assemblyComponents.find(c => c.type === 'CPU')?.id;
     const ramSticks = assemblyComponents.filter(c => c.type === 'RAM').map(c => c.id);
     const isRamCorrect = componentSlots.RAM1 !== null && componentSlots.RAM2 !== null && componentSlots.RAM1 !== componentSlots.RAM2 && ramSticks.includes(componentSlots.RAM1!) && ramSticks.includes(componentSlots.RAM2!);
@@ -772,7 +782,10 @@ const InformatykGame = () => {
   }
 
 
-  // -------------------------- RENDER LOGIC ---------------------------------
+  // -------------------------- WYŚWIETLANIE ---------------------------------
+  // Maszyna stanów UI: Renderowanie warunkowe oparte na postępie użytkownika.
+  // Kolejność: 1. Quiz -> 2. Montaż PC -> 3. Zarabianie kabla -> 4. Wynik końcowy.
+  // Każdy ekran posiada 'Summary' wyjaśniające aspekty edukacyjne.
 
   // 1. OSTATNI EKRAN (Quiz + Montaż + RJ Game skończone)
   if (quizComplete && assemblyComplete && rjComplete) {
@@ -869,7 +882,7 @@ const InformatykGame = () => {
             </div>
           </div>
 
-          {/* Feedback Text */}
+          {/* Feedback */}
           <div className="bg-muted/50 p-4 rounded-lg mb-6 text-xs leading-relaxed text-center border border-border/50 italic text-muted-foreground">
             {percentage >= 70
                 ? "Wyśmienicie! Masz solidne podstawy do pracy jako Technik Informatyk. Świetnie radzisz sobie zarówno z teorią, jak i praktyką."
@@ -997,7 +1010,7 @@ const InformatykGame = () => {
     );
   }
 
-  // 3. RJ GAME (główny etap - jeśli Quiz i Assembly skończone)
+  // 3. RJ GAME
   if (quizComplete && assemblyComplete) {
     const attemptsLeft = 3 - rjAttempts;
     const canAttempt = rjAttempts < 3;
@@ -1208,7 +1221,7 @@ const InformatykGame = () => {
     );
   }
 
-  // 5. PC ASSEMBLY GAME (główny etap - jeśli quizComplete jest true, ale Assembly nie jest zakończone)
+  // 5. PC ASSEMBLY GAME
   if (quizComplete) {
     const attemptsLeft = 3 - assemblyAttempts;
     const canAttempt = assemblyAttempts < 3;
@@ -1341,7 +1354,7 @@ const InformatykGame = () => {
           );
       }
 
-  // 6. QUIZ (główny etap - renderowany tylko, jeśli quiz nie jest zakończony)
+  // 6. QUIZ
 
   return (
       <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">

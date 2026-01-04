@@ -33,7 +33,7 @@ const careers = [
   },
   {
     id: "komunikacja",
-    name: "Technik komunikacji",
+    name: "Technik szerokopasmowej komunikacji elektroniczne",
     icon: Radio,
     color: "from-secondary to-primary",
     description: "Sieci szerokopasmowe",
@@ -54,14 +54,14 @@ const careers = [
   },
   {
     id: "elektroenergetyk",
-    name: "Technik elektroenergetyk",
+    name: "Technik elektroenergetyk transportu szynowego",
     icon: Cog,
     color: "from-secondary to-accent",
     description: "Transport szynowy",
   },
   {
     id: "transport",
-    name: "Technik transportu",
+    name: "Technik transportu kolejowego",
     icon: Train,
     color: "from-primary to-accent",
     description: "Transport kolejowy",

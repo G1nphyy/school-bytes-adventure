@@ -1,6 +1,3 @@
-/* ------------------------------------------------------------------ */
-/*  ProgrammerGame.tsx  – Styl InformatykGame + Centrowanie           */
-/* ------------------------------------------------------------------ */
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
@@ -18,20 +15,20 @@ let quizQuestions = [
   {
     id: 1,
     type: "single",
-    questionText: "Które z poniższych zdań najlepiej opisuje, czym naprawdę zajmuje się programista?",
+    questionText: "Which of the following sentences best describes what a programmer really does?",
     answers: [
-      { id: "a", text: "Tylko naprawia drukarki i ustawia antywirusa.", correct: false },
-      { id: "b", text: "Wymyśla i pisze instrukcje, dzięki którym komputer robi to, co myślimy", correct: true },
-      { id: "c", text: "Składa komputery", correct: false },
-      { id: "d", text: "Maluje obrazki w Paincie", correct: false },
+      { id: "a", text: "Only repairs printers and sets up antivirus.", correct: false },
+      { id: "b", text: "Invents and writes instructions that make the computer do what we think.", correct: true },
+      { id: "c", text: "He assembles computers", correct: false },
+      { id: "d", text: "He paints pictures in Paint", correct: false },
     ],
     hints: [
-      "Programista to nie serwisant – nie ogranicza się do napraw.",
-      "Jego głównym zadaniem jest pisanie instrukcji dla komputera.",
+      "A programmer is not a service technician – he is not limited to repairs",
+      "Its main task is to write instructions for the computer.",
     ],
     usefulness: [
-      "Zrozumienie roli programisty pomoże Ci świadomie wybrać kierunek dalszej nauki.",
-      "To podstawa do rozmów kwalifikacyjnych i pracy w zawodzie.",
+      "Understanding the role of a programmer will help you consciously choose the direction of your further education.",
+      "This is the basis for job interviews and professional work.",
     ],
   },
   {
@@ -76,7 +73,7 @@ let quizQuestions = [
   {
     id: 4,
     type: "multiple",
-    questionText: "Które z poniższych nazw odpowiadają językom programowania? (wszystkie poprawne)",
+    questionText: "Which of the following names correspond to programming languages?",
     answers: [
       { id: "a", text: "CISCO" },
       { id: "b", text: "SQL" },
@@ -85,13 +82,13 @@ let quizQuestions = [
     ],
     correct: ["b", "c"],
     hints: [
-      "SQL to język zapytań – używany w bazach danych.",
-      "C++ to klasyczny język systemowo-aplikacyjny.",
-      "CISCO i INTEL to nazwy firm, nie języki.",
+      "SQL is a query language – used in databases.",
+      "C++ is a classic system and application language.",
+      "CISCO and INTEL are company names, not languages.",
     ],
     usefulness: [
-      "Rozpoznawanie języków ułatwi czytanie ogłoszenia o pracę.",
-      "Wiedza ta jest wymagana na rozmowach kwalifikacyjnych.",
+      "Language recognition will make it easier to read job advertisements.",
+      "This knowledge is required for job interviews.",
     ],
   },
   {
@@ -112,16 +109,16 @@ let quizQuestions = [
   {
     id: 6,
     type: "short",
-    questionText: "Jaka instrukcja pozwala rozpatrzeć różne przypadki w zależności od warunku?",
+    questionText: "What instruction allows you to consider different cases depending on the condition?",
     correctText: "if",
-    acceptable: ["If", "IF", "Jeżeli", "Jeśli", "jeżeli", "jeśli"],
+    acceptable: ["If", "IF", "Jeżeli", "Jeśli", "jeżeli", "jeśli", "switch", 'Switch'],
     hints: [
-      "Jest to najprostszy wybór: tak / nie.",
-      "Występuje w każdym języku programowania.",
+      "This is the simplest choice: yes/no.",
+      "It occurs in every programming language.",
     ],
     usefulness: [
-      "Bez instrukcji warunkowych nie istnieje logika aplikacji.",
-      "To temat obowiązkowy na egzaminie zawodowym INF.03/04.",
+      "Without conditional statements, there is no application logic.",
+      "This is a mandatory topic for the INF.03/04 professional exam.",
     ],
   },
   {
@@ -498,13 +495,13 @@ function MiniGameInner({ onFinish, addScore }: { onFinish: () => void, addScore:
           </div>
         </div>
 
-        {/* Hints */}
+        {/* Podpowiedzi */}
         <div className="space-y-3 pt-2">
           {hintsVisible < editorTask.hints.length && !completed && (
               <Button
                   onClick={() => {
                     setHintsVisible(prev => prev + 1);
-                    addScore(-5); // Penalizacja od razu przy odkryciu? W InformatykGame jest po prostu licznik, tu upraszczamy.
+                    addScore(-5);
                   }}
                   variant="outline"
                   size="sm"
@@ -561,9 +558,7 @@ function MiniGameInner({ onFinish, addScore }: { onFinish: () => void, addScore:
   );
 }
 
-/* ==================================================================== */
 /* ===================== GŁÓWNY KOMPONENT – QUIZ ====================== */
-/* ==================================================================== */
 type View = "quiz" | "minigame" | "finished";
 
 export default function ProgrammerGame() {
@@ -576,7 +571,7 @@ export default function ProgrammerGame() {
   const [quizScore, setQuizScore] = useState(0);
   const [locked, setLocked] = useState(false);
 
-  // Hint states per question
+  // Podpowiedzi
   const [hintLevel, setHintLevel] = useState(0);
   const [showUsefulness, setShowUsefulness] = useState(false);
 
@@ -683,7 +678,6 @@ export default function ProgrammerGame() {
               const showCorrect = showResult && isCorrectAnswer;
               const showWrong = showResult && isSelected && !isCorrectAnswer;
 
-              // Base styles from InformatykGame
               const baseClasses = "w-full justify-start text-left arcade-button transition-all duration-200 cursor-pointer p-4 text-sm border h-auto border-2 rounded-xl whitespace-normal";
               let stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30";
 
@@ -701,7 +695,6 @@ export default function ProgrammerGame() {
               } else if (isSelected) {
                 stateClasses = "border-primary bg-primary/20 text-primary font-bold";
               } else {
-                // Default hover state
                 stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30 hover:bg-background/5 hover:text-foreground";
               }
 
@@ -747,7 +740,7 @@ export default function ProgrammerGame() {
                   >
                     <Checkbox
                         checked={isSelected}
-                        onCheckedChange={() => {}} // handled by div click
+                        onCheckedChange={() => {}}
                         className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground border-primary"
                     />
                     <span className="text-xs">{a.text}</span>
