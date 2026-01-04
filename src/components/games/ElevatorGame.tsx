@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Activity, Target, Clock, MapPin as MapPinIcon } from "lucide-react";
+import { GraduationCap, Activity, Target, Clock, MapPin as MapPinIcon, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import stairs_to_left from "@/assets/graphics/stairs/stairs_to_left.png";
 import stairs_to_right from "@/assets/graphics/stairs/stairs_to_right.png";
@@ -15,6 +15,7 @@ import npc2_left from "@/assets/graphics/stairs/npc2_left.png";
 import npc2_right from "@/assets/graphics/stairs/npc2_right.png";
 import pinImg from "@/assets/graphics/stairs/pin.png";
 import starImg from "@/assets/graphics/stairs/star.png";
+
 const originalCell = 32;
 const stairWidthRatio = 0.5;
 const segmentsPerFloor = 2;
@@ -72,11 +73,37 @@ export default function ElevatorGame() {
   const [randomJamCount, setRandomJamCount] = useState(0);
   const [lastUserMoveTime, setLastUserMoveTime] = useState(Date.now());
   const [spawnedFloor1, setSpawnedFloor1] = useState(false);
+  const [collisionError, setCollisionError] = useState(false);
+  const [sprint, setSprint] = useState(0);
+  const [isSprintKeyDown, setIsSprintKeyDown] = useState(false);
+  const [isBypassing, setIsBypassing] = useState(false);
+  const [showBubble, setShowBubble] = useState(false);
+  const [isPunished, setIsPunished] = useState(false);
+  const [nextStepBecameFreeAt, setNextStepBecameFreeAt] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const npcIdRef = useRef(0);
   const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const previousNextOccupied = useRef(true);
   const isPaused = !isGameStarted || gameOver || gameWon || timeOut || isFinishing;
+  const BASE_JUMP_COOLDOWN = 500;
+  const FOLLOW_JUMP_COOLDOWN = 200;
+  const RECENT_FREE_THRESHOLD = 300;
+  // Auto detoggle when sprint <=0
+  useEffect(() => {
+    if (sprint <= 0 && isSprintKeyDown) {
+      setIsSprintKeyDown(false);
+    }
+  }, [sprint, isSprintKeyDown]);
+  // Monitor when next step becomes free
+  useEffect(() => {
+    const nextStep = userStep + 1;
+    const isNextOccupied = npcs.some(n => n.currentStep === nextStep && !n.isFinishing && !n.isGhost);
+    if (!isNextOccupied && previousNextOccupied.current) {
+      setNextStepBecameFreeAt(Date.now());
+    }
+    previousNextOccupied.current = isNextOccupied;
+  }, [userStep, npcs]);
   // RESIZE HANDLING
   useEffect(() => {
     const updateDimensions = () => {
@@ -153,6 +180,10 @@ export default function ElevatorGame() {
   useEffect(() => {
     if (isPaused || !hasMoved) return;
     const currentFloor = Math.floor(userStep / stepsPerFloor);
+    const applyJamBonus = () => {
+      setTrafficJam(true);
+      setSprint(prev => Math.min(5, prev + 3)); // Bonus +3 sprintu przy zatorze
+    };
     if ((currentFloor === 2 || currentFloor === 4) && !triggeredFloors.includes(currentFloor)) {
       setTrafficJam(true);
       setTriggeredFloors(prev => [...prev, currentFloor]);
@@ -183,11 +214,100 @@ export default function ElevatorGame() {
       }
     }
   }, [x, y, isGameStarted, cell, isMobile, virtualMapWidth]);
+  // Sprint charging
+  useEffect(() => {
+    if (isPaused || !hasMoved) return;
+    const interval = setInterval(() => {
+      setSprint(prev => Math.min(5, prev + 1));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isPaused, hasMoved]);
+  // Key listeners for sprint (bypass)
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+        setIsSprintKeyDown(true);
+      }
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+        setIsSprintKeyDown(false);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keyup', onKeyUp);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('keyup', onKeyUp);
+    };
+  }, []);
+  // Bypass logic when holding shift
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+
+    // Jeśli sprint jest włączony, nie mamy kary i gra trwa
+    if (isSprintKeyDown && !isPaused && !isPunished && isGameStarted && isReady && canJump) {
+      intervalId = setInterval(() => {
+        // Jeśli energia się skończyła - WYŁĄCZ TOGGLE i nie pozwól na ruch
+        if (sprint <= 0) {
+          setIsSprintKeyDown(false);
+          return;
+        }
+
+        const currentStep = userStep;
+        const nextStep = currentStep + 1;
+
+        // Meta
+        if (nextStep >= starStep) {
+          const p = getPosForStep(nextStep, segments);
+          setX(p.x); setY(p.y); setUserStep(nextStep);
+          setStarCollected(true); setIsFinishing(true);
+          setTimeout(() => setGameWon(true), 800);
+          return;
+        }
+
+        // Sprawdź kolizję i zamianę miejscami
+        const collidingNpc = npcs.find(n => n.currentStep === nextStep && !n.isFinishing && !n.isGhost);
+        if (collidingNpc) {
+          // Zamiana miejscami
+          setNpcs(prev => prev.map(n =>
+            n.id === collidingNpc.id
+              ? { ...n, currentStep: currentStep, x: getPosForStep(currentStep, segments).x, y: getPosForStep(currentStep, segments).y, isLeft: getPosForStep(currentStep, segments).isLeft }
+              : n
+          ));
+          setShowBubble(true);
+          setTimeout(() => setShowBubble(false), 500);
+        }
+
+        // AUTO-JUMP: Wykonaj skok
+        const nextPos = getPosForStep(nextStep, segments);
+        setUserStep(nextStep);
+        setX(nextPos.x);
+        setY(nextPos.y);
+        setJumpKey(prev => prev + 1);
+        setCanJump(false);
+
+        // Sprint jest mega szybki (100ms cooldown)
+        setTimeout(() => setCanJump(true), 100);
+
+        // ZUŻYCIE ENERGII: 1 punkt na każdy schodek
+        setSprint(prev => Math.max(0, prev - 1));
+
+        if (!timerActive) setTimerActive(true);
+        if (!hasMoved) setHasMoved(true);
+
+      }, 120); // Prędkość biegu
+    }
+    return () => { if (intervalId) clearInterval(intervalId); };
+  }, [isSprintKeyDown, isPaused, isPunished, isGameStarted, isReady, canJump, userStep, sprint, npcs, segments]);
   const handleJump = () => {
     if (isGameStarted && isReady && canJump && !isPaused) {
       if (!timerActive) setTimerActive(true);
       if (!hasMoved) setHasMoved(true);
+
       const nextStep = userStep + 1;
+
+      // Meta
       if (nextStep >= starStep) {
         const p = getPosForStep(nextStep, segments);
         setX(p.x); setY(p.y); setUserStep(nextStep);
@@ -195,12 +315,44 @@ export default function ElevatorGame() {
         setTimeout(() => setGameWon(true), 800);
         return;
       }
-      if (npcs.some(n => n.currentStep === nextStep && !n.isFinishing && !n.isGhost)) { setGameOver(true); return; }
+
+      // Sprawdzanie kolizji
+      const npcAtNextStep = npcs.some(n => n.currentStep === nextStep && !n.isFinishing && !n.isGhost);
+
+      if (npcAtNextStep) {
+        // Jeśli mamy sprint i trzymamy shift - ZAMIANA MIEJSCAMI
+        if (isSprintKeyDown && sprint > 0) {
+          setSprint(prev => prev - 1);
+          const collidingNpc = npcs.find(n => n.currentStep === nextStep && !n.isFinishing && !n.isGhost);
+          if (collidingNpc) {
+            setNpcs(prev => prev.map(n =>
+              n.id === collidingNpc.id
+                ? { ...n, currentStep: userStep, x: getPosForStep(userStep, segments).x, y: getPosForStep(userStep, segments).y, isLeft: getPosForStep(userStep, segments).isLeft }
+                : n
+            ));
+          }
+          setShowBubble(true);
+          setTimeout(() => setShowBubble(false), 800);
+        } else {
+          // SPEEDRUN MODE: Zamiast porażki, dajemy agresywny feedback
+          setCollisionError(true);
+          setTimeout(() => setCollisionError(false), 300);
+          return;
+        }
+      }
+
+      // Wykonanie skoku (tylko jeśli nie było return wyżej)
       const nextPos = getPosForStep(nextStep, segments);
-      setUserStep(nextStep); setX(nextPos.x); setY(nextPos.y);
-      setJumpKey(prev => prev + 1); setCanJump(false);
-      setLastUserMoveTime(Date.now());
-      setTimeout(() => setCanJump(true), 400);
+      setUserStep(nextStep);
+      setX(nextPos.x);
+      setY(nextPos.y);
+      setJumpKey(prev => prev + 1);
+      setCanJump(false);
+      const now = Date.now();
+      setLastUserMoveTime(now);
+      const becameFreeRecently = now - nextStepBecameFreeAt < RECENT_FREE_THRESHOLD;
+      const cooldown = becameFreeRecently ? FOLLOW_JUMP_COOLDOWN : BASE_JUMP_COOLDOWN;
+      setTimeout(() => setCanJump(true), cooldown);
     }
   };
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -227,6 +379,7 @@ export default function ElevatorGame() {
   useEffect(() => {
     if (isPaused || !hasMoved) return;
     const moveInterval = setInterval(() => {
+      if (isSprintKeyDown && sprint > 0) return;
       setNpcs(prev => {
         const occupied = new Set(prev.map(n => n.currentStep));
         occupied.add(userStep);
@@ -241,6 +394,7 @@ export default function ElevatorGame() {
           const isBoosted = isLastRound && !trafficJam && npc.currentStep < avgLastRoundStep - 3;
           const effectiveSpeed = isBoosted ? 400 : npc.speed;
           if (npc.isFinishing) return npc;
+          if (isBypassing) return npc;
           if (now - npc.lastMoveTime < effectiveSpeed) return npc;
           const nextStep = npc.currentStep + 1;
           const isAtExit = npc.currentStep >= npc.exitStep;
@@ -259,7 +413,7 @@ export default function ElevatorGame() {
       });
     }, 100);
     return () => clearInterval(moveInterval);
-  }, [isPaused, hasMoved, trafficJam, userStep, segments]);
+  }, [isPaused, hasMoved, trafficJam, userStep, segments, isBypassing]);
   useEffect(() => {
     if (isGameStarted && !initialSpawnDone && segments.length > 0) {
       const newNpcs = [];
@@ -276,9 +430,12 @@ export default function ElevatorGame() {
           npcType: npcType
         };
       };
-      [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].forEach(i => newNpcs.push(createNpc(i, stepsPerFloor * 4)));
-      [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29].forEach(i => newNpcs.push(createNpc(i, stepsPerFloor * 3)));
-      [32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45].forEach(i => newNpcs.push(createNpc(i, stepsPerFloor * 4)));
+      for (let i = 5; i < 3 * stepsPerFloor; i++) {
+        const currentFloor = Math.floor(i / stepsPerFloor);
+        const exitFloor = Math.floor(Math.random() * (5 - currentFloor)) + currentFloor + 1;
+        const exitStep = exitFloor * stepsPerFloor;
+        newNpcs.push(createNpc(i, exitStep));
+      }
       [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61].forEach(i => newNpcs.push(createNpc(i, stepsPerFloor * 5)));
       setNpcs(newNpcs);
       setInitialSpawnDone(true);
@@ -311,10 +468,14 @@ export default function ElevatorGame() {
     setUserStep(0); setX(startPos.x); setY(startPos.y);
     setGameOver(false); setGameWon(false); setTimeOut(false); setIsFinishing(false);
     setJumpKey(0); setNpcs([]); setInitialSpawnDone(false);
-    setIsReady(false); setHasMoved(false); setStarCollected(false); setTimeLeft(120);
+    setIsReady(false); setHasMoved(false); setStarCollected(false); setTimeLeft(60);
     setTimerActive(false); setTriggeredFloors([]); setRandomJamCount(0);
     setTrafficJam(false); setLastUserMoveTime(Date.now());
     setSpawnedFloor1(false);
+    setSprint(0);
+    setIsSprintKeyDown(false);
+    setIsBypassing(false);
+    setShowBubble(false);
     if (contentRef.current) contentRef.current.style.transform = 'translate3d(0px, 0px, 0px)';
   };
   const currentFloor = Math.floor(userStep / stepsPerFloor);
@@ -324,6 +485,8 @@ export default function ElevatorGame() {
   const stairWidth = stairWidthRatio * virtualMapWidth;
   const leftWallX = centerX - stairWidth / 2 - 100;
   const rightWallX = centerX + stairWidth / 2 + 100;
+  const statusText = isPaused ? "STOP" : isBypassing ? "OMIJANIE" : trafficJam ? "ZATOR" : "PŁYNNY";
+  const statusColor = isPaused ? "slate" : isBypassing ? "yellow" : trafficJam ? "red" : "green";
   return (
     <div className="relative w-full h-screen overflow-hidden bg-slate-950 font-sans text-slate-50">
       {!isMobile && (
@@ -331,19 +494,24 @@ export default function ElevatorGame() {
           <div className="pt-8">
             <div className="mb-6 text-center bg-primary/10 p-4 rounded-2xl border border-primary/20">
               <GraduationCap className="w-10 h-10 text-primary mx-auto mb-1 animate-bounce" />
-              <h2 className="text-lg font-black uppercase italic tracking-tighter">System HR</h2>
+              <h2 className="text-lg font-black uppercase italic tracking-tighter">Podczas Przerwy...</h2>
             </div>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className={`p-4 rounded-xl border-2 flex flex-col items-center justify-center transition-all ${isPaused ? 'bg-slate-800 border-white/10' : (trafficJam ? 'bg-red-500/20 border-red-500' : 'bg-green-500/20 border-green-500')}`}>
-                  <Activity className={`w-5 h-5 mb-1 ${trafficJam ? 'text-red-500' : 'text-green-500'}`} />
+              <div className="grid grid-cols-3 gap-3">
+                <div className={`p-4 rounded-xl border-2 flex flex-col items-center justify-center transition-all bg-${statusColor}-500/20 border-${statusColor}-500`}>
+                  <Activity className={`w-5 h-5 mb-1 text-${statusColor}-500`} />
                   <span className="text-[10px] uppercase font-bold opacity-70">Status</span>
-                  <div className="font-black text-sm">{isPaused ? "STOP" : (trafficJam ? "ZATOR" : "PŁYNNY")}</div>
+                  <div className="font-black text-sm">{statusText}</div>
                 </div>
                 <div className="p-4 rounded-xl border-2 border-primary/40 bg-primary/10 flex flex-col items-center justify-center">
                   <Target className="w-5 h-5 mb-1 text-primary" />
                   <span className="text-[10px] uppercase font-bold opacity-70">Cel</span>
                   <div className="font-black text-sm">PIĘTRO {targetFloor}</div>
+                </div>
+                <div className="p-4 rounded-xl border-2 border-yellow-500/40 bg-yellow-500/10 flex flex-col items-center justify-center">
+                  <Zap className="w-5 h-5 mb-1 text-yellow-500" />
+                  <span className="text-[10px] uppercase font-bold opacity-70">Sprint</span>
+                  <div className="font-black text-sm">{sprint}</div>
                 </div>
               </div>
               <div className="p-4 rounded-xl border-2 border-purple-500/40 bg-purple-500/10 flex flex-col items-center justify-center">
@@ -361,7 +529,10 @@ export default function ElevatorGame() {
                 </div>
               </div>
               <div className="bg-white/5 p-5 rounded-2xl border border-white/10 text-sm opacity-80">
-                Opis gry: Wspinaj się po schodach, skacząc spacją, unikaj kolizji z NPC. Dotrzyj do gwiazdy na piętrze 5 przed upływem czasu.
+                Zegar tyka! Masz tylko minutę, by dotrzeć do pracowni na <span className="text-primary font-bold">5. piętrze</span>.
+                  Używaj <span className="font-bold text-white">Spacji</span>, aby skakać po schodach, ale gdy drogę zablokuje Ci tłum – użyj <span className="font-bold text-yellow-500 text-xs uppercase">Shiftu</span>.
+                  <br /><br />
+                  Sprint pozwala Ci <span className="italic text-yellow-400">przepychać innych uczniów</span> i biec przed siebie, ale zużywa energię, która regeneruje się tylko podczas zwykłego ruchu. Zarządzaj energią mądrze, omijaj zatory i dotknij <span className="text-yellow-500 font-bold underline">gwiazdy</span>, zanim zadzwoni dzwonek!
               </div>
             </div>
           </div>
@@ -390,7 +561,7 @@ export default function ElevatorGame() {
               const stepFull = (f + 1) * stepsPerFloor;
               const posFull = getPosForStep(stepFull, segments);
               const floorTop = posFull.y + cell / 2;
-              const floorWidth = isMobile ? mapWidth : virtualMapWidth;
+              const floorWidth = virtualMapWidth;
               const wallWidth = 24;
               const wallHeight = '200%';
               return (
@@ -403,7 +574,7 @@ export default function ElevatorGame() {
                       top: floorTop,
                       width: floorWidth,
                       height: cell,
-                      background: '#020617',
+                      background: '#c2c1a8',
                       zIndex: 1,
                     }}
                   />
@@ -457,7 +628,7 @@ export default function ElevatorGame() {
                       top: posHalf.y + cell / 2,
                       width: smallWidth,
                       height: cell / 2,
-                      background: "linear-gradient(to bottom, #111827, #020617)",
+                      background: "#c2c1a8",
                       zIndex: 2,
                     }}
                   />
@@ -475,9 +646,9 @@ export default function ElevatorGame() {
                       position: "absolute",
                       left: 0,
                       top: floorTop,
-                      width: isMobile ? '100%' : '200%',
+                      width: virtualMapWidth,
                       height: '100%',
-                      background: "linear-gradient(to bottom, #111827, #020617)",
+                      background: "linear-gradient(to bottom, #1f2937, #000000)",
                       zIndex: 2,
                     }}
                   />
@@ -497,7 +668,7 @@ export default function ElevatorGame() {
                       top: floorTop,
                       width: isMobile ? '100%' : '200%',
                       height: cell,
-                      background: '#020617',
+                      background: '#c2c1a8',
                       zIndex: 1,
                     }}
                   />
@@ -535,6 +706,20 @@ export default function ElevatorGame() {
                 style={{ left: 'calc(50% - 8px)' }}
               />
               <img src={isFinishing ? user_to_right : (segments[Math.floor(userStep/stepsPerSegment)]?.isLeft ? user_to_left : user_to_right)} alt="hero" style={{ width: heroWidth, height: heroHeight }} />
+              <AnimatePresence>
+                {showBubble && (
+                  <motion.div
+                    key="bubble"
+                    className="absolute -top-20 left-1/2 transform -translate-x-1/2 bg-white text-black px-4 py-2 rounded-full text-xs font-bold shadow-md whitespace-nowrap"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    Przepraszam, sorry!
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
             {/* NPCs - SKOK Z KODU B */}
             {npcs.map((npc) => (
@@ -564,8 +749,11 @@ export default function ElevatorGame() {
           <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-[100]">
             {isMobile ? (
               <Card className="w-4/5 max-w-md p-6 bg-slate-800/90 border border-primary/30 rounded-2xl shadow-2xl">
-                <h2 className="text-2xl font-black uppercase italic tracking-tighter text-primary mb-4 text-center">System HR</h2>
-                <p className="text-white/90 mb-6 text-center">Wspinaj się po schodach, dotykając ekranu, unikaj kolizji z NPC. Dotrzyj do gwiazdy na piętrze 5 przed upływem czasu.</p>
+                <h2 className="text-2xl font-black uppercase italic tracking-tighter text-primary mb-4 text-center">Podczas Przerwy...</h2>
+                <p className="text-white/90 mb-6 text-center">Zegar tyka! Masz tylko minutę, by dotrzeć do pracowni na <span className="text-primary font-bold">5. piętrze</span>.
+                                                                <span className="font-bold text-white"> Klikaj w ekran albo używaj przycisku na dole</span>, aby skakać po schodach, ale gdy uzbierasz energię – użyj <span className="font-bold text-yellow-500 text-xs uppercase">przycisku pioruna na dole</span>.
+                                                                <br /><br />
+                                                                Sprint pozwala Ci <span className="italic text-yellow-400">przepychać innych uczniów</span> i biec przed siebie, ale zużywa energię, która regeneruje się tylko podczas zwykłego ruchu. Zarządzaj energią mądrze, omijaj zatory i dotknij <span className="text-yellow-500 font-bold underline">gwiazdy</span>, zanim zadzwoni dzwonek!</p>
                 <Button onClick={() => setIsGameStarted(true)} className="w-full h-12 bg-primary text-xl font-black uppercase italic tracking-tighter">Graj</Button>
               </Card>
             ) : (
@@ -576,24 +764,106 @@ export default function ElevatorGame() {
       </Card>
       {/* MOBILE BOTTOM UI */}
       {isMobile && (
-        <div className="fixed bottom-0 left-0 w-full bg-slate-900/95 border-t border-white/10 z-50 p-4 flex justify-around items-center text-sm">
-          <div className="flex flex-col items-center">
-            <Activity className={`w-5 h-5 ${trafficJam ? 'text-red-500' : 'text-green-500'}`} />
-            <span className="font-bold">{trafficJam ? "ZATOR" : "PŁYNNY"}</span>
+        <>
+          {/* AGRESYWNY PRZYCISK ZAP (SPRINT) */}
+          <div className="fixed bottom-24 right-6 z-[100] pointer-events-none">
+            <motion.button
+              className={`w-20 h-20 rounded-full border-4 flex flex-col items-center justify-center pointer-events-auto shadow-2xl transition-colors
+                ${isSprintKeyDown ? 'bg-yellow-500 border-yellow-200 shadow-yellow-500/50' :
+                  sprint > 0 ? 'bg-slate-800/90 border-yellow-500 text-yellow-500' : 'bg-slate-900 border-slate-700 text-slate-700'}
+              `}
+              // Trzęsienie przy braku energii
+              animate={isPunished ? { x: [-5, 5, -5, 5, 0], rotate: [-10, 10, -10, 10, 0] } : {}}
+              transition={{ duration: 0.1, repeat: 10 }}
+
+              onPointerDown={(e) => {
+                e.preventDefault();
+                if (isPunished) return;
+
+                if (!isSprintKeyDown && sprint <= 0) {
+                  setIsPunished(true);
+                  setTimeout(() => setIsPunished(false), 1500);
+                } else {
+                  setIsSprintKeyDown(!isSprintKeyDown);
+                }
+              }}
+            >
+              <Zap className={`w-8 h-8 ${isSprintKeyDown ? 'fill-black text-black' : ''}`} />
+              <span className="text-[10px] font-black uppercase leading-none mt-1">
+                {isPunished ? "STUN!" : isSprintKeyDown ? "ON" : "ZAP"}
+              </span>
+            </motion.button>
+
+            {/* PASEK PROGRESU ENERGII (WOKÓŁ PRZYCISKU) */}
+            <svg className="absolute top-0 left-0 w-20 h-20 -rotate-90 pointer-events-none">
+              <circle
+                cx="40" cy="40" r="36"
+                fill="transparent"
+                stroke="white"
+                strokeOpacity="0.1"
+                strokeWidth="4"
+              />
+              <motion.circle
+                cx="40" cy="40" r="36"
+                fill="transparent"
+                stroke="#eab308"
+                strokeWidth="4"
+                strokeDasharray="226.2"
+                animate={{ strokeDashoffset: 226.2 - (226.2 * sprint) / 10 }}
+              />
+            </svg>
           </div>
-          <div className="flex flex-col items-center">
-            <Target className="w-5 h-5 text-primary" />
-            <span className="font-bold">Cel: {targetFloor}</span>
+
+          {/* PRZYCISK SKOKU (LEWA STRONA) */}
+          <div className="fixed bottom-24 left-6 z-[100] pointer-events-none">
+             <button
+               className={`w-20 h-20 rounded-full bg-white/10 border-4 border-white/20 backdrop-blur-md flex items-center justify-center pointer-events-auto active:scale-90 transition-transform ${isPunished ? 'opacity-20' : 'opacity-100'}`}
+               onPointerDown={(e) => { e.preventDefault(); handleJump(); }}
+             >
+               <Activity className="text-white w-10 h-10" />
+             </button>
           </div>
-          <div className="flex flex-col items-center">
-            <MapPinIcon className="w-5 h-5 text-purple-500" />
-            <span className="font-bold">Piętro: {currentFloorDisplay}</span>
+
+          {/* PASEK STATYSTYK (POPRAWIONY) */}
+          <div className="fixed bottom-0 left-0 w-full bg-slate-950/95 backdrop-blur-xl border-t border-white/10 z-50 p-4 flex justify-between items-center h-20 px-6">
+
+            {/* LEWA: PIĘTRO I STATUS */}
+            <div className="flex gap-4 items-center">
+              <div className="flex flex-col items-center">
+                <MapPinIcon className="w-5 h-5 text-purple-500" />
+                <span className="font-bold text-[10px] text-slate-400">P: {currentFloorDisplay}</span>
+              </div>
+            </div>
+
+            {/* ŚRODEK: TIMER (GŁÓWNY ELEMENT) */}
+            <div className="absolute left-1/2 -translate-x-1/2">
+              <div className="bg-white/5 px-6 py-2 rounded-2xl border border-white/10 flex items-center gap-3 shadow-[0_0_15px_rgba(255,255,255,0.05)]">
+                <Clock className={`w-5 h-5 ${timeLeft < 20 ? 'text-red-500 animate-pulse' : 'text-primary'}`} />
+                <span className="font-black text-2xl tabular-nums tracking-tight">
+                  {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+                </span>
+              </div>
+            </div>
+
+            {/* PRAWA: CEL */}
+            <div className="flex flex-col items-center">
+              <Target className="w-5 h-5 text-primary" />
+              <span className="font-bold text-[10px] text-slate-400">CEL: {targetFloor}</span>
+            </div>
+
+            {/* OVERLAY KARY (STUN) */}
+            <AnimatePresence>
+              {isPunished && (
+                <motion.div
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-red-900/40 backdrop-blur-sm flex items-center justify-center z-[60]"
+                >
+                  <span className="text-white font-black italic tracking-widest animate-ping">ZADYSZKA!</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-          <div className="flex items-center gap-2">
-            <Clock className={`w-5 h-5 ${timeLeft < 20 ? 'text-red-500 animate-pulse' : 'text-primary'}`} />
-            <span className="font-black">{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
-          </div>
-        </div>
+        </>
       )}
       {(gameOver || gameWon || timeOut) && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-950/95 text-white z-[200] p-4 sm:p-12 text-center">
