@@ -231,7 +231,7 @@ function CodeBlock({ text, origin, index, dragId, isGhost }: any) {
   );
 }
 
-/* ----------------- RowSlot (dropped directly into numbered rows) ----------------- */
+/* ----------------- Drag and drop mechanizm ----------------- */
 function RowSlot({ rowIndex, value, onDropToRow, onSwapRows, highlight }: any) {
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: ItemTypes.BLOCK,
@@ -276,7 +276,7 @@ function RowSlot({ rowIndex, value, onDropToRow, onSwapRows, highlight }: any) {
   );
 }
 
-/* ----------------- MiniGame component (in-editor dragging only) ----------------- */
+/* ----------------- KOMPONENT MINIGRY ----------------- */
 function MiniGame({ onFinish, addScore }: { onFinish: () => void, addScore: (points: number) => void }) {
   return (
       <DndProvider backend={HTML5Backend}>

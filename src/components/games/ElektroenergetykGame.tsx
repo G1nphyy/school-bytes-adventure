@@ -92,8 +92,9 @@ const quizQuestions = [
   },
 ] as const;
 
-/* ----------------- ETAP 2: DIAGNOSTYKA OBWODU (PRAWIE OHMA) ----------------- */
+/* ----------------- ETAP 2: DIAGNOSTYKA OBWODU (PRAW0 OHMA) ----------------- */
 function DiagnosticMathGame({ onFinish, addScore }: { onFinish: () => void; addScore: (points: number) => void }) {
+    // system kar – w energetyce błąd kosztuje, więc tutaj uciekają punkty.
   const [maxStagePoints, setMaxStagePoints] = useState(80);
   const [userInput, setUserInput] = useState("");
   const [status, setStatus] = useState<"idle" | "error" | "success">("idle");
@@ -178,8 +179,11 @@ function ShuffledTrakcjaGame({ onFinish, addScore }: { onFinish: () => void; add
   ];
 
   // Losowa kolejność przycisków na ekranie
+  // useMemo - przyciski nie latają po ekranie
   const shuffledButtons = useMemo(() => [...elements].sort(() => Math.random() - 0.5), []);
 
+// sprawdza, czy gracz klika elementy w kolejności technologicznej:
+  // Podstacja -> Linia zasilająca -> Sieć jezdna -> Pociąg.
   const handleElementClick = (id: number) => {
     if (status !== "idle" || activatedIds.includes(id)) return;
 
@@ -250,6 +254,8 @@ export default function ElektroenergetykGame() {
   const [locked, setLocked] = useState(false);
   const [summaryIndex, setSummaryIndex] = useState(0);
 
+// summaryIndex pozwala nam dynamicznie przełączać opisy,
+// żeby nie zasypać użytkownika ścianą tekstu na jednym ekranie.
   const reasons = [
     { title: "Deficyt Specjalistów", text: "Brakuje tysięcy pracowników w sektorze energetycznym i kolejowym. To gwarancja stabilnej pracy i wysokich zarobków tuż po szkole.", icon: HardHat },
     { title: "Współpraca z KW", text: "Szkoła współpracuje z Kolejami Wielkopolskimi. Najlepsi uczniowie mają szansę na stypendia i pewny start zawodowy w Poznaniu.", icon: TrainFront },
@@ -259,6 +265,8 @@ export default function ElektroenergetykGame() {
 
   const q = quizQuestions[qIndex];
 
+ // Mechanizm blokady, żeby uczeń nie mógł "wyklikać" wszystkich odpowiedzi na raz
+  // zanim system (i animacja) przetworzy wynik.
   const handleSingleChoice = (answerId: string) => {
     if (showResult || locked) return;
     setAnswers(prev => ({ ...prev, [q.id]: answerId }));

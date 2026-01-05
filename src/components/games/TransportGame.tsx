@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+// Import ikony z lucide-react
 import {
   CheckCircle2, XCircle, Train as TrainIcon, GraduationCap,
   Map as MapIcon, ShieldCheck, Lightbulb, HelpCircle, Info
@@ -58,6 +59,7 @@ levels.forEach(levelObj => {
   levelObj.map[levelObj.start.y][levelObj.start.x + 2 ] = "S";
 });
 
+/* --- Baza Pytań --- */
 const railwayQuestions = [
   {
     question: "Jaki jest standardowy rozstaw szyn w Polsce na liniach magistralnych?",
@@ -145,6 +147,7 @@ const railwayQuestions = [
   }
 ];
 
+/* --- GŁÓWNY KOMPONENT --- */
 export default function TransportGame() {
   const [levelIndex, setLevelIndex] = useState(0);
   const [level, setLevel] = useState(levels[0].map.map(row => [...row]));
@@ -182,6 +185,7 @@ export default function TransportGame() {
     }
   }, [levelIndex]);
 
+// Obsługa wyboru kierunku
   const chooseDirection = (rx, ry) => {
     setActiveSwitch({ rx, ry });
   };
@@ -201,7 +205,7 @@ export default function TransportGame() {
     setShowUsefulness(false);
     setIsQuizActive(true);
   };
-
+  // Obsługa pytań
   const handleQuizAnswer = (optionIndex) => {
     if (optionIndex === quizQuestion.correct) {
       setQuizFeedback({ ok: true, msg: "Poprawnie! Kierunek ustawiony." });
@@ -220,14 +224,14 @@ export default function TransportGame() {
       }, 1500);
     }
   };
-
+  // Podpowiedzi
   const applyHint = () => {
     if (!showHint && score >= 2) {
       setScore(prev => prev - 2);
       setShowHint(true);
     }
   };
-
+  // Restart gry
   const resetGame = (newLevelIndex = 0, fullReset = true) => {
     const nextLvl = levels[newLevelIndex];
     setLevelIndex(newLevelIndex);
@@ -243,7 +247,7 @@ export default function TransportGame() {
     setActiveSwitch(null);
     if (fullReset) setScore(0);
   };
-
+  // Przejście do następnego levelu
   const nextLevel = () => {
     if (levelIndex + 1 < levels.length) {
       resetGame(levelIndex + 1, false);
@@ -252,6 +256,7 @@ export default function TransportGame() {
     }
   };
 
+// Poruszanie ciuchci
   const autoMove = () => {
     if (!isGameStarted || gameOver || gameWon || isQuizActive) return;
 
@@ -488,7 +493,7 @@ export default function TransportGame() {
                 style={{
                   width: mapWidth * cell,
                   height: mapHeight * cell,
-                  backgroundImage: `url(${ground})`, // Tło ziemi jako powtarzalny obrazek
+                  backgroundImage: `url(${ground})`, // Tło ziemi powtarzalne
                   backgroundSize: `${cell}px ${cell}px`
                 }}
             >

@@ -89,13 +89,11 @@ export default function ElevatorGame() {
   const BASE_JUMP_COOLDOWN = 500;
   const FOLLOW_JUMP_COOLDOWN = 200;
   const RECENT_FREE_THRESHOLD = 300;
-  // Auto detoggle when sprint <=0
   useEffect(() => {
     if (sprint <= 0 && isSprintKeyDown) {
       setIsSprintKeyDown(false);
     }
   }, [sprint, isSprintKeyDown]);
-  // Monitor when next step becomes free
   useEffect(() => {
     const nextStep = userStep + 1;
     const isNextOccupied = npcs.some(n => n.currentStep === nextStep && !n.isFinishing && !n.isGhost);
@@ -104,7 +102,6 @@ export default function ElevatorGame() {
     }
     previousNextOccupied.current = isNextOccupied;
   }, [userStep, npcs]);
-  // RESIZE HANDLING
   useEffect(() => {
     const updateDimensions = () => {
       if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current);
@@ -176,7 +173,7 @@ export default function ElevatorGame() {
       setStarStep(5 * stepsPerFloor);
     }
   }, [virtualMapWidth, cell]);
-  // Traffic Jam Logic
+  // LOGIKA KORKU
   useEffect(() => {
     if (isPaused || !hasMoved) return;
     const currentFloor = Math.floor(userStep / stepsPerFloor);
@@ -201,7 +198,7 @@ export default function ElevatorGame() {
     const t = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
     return () => clearInterval(t);
   }, [timerActive, isPaused, timeLeft]);
-  // Camera follow
+  // KAMERA PODĄŻAJĄCA ZA GRACZEM
   useEffect(() => {
     if (contentRef.current && scrollContainerRef.current && isGameStarted) {
       const viewW = scrollContainerRef.current.clientWidth;
@@ -214,7 +211,7 @@ export default function ElevatorGame() {
       }
     }
   }, [x, y, isGameStarted, cell, isMobile, virtualMapWidth]);
-  // Sprint charging
+  // ŁADOWANIE SPRINTU
   useEffect(() => {
     if (isPaused || !hasMoved) return;
     const interval = setInterval(() => {
@@ -222,7 +219,6 @@ export default function ElevatorGame() {
     }, 3000);
     return () => clearInterval(interval);
   }, [isPaused, hasMoved]);
-  // Key listeners for sprint (bypass)
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
@@ -241,7 +237,6 @@ export default function ElevatorGame() {
       document.removeEventListener('keyup', onKeyUp);
     };
   }, []);
-  // Bypass logic when holding shift
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
 
@@ -334,7 +329,7 @@ export default function ElevatorGame() {
           setShowBubble(true);
           setTimeout(() => setShowBubble(false), 800);
         } else {
-          // SPEEDRUN MODE: Zamiast porażki, dajemy agresywny feedback
+          // SPEEDRUN MODE
           setCollisionError(true);
           setTimeout(() => setCollisionError(false), 300);
           return;
