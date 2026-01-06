@@ -465,7 +465,7 @@ export default function DSDGame() {
             ) : gameStarted && !showDialog ? (
               showResult ? (
                 <div className="w-full h-full flex flex-col py-4">
-                  <div className="flex flex-col space-y-4 cursor-grab overflow-y-auto scrollbar-hide p-2">
+                  <div className="flex flex-col space-y-4 overflow-y-auto scrollbar-hide p-2">
                     <AnimatePresence>
                     {[...bots, { name: 'Ty', score: playerScore, answered: 6, finishedAt: playerFinishedAt }]
                       .sort(sortParticipants)
