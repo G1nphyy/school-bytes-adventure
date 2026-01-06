@@ -483,7 +483,7 @@ export default function ElevatorGame() {
   const statusText = isPaused ? "STOP" : isBypassing ? "OMIJANIE" : trafficJam ? "ZATOR" : "PŁYNNY";
   const statusColor = isPaused ? "slate" : isBypassing ? "yellow" : trafficJam ? "red" : "green";
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-slate-950 font-sans text-slate-50">
+    <div className="relative w-full min-h-[80vh] overflow-hidden bg-slate-950 font-sans text-slate-50">
       {!isMobile && (
         <Card className="h-screen w-[28%] fixed left-0 top-0 border-r border-white/10 bg-slate-900/95 flex flex-col p-6 z-50">
           <div className="pt-8">
