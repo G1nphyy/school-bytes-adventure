@@ -703,7 +703,21 @@ export default function ElectronicsGame() {
         <div className="space-y-3">
           {q.answers.map((a) => {
             const isSelected = (val || []).includes(a.id);
-            const containerClass = isSelected ? "border-primary bg-primary/10" : "border-border hover:border-primary/50 bg-background hover:shadow-md hover:shadow-primary/30";
+            const isCorrect = q.correct?.includes(a.id);
+            const showSuccess = showResult && isCorrect;
+            const showError = showResult && isSelected && !isCorrect;
+
+            let containerClass = isSelected ? "border-primary bg-primary/10" : "border-border hover:border-primary/50 bg-background hover:shadow-md hover:shadow-primary/30";
+
+            if (showResult) {
+              if (showSuccess) {
+                containerClass = "border-accent bg-accent/20 text-accent font-bold";
+              } else if (showError) {
+                containerClass = "border-destructive bg-destructive/20 text-destructive font-bold";
+              } else {
+                containerClass = "border-border bg-background/50 text-muted-foreground opacity-60";
+              }
+            }
 
             return (
               <div
@@ -715,8 +729,14 @@ export default function ElectronicsGame() {
                   updateAnswer(isSelected ? arr.filter((x: string) => x !== a.id) : [...arr, a.id]);
                 }}
               >
-                <Checkbox checked={isSelected} onCheckedChange={() => {}} className="data-[state=checked]:bg-primary border-primary" />
-                <span className="text-xs">{a.text}</span>
+                <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={() => {}}
+                    className={`border-primary ${showResult && isCorrect ? "data-[state=checked]:bg-accent border-accent" : ""}`}
+                />
+                <span className="text-xs flex-grow">{a.text}</span>
+                {showSuccess && <CheckCircle2 className="w-4 h-4 ml-2 shrink-0" />}
+                {showError && <XCircle className="w-4 h-4 ml-2 shrink-0" />}
               </div>
             );
           })}
@@ -726,15 +746,31 @@ export default function ElectronicsGame() {
 
     if (q.type === "short") {
       return (
-        <div className="space-y-2">
-          <Input
-            placeholder="Wpisz odpowiedź..."
-            value={val || ""}
-            onChange={(e) => updateAnswer(e.target.value)}
-            disabled={showResult}
-            className="border-2 border-primary/50 focus-visible:ring-0 focus-visible:border-primary text-lg p-6 rounded-xl"
-          />
-        </div>
+          <div className="space-y-2">
+            <Input
+                placeholder="Wpisz odpowiedź..."
+                value={val || ""}
+                onChange={(e) => updateAnswer(e.target.value)}
+                disabled={showResult}
+                className={`border-2 text-lg p-6 rounded-xl transition-all ${
+                    showResult
+                        ? feedback?.ok
+                            ? "border-accent bg-accent/10 text-accent"
+                            : "border-destructive bg-destructive/10 text-destructive"
+                        : "border-primary/50 focus-visible:ring-0 focus-visible:border-primary"
+                }`}
+            />
+            {showResult && !feedback?.ok && (
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-3 bg-accent/10 border-2 border-accent/30 rounded-lg text-accent text-sm font-bold flex items-center justify-center gap-2"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Poprawna odpowiedź: {q.correctText}
+                </motion.div>
+            )}
+          </div>
       );
     }
 

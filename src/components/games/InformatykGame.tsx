@@ -4,6 +4,15 @@ import { Card } from "@/components/ui/card";
 import { Shield, Cable, CheckCircle2, XCircle, Lightbulb, Cpu, MemoryStick, HardDrive, Trophy} from "lucide-react";
 import RJ45_T568B from '@/assets/Utp_T568B.gif';
 
+
+// IMPORT GRAFIK KOMPUTEROWYCH
+import MB_IMG from '@/assets/graphics/computer/motherboard.png';
+import CPU_IMG from '@/assets/graphics/computer/cpu.png';
+import RAM_IMG from '@/assets/graphics/computer/ram.png';
+import GPU_IMG from '@/assets/graphics/computer/gpu.png';
+import COOLER_IMG from '@/assets/graphics/computer/cooling.png';
+
+
 // DND IMPORTS
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -176,11 +185,11 @@ const assemblyComponents: AssemblyComponentType[] = [
 ];
 
 const assemblySlots = {
-  CPU: { type: "CPU", label: "Gniazdo Procesora" },
-  COOLER: { type: "COOLER", label: "Mocowanie Chłodzenia" },
-  RAM1: { type: "RAM", label: "Slot RAM A1" },
-  RAM2: { type: "RAM", label: "Slot RAM B1" },
-  PCIEX16: { type: "GPU", label: "Slot PCI-E x16" },
+  CPU: { type: "CPU", label: "" },
+  COOLER: { type: "COOLER", label: "" },
+  RAM1: { type: "RAM", label: "" },
+  RAM2: { type: "RAM", label: "" },
+  PCIEX16: { type: "GPU", label: "" },
 };
 
 const assemblyHintsData = [
@@ -401,21 +410,60 @@ const DraggableComponent: React.FC<DraggableComponentProps> = ({ component, curr
     }),
   }));
 
-  const ComponentIcon = component.type === 'CPU' ? Cpu : component.type === 'RAM' ? MemoryStick : component.type === 'GPU' ? HardDrive : Lightbulb;
+  const getComponentImage = () => {
+    switch (component.type) {
+      case 'CPU': return CPU_IMG;
+      case 'RAM': return RAM_IMG;
+      case 'GPU': return GPU_IMG;
+      case 'COOLER': return COOLER_IMG;
+      default: return "";
+    }
+  };
 
   return (
-      <motion.div
-          ref={drag}
-          style={{ opacity: isDragging ? 0.5 : 1, cursor: 'grab' }}
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          exit={{ scale: 0.8 }}
-          onClick={() => currentSlot && onRemove(component.id, currentSlot)}
-          className={`p-1 border-2 text-center text-[10px] transition-all flex items-center justify-center font-bold ${currentSlot ? 'absolute w-full h-full bg-accent/80 text-black border-accent' : 'bg-background hover:border-primary'}`}
-      >
-        <ComponentIcon className="w-3 h-3 mr-1" />
-        {component.name}
-      </motion.div>
+      <div className={`${currentSlot ? 'absolute inset-0' : 'relative w-24 h-24'}`}>
+        {/* WARSTWA WIZUALNA: Obrazek i ramka */}
+        <motion.div
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0.8 }}
+            className={`flex flex-col items-center justify-center font-bold pointer-events-none transition-all ${
+                currentSlot
+                    ? `absolute inset-0 ${component.type === 'COOLER' ? 'z-50' : 'z-10'}`
+                    : 'absolute inset-0 border-2 border-border bg-background rounded-lg z-10'
+            }`}
+        >
+          <img
+              src={getComponentImage()}
+              alt={component.name}
+              className={`${currentSlot
+                  ? (component.type === 'COOLER'
+                      ? 'w-[250%] h-[200%] -left-[20%] -top-[85%] z-30 max-w-none max-h-none absolute -rotate-90 overflow-visible object-contain'
+                      : component.type === 'GPU'
+                          ? 'w-[120%] h-[400%] bottom-0 left-0 max-w-none max-h-none absolute object-contain'
+                          : 'w-full h-full object-fill') : 
+                          ( component.type === 'CPU'
+                              ? 'z-20'
+                              : 'w-16 h-16 mb-1 object-contain ')
+              }`}
+          />
+          {!currentSlot && <span className="text-[10px] leading-none text-center px-1">{component.name}</span>}
+        </motion.div>
+
+        {/* HITBOX / DRAG HANDLE: Teraz zawsze aktywny */}
+        <div
+            ref={drag}
+            onClick={(e) => {
+              if (currentSlot) {
+                e.stopPropagation();
+                onRemove(component.id, currentSlot);
+              }
+            }}
+            className={`absolute inset-0 z-30 cursor-grab active:cursor-grabbing rounded-lg ${
+                !currentSlot ? 'hover:border-primary border-2 border-transparent' : ''
+            }`}
+        />
+      </div>
   );
 };
 
@@ -443,21 +491,32 @@ const ComponentDropZone: React.FC<ComponentDropZoneProps> = ({ slotName, slotDat
 
   const isActive = isOver && canDrop;
 
+  // PROCENTOWE POZYCJONOWANIE - sloty pozostają w stałych miejscach
   const slotClasses = {
-    CPU: 'w-24 h-24 border-4 border-gray-700 bg-gray-900 absolute top-[25%] left-[25%]',
-    COOLER: 'w-28 h-28 border-dashed border-2 border-red-400 bg-transparent absolute top-[25%] left-[25%]',
-    RAM1: 'w-4 h-20 border-2 border-green-600 bg-gray-800 absolute top-[20%] right-[30%]',
-    RAM2: 'w-4 h-20 border-2 border-green-600 bg-gray-800 absolute top-[20%] right-[20%]',
-    PCIEX16: 'w-6 h-48 border-2 border-blue-600 bg-gray-800 absolute bottom-[15%] right-[25%]',
+    CPU: 'w-[10%] h-[21%] top-[24%] left-[46.7%] z-20',
+    COOLER: 'w-[18.5%] h-[47%] top-[12%] left-[42.5%] z-40',
+    RAM1: 'w-[2%] h-[77.5%] top-[7%] left-[66%] z-20',
+    RAM2: 'w-[2%] h-[77.5%] top-[7%] left-[70.5%] z-20',
+    PCIEX16: 'w-[35%] h-[4.5%] bottom-[0%] left-[37%] z-20',
   };
+
+  const isCooler = slotName === 'COOLER';
 
   return (
       <div
           ref={drop}
-          className={`${slotClasses[slotName as keyof typeof slotClasses]} relative transition-all duration-200 ${isActive ? 'bg-primary/30' : ''}`}
-          style={{ opacity: 1 }}
+          onClick={(e) => {
+            // Jeśli klikniesz w obszar slotu, usuwamy przypisany do niego komponent
+            if (componentId) {
+              onRemove(componentId, slotName);
+            }
+          }}
+          className={`${slotClasses[slotName as keyof typeof slotClasses]} absolute transition-all duration-200 flex items-center justify-center ${
+              isActive ? 'bg-primary/40 scale-105 border-white/40 border-2' :
+                  (componentId && isCooler ? '' : 'border-2 border-white/10 bg-black/20')
+          } ${componentId ? 'cursor-pointer hover:border-destructive/50' : ''}`}
       >
-        <span className={`text-[8px] text-muted-foreground absolute -top-4 left-0 p-1 bg-card/80 rounded-sm`}>{slotData.label}</span>
+        <span className={`text-[7px] md:text-[9px] text-white/50 absolute -top-5 left-0 uppercase font-black tracking-tighter whitespace-nowrap ${componentId && isCooler ? 'hidden' : ''}`}>{slotData.label}</span>
         {component && (
             <DraggableComponent
                 component={component}
@@ -469,7 +528,13 @@ const ComponentDropZone: React.FC<ComponentDropZoneProps> = ({ slotName, slotDat
   );
 };
 
-
+interface ComponentDropZoneProps {
+  slotName: string;
+  slotData: { type: 'CPU' | 'RAM' | 'GPU' | 'COOLER', label: string };
+  componentId: number | null;
+  onDrop: (componentId: number, targetSlotName: string, sourceSlotName: string | null) => void;
+  onRemove: (componentId: number, slotName: string) => void;
+}
 // -------------------------- GŁÓWNY KOMPONENT GRY ---------------------------------
 // Zarządzanie stanem gry
 // Każdy etap ma własną logikę punktacji, system podpowiedzi z karami punktowymi
@@ -1228,10 +1293,10 @@ const InformatykGame = () => {
     const assemblyHintsAvailable = assemblyHintsData.length;
 
     return (
-          <DndProvider backend={HTML5Backend}>
-            <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
-              <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
-                <div className="mb-6 text-center">
+        <DndProvider backend={HTML5Backend}>
+          <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
+            <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
+              <div className="mb-6 text-center">
                   <Cpu className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
               <h2 className="text-lg text-foreground mb-2">ETAP 2: MONTAŻ PC</h2>
               <p className="text-lg font-bold text-primary mb-2">Punkty: {totalScore}</p>
@@ -1240,24 +1305,33 @@ const InformatykGame = () => {
                 Pozostałe próby: {attemptsLeft > 0 ? attemptsLeft : 0}
               </p>
 
-            </div>
+              </div>
 
-            {/* Płyta Główna (Mock-up) */}
-            <div className="flex justify-center h-80 mb-8 p-4 bg-gray-600 relative border-8 border-gray-800 rounded-lg">
-              {/* Renderowanie wszystkich slotów */}
-              {Object.keys(assemblySlots).map((slotName) => (
-                  <ComponentDropZone
-                      key={slotName}
-                      slotName={slotName}
-                      slotData={assemblySlots[slotName as keyof typeof assemblySlots] as any} // Użycie 'any' dla uproszczenia
-                      componentId={componentSlots[slotName]}
-                      onDrop={handleAssemblyDrop}
-                      onRemove={handleRemoveComponent}
-                  />
-              ))}
-            </div>
 
-            {/* Dostępne Komponenty */}
+              {/* Płyta Główna (Grafika jako tło) */}
+              <div className="flex justify-center mb-8 bg-slate-950 relative border-4 md:border-8 border-slate-800 rounded-2xl overflow-hidden shadow-2xl aspect-video w-full max-w-3xl mx-auto">
+                <img
+                    src={MB_IMG}
+                    alt="Motherboard"
+                    className="absolute inset-0 w-full h-full object-contain opacity-90"
+                />
+
+                {/* Nakładka pozycjonująca (proporcje 16:9) */}
+                <div className="absolute inset-0 w-full h-full">
+                  {Object.keys(assemblySlots).map((slotName) => (
+                      <ComponentDropZone
+                          key={slotName}
+                          slotName={slotName}
+                          slotData={assemblySlots[slotName as keyof typeof assemblySlots] as any}
+                          componentId={componentSlots[slotName]}
+                          onDrop={handleAssemblyDrop}
+                          onRemove={handleRemoveComponent}
+                      />
+                  ))}
+                </div>
+              </div>
+
+              {/* Dostępne Komponenty */}
             <div className="mb-6 flex-grow">
               <p className="text-xs text-muted-foreground mb-3 text-center">
                 Dostępne podzespoły:

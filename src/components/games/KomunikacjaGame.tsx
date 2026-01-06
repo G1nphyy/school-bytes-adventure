@@ -305,31 +305,65 @@ export default function KomunikacjaGame() {
                           </Button>
                       ))}
 
-                      {q.type === "multiple" && q.answers.map(a => (
-                          <div
-                              key={a.id}
-                              onClick={() => {
-                                if (showResult) return;
-                                const prev = answers[q.id] || [];
-                                setAnswers({ ...answers, [q.id]: prev.includes(a.id) ? prev.filter((x: any) => x !== a.id) : [...prev, a.id] });
-                              }}
-                              className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer arcade-button transition-all hover:border-primary hover:shadow-md hover:shadow-primary/30 hover:bg-background ${
-                                  (answers[q.id] || []).includes(a.id) ? "border-primary bg-primary/20 shadow-md shadow-primary/30" : "border-border bg-background"
-                              } ${showResult ? "opacity-60 pointer-events-none" : ""}`}
-                          >
-                            <Checkbox checked={(answers[q.id] || []).includes(a.id)} onCheckedChange={() => {}} className="border-primary" />
-                            <span className="text-sm font-medium">{a.text}</span>
-                          </div>
-                      ))}
+                      {q.type === "multiple" && q.answers.map(a => {
+                        const isSelected = (answers[q.id] || []).includes(a.id);
+                        const isCorrect = q.correct.includes(a.id);
+                        const showSuccess = showResult && isCorrect;
+                        const showDanger = showResult && isSelected && !isCorrect;
+
+                        let stateClasses = isSelected ? "border-primary bg-primary/20 shadow-md shadow-primary/30" : "border-border bg-background";
+
+                        if (showResult) {
+                          if (showSuccess) stateClasses = "border-accent bg-accent/20 text-accent font-black";
+                          else if (showDanger) stateClasses = "border-destructive bg-destructive/20 text-destructive";
+                          else stateClasses = "opacity-40 border-border bg-background";
+                        }
+
+                        return (
+                            <div
+                                key={a.id}
+                                onClick={() => {
+                                  if (showResult) return;
+                                  const prev = answers[q.id] || [];
+                                  setAnswers({ ...answers, [q.id]: prev.includes(a.id) ? prev.filter((x: any) => x !== a.id) : [...prev, a.id] });
+                                }}
+                                className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer arcade-button transition-all hover:border-primary ${stateClasses} ${showResult ? "pointer-events-none" : ""}`}
+                            >
+                              <Checkbox
+                                  checked={isSelected}
+                                  onCheckedChange={() => {}}
+                                  className={`border-primary ${showSuccess ? "border-accent data-[state=checked]:bg-accent" : ""}`}
+                              />
+                              <span className="text-sm font-medium flex-grow">{a.text}</span>
+                              {showSuccess && <CheckCircle2 className="w-4 h-4 shrink-0" />}
+                              {showDanger && <XCircle className="w-4 h-4 shrink-0" />}
+                            </div>
+                        );
+                      })}
 
                       {q.type === "short" && (
-                          <Input
-                              placeholder="Wpisz odpowiedź..."
-                              disabled={showResult}
-                              className="h-14 text-lg font-bold border-2 border-primary/50 text-center uppercase focus-visible:ring-0 focus-visible:border-primary"
-                              value={answers[q.id] || ""}
-                              onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                          />
+                          <div className="space-y-3">
+                            <Input
+                                placeholder="Wpisz odpowiedź..."
+                                disabled={showResult}
+                                className={`h-14 text-lg font-bold border-2 text-center uppercase focus-visible:ring-0 transition-all ${
+                                    showResult
+                                        ? feedback?.ok ? "border-accent bg-accent/10 text-accent" : "border-destructive bg-destructive/10 text-destructive"
+                                        : "border-primary/50 focus-visible:border-primary"
+                                }`}
+                                value={answers[q.id] || ""}
+                                onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                            />
+                            {showResult && !feedback?.ok && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="p-3 bg-accent/10 border-2 border-accent rounded-xl text-accent text-center font-black text-sm"
+                                >
+                                  POPRAWNY SYMBOL: {q.correctText}
+                                </motion.div>
+                            )}
+                          </div>
                       )}
                     </div>
 
