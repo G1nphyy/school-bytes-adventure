@@ -1,20 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-// Import ikony z lucide-react
 import {
   CheckCircle2, XCircle, Train as TrainIcon, GraduationCap,
-  Map as MapIcon, ShieldCheck, Lightbulb, HelpCircle, Info
+  Map as MapIcon, ShieldCheck, Lightbulb, HelpCircle, Play
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Train from "@/components/ui/train";
 import rails from "@/assets/graphics/train/rail.png";
 import switchImg from "@/assets/graphics/train/switch.png";
 import switchToTop from "@/assets/graphics/train/switch_to_top.png";
 import switchToBottom from "@/assets/graphics/train/switch_to_bottom.png";
 import ground from "@/assets/graphics/train/ground.png";
-import exitLevel from "@/assets/graphics/train/exit_level.png"
-import enterLevel from "@/assets/graphics/train/enter_level.png"
+import exitLevel from "@/assets/graphics/train/exit_level.png";
+import enterLevel from "@/assets/graphics/train/enter_level.png";
 
 const cell = 85;
 const mapHeight = 10;
@@ -56,10 +55,9 @@ levels.forEach(levelObj => {
   levelObj.switches.forEach(sw => levelObj.map[sw.y][sw.x] = "T");
   levelObj.map[levelObj.end.y][levelObj.end.x] = "E";
   levelObj.points.forEach(pt => levelObj.map[pt.y][pt.x] = "P");
-  levelObj.map[levelObj.start.y][levelObj.start.x + 2 ] = "S";
+  levelObj.map[levelObj.start.y][levelObj.start.x + 2] = "S";
 });
 
-/* --- Baza Pytań --- */
 const railwayQuestions = [
   {
     question: "Jaki jest standardowy rozstaw szyn w Polsce na liniach magistralnych?",
@@ -147,8 +145,8 @@ const railwayQuestions = [
   }
 ];
 
-/* --- GŁÓWNY KOMPONENT --- */
 export default function TransportGame() {
+  const [isMobile, setIsMobile] = useState(false);
   const [levelIndex, setLevelIndex] = useState(0);
   const [level, setLevel] = useState(levels[0].map.map(row => [...row]));
   const [x, setX] = useState(levels[0].start.x * cell);
@@ -163,21 +161,25 @@ export default function TransportGame() {
   const [gameWon, setGameWon] = useState(false);
   const [score, setScore] = useState(0);
   const [isGameStarted, setIsGameStarted] = useState(false);
-  const [pointFrame, setPointFrame] = useState(0);
+  const [showIntroPopup, setShowIntroPopup] = useState(true);
 
-  // Stany quizu
   const [isQuizActive, setIsQuizActive] = useState(false);
   const [quizQuestion, setQuizQuestion] = useState(null);
   const [quizFeedback, setQuizFeedback] = useState(null);
   const [pendingDirection, setPendingDirection] = useState(null);
-  const [shuffledOptions, setShuffledOptions] = useState([]);
   const [showHint, setShowHint] = useState(false);
   const [showUsefulness, setShowUsefulness] = useState(false);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const mapWidth = level[0].length;
 
-  // Kamera: Resetowanie scrolla na start poziomu
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollLeft = 0;
@@ -185,7 +187,6 @@ export default function TransportGame() {
     }
   }, [levelIndex]);
 
-// Obsługa wyboru kierunku
   const chooseDirection = (rx, ry) => {
     setActiveSwitch({ rx, ry });
   };
@@ -193,11 +194,9 @@ export default function TransportGame() {
   const startDirectionQuiz = (dir) => {
     setPendingDirection(dir);
     const rawQuestion = railwayQuestions[Math.floor(Math.random() * railwayQuestions.length)];
-
     const correctText = rawQuestion.options[rawQuestion.correct];
     const shuffled = [...rawQuestion.options].sort(() => Math.random() - 0.5);
     const newCorrectIdx = shuffled.indexOf(correctText);
-
 
     setQuizQuestion({ ...rawQuestion, options: shuffled, correct: newCorrectIdx });
     setQuizFeedback(null);
@@ -205,7 +204,7 @@ export default function TransportGame() {
     setShowUsefulness(false);
     setIsQuizActive(true);
   };
-  // Obsługa pytań
+
   const handleQuizAnswer = (optionIndex) => {
     if (optionIndex === quizQuestion.correct) {
       setQuizFeedback({ ok: true, msg: "Poprawnie! Kierunek ustawiony." });
@@ -224,14 +223,14 @@ export default function TransportGame() {
       }, 1500);
     }
   };
-  // Podpowiedzi
+
   const applyHint = () => {
     if (!showHint && score >= 2) {
       setScore(prev => prev - 2);
       setShowHint(true);
     }
   };
-  // Restart gry
+
   const resetGame = (newLevelIndex = 0, fullReset = true) => {
     const nextLvl = levels[newLevelIndex];
     setLevelIndex(newLevelIndex);
@@ -247,7 +246,7 @@ export default function TransportGame() {
     setActiveSwitch(null);
     if (fullReset) setScore(0);
   };
-  // Przejście do następnego levelu
+
   const nextLevel = () => {
     if (levelIndex + 1 < levels.length) {
       resetGame(levelIndex + 1, false);
@@ -256,7 +255,6 @@ export default function TransportGame() {
     }
   };
 
-// Poruszanie ciuchci
   const autoMove = () => {
     if (!isGameStarted || gameOver || gameWon || isQuizActive) return;
 
@@ -289,7 +287,7 @@ export default function TransportGame() {
 
     const tile = level[gy][gx];
 
-    if ( (!transitioning && !["-", "T", "P", "E"].includes(tile) ) && !(gx >= -2 && gx <= 1) ) {
+    if ((!transitioning && !["-", "T", "P", "E"].includes(tile)) && !(gx >= -2 && gx <= 1)) {
       setGameOver(true);
       return;
     }
@@ -334,16 +332,40 @@ export default function TransportGame() {
   }, [x, y, direction, switchDirs, transitioning, targetDir, gameOver, gameWon, levelIndex, isQuizActive, isGameStarted]);
 
   return (
-      <div className="relative w-full h-[80vh] overflow-hidden bg-slate-950 font-sans text-slate-50">
+    <div className="relative w-full min-h-screen overflow-hidden bg-slate-950 font-sans text-slate-50">
+      {/* INTRO POPUP – MOBILE */}
+      {isMobile && showIntroPopup && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-slate-950/95 backdrop-blur-xl">
+          <Card className="w-full h-full mx-0 my-0 p-8 bg-slate-900 border-0 rounded-none shadow-none flex flex-col justify-between">
+            <div className="text-center">
+              <GraduationCap className="w-24 h-24 text-primary mx-auto mb-8 animate-bounce" />
+              <h2 className="text-5xl font-black uppercase tracking-tighter mb-4">Szkoła Kolejowa</h2>
+              <p className="text-2xl font-bold text-primary uppercase tracking-widest">Symulator Dyżurnego Ruchu</p>
+            </div>
 
-        {/* HUD: Punkty */}
-        <div className="fixed top-4 left-[64%] -translate-x-1/2 z-[100] pointer-events-none">
-          <div className="bg-black/60 px-8 py-3 rounded-full border-2 border-primary/30 backdrop-blur-lg flex items-center gap-4 shadow-[0_0_20px_rgba(59,130,246,0.2)]">
-            <TrainIcon className="text-primary w-6 h-6" />
-            <span className="text-2xl font-black uppercase tracking-tighter italic">Punkty: {score}</span>
-          </div>
+            <div className="space-y-6 text-left text-slate-300 text-lg leading-relaxed">
+              <p>Jesteś dyżurnym ruchu. Prowadź pociąg bezpiecznie do celu.</p>
+              <p>Kliknij zwrotnicę → wybierz kierunek → odpowiedz na pytanie.</p>
+              <p className="font-bold text-amber-400">Poprawna odpowiedź = zmiana toru</p>
+              <p className="italic text-slate-500">Zbierz punkty, unikaj wykolejenia!</p>
+            </div>
+
+            <Button
+              onClick={() => {
+                setShowIntroPopup(false);
+                setIsGameStarted(true);
+              }}
+              className="w-full h-20 text-3xl font-black uppercase bg-primary hover:bg-primary/90 shadow-2xl"
+            >
+              <Play className="w-10 h-10 mr-4" />
+              Start
+            </Button>
+          </Card>
         </div>
+      )}
 
+      {/* LEWE MENU – DESKTOP */}
+      {!isMobile && (
         <Card className="h-screen w-[28%] fixed left-0 top-0 border-r border-white/5 bg-card/95 text-card-foreground flex flex-col p-6 overflow-hidden z-20">
           <div className="pt-12 flex-1 overflow-y-auto custom-scrollbar">
             <div className="mb-8 text-center bg-primary/5 p-6 rounded-3xl border border-primary/10">
@@ -365,8 +387,8 @@ export default function TransportGame() {
                   <div className="bg-slate-900/50 p-3 rounded-xl border border-white/5">
                     <span className="block text-[9px] font-bold text-muted-foreground mb-1">STATUS:</span>
                     <span className="text-[10px] font-black text-emerald-500 uppercase flex items-center gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Operacyjny
-                  </span>
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Operacyjny
+                    </span>
                   </div>
                 </div>
               </section>
@@ -386,263 +408,285 @@ export default function TransportGame() {
             <div className="bg-muted/50 p-4 rounded-xl">
               <span className="text-[9px] font-black text-muted-foreground uppercase block mb-2">Specjalizacja:</span>
               <span className="text-xs font-bold flex items-center gap-2 text-foreground">
-              <div className="w-2 h-2 rounded-full bg-primary" />
-              Technik Transportu Kolejowego
-            </span>
+                <div className="w-2 h-2 rounded-full bg-primary" />
+                Technik Transportu Kolejowego
+              </span>
             </div>
           </div>
         </Card>
+      )}
 
-        {/* QUIZ OVERLAY */}
-        {isQuizActive && (
-            <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-in fade-in">
-              <Card className="max-w-xl w-full p-8 border-4 border-primary/30 shadow-[0_0_50px_rgba(59,130,246,0.3)] animate-in zoom-in-95 bg-slate-900 overflow-hidden relative text-white">
-                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                  <TrainIcon size={200} />
-                </div>
-
-                <div className="text-center mb-8">
-                  <div className="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-primary/20">
-                    <ShieldCheck className="text-primary w-10 h-10" />
-                  </div>
-                  <h3 className="text-3xl font-black uppercase tracking-tighter">Autoryzacja Manewru</h3>
-                  <p className="text-muted-foreground text-sm font-bold uppercase tracking-widest opacity-60">Zabezpieczenie Trasy</p>
-                </div>
-
-                <div className="space-y-6">
-                  <p className="text-xl font-bold text-center leading-tight mb-8">{quizQuestion.question}</p>
-
-                  <div className="grid gap-3">
-                    {quizQuestion.options.map((opt, i) => (
-                        <Button
-                            key={i}
-                            variant="outline"
-                            disabled={!!quizFeedback}
-                            onClick={() => handleQuizAnswer(i)}
-                            className="h-16 text-sm font-black border-2 rounded-2xl hover:bg-primary/10 transition-all whitespace-normal py-4 arcade-button"
-                        >
-                          {opt}
-                        </Button>
-                    ))}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/10">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={showHint || score < 2 || !!quizFeedback}
-                        onClick={applyHint}
-                        className="rounded-xl border-2 h-12 text-[10px] font-black uppercase"
-                    >
-                      <Lightbulb className="w-4 h-4 mr-2 text-amber-400" />
-                      Podpowiedź (-2 PKT)
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowUsefulness(!showUsefulness)}
-                        disabled={!!quizFeedback}
-                        className="rounded-xl border-2 text-[10px] font-black uppercase h-auto py-3 whitespace-normal"
-                    >
-                      <HelpCircle className="w-4 h-4 mr-2 text-blue-400" />
-                      Zastosowanie
-                    </Button>
-                  </div>
-
-                  {showHint && (
-                      <div className="p-4 bg-amber-500/10 border-2 border-amber-500/30 rounded-2xl animate-in slide-in-from-top-4">
-                        <p className="text-xs font-bold italic text-amber-200 text-center uppercase tracking-wider mb-1">Wskazówka techniczna:</p>
-                        <p className="text-sm text-center text-amber-100/80">{quizQuestion.hint}</p>
-                      </div>
-                  )}
-
-                  {showUsefulness && (
-                      <div className="p-4 bg-blue-500/10 border-2 border-blue-500/30 rounded-2xl animate-in slide-in-from-top-4">
-                        <div className="flex items-center gap-2 mb-1 justify-center">
-                          <Info size={14} className="text-blue-400" />
-                          <p className="text-xs font-black text-blue-200 uppercase">Praktyka zawodowa:</p>
-                        </div>
-                        <p className="text-sm text-center text-blue-100/80 leading-relaxed">{quizQuestion.usefulness}</p>
-                      </div>
-                  )}
-
-                  {quizFeedback && (
-                      <div className={`p-6 rounded-2xl border-4 text-center animate-in slide-in-from-bottom-4 shadow-2xl ${
-                          quizFeedback.ok ? "bg-emerald-500/20 border-emerald-500 text-emerald-400" : "bg-red-500/20 border-red-500 text-red-400"
-                      }`}>
-                        <div className="flex items-center justify-center gap-3 mb-2">
-                          {quizFeedback.ok ? <CheckCircle2 size={32} /> : <XCircle size={32} />}
-                          <span className="font-black uppercase text-xl">{quizFeedback.ok ? "Autoryzowano" : "Odrzucono"}</span>
-                        </div>
-                        <p className="text-sm font-bold uppercase tracking-widest italic">{quizFeedback.msg}</p>
-                      </div>
-                  )}
-                </div>
-              </Card>
+      {/* DOLNE MENU – MOBILE */}
+      {isMobile && isGameStarted && !gameOver && !gameWon && (
+        <div className="fixed bottom-0 left-0 right-0 z-50">
+          <div className="bg-black/80 backdrop-blur-xl border-t border-white/10 px-6 py-5 flex items-center justify-around shadow-2xl">
+            <div className="text-center">
+              <MapIcon className="w-8 h-8 text-primary mx-auto mb-1" />
+              <span className="text-xl font-black">Poziom {levelIndex + 1}</span>
             </div>
-        )}
+            <div className="text-center">
+              <TrainIcon className="w-8 h-8 text-primary mx-auto mb-1" />
+              <span className="text-2xl font-black">Punkty: {score}</span>
+            </div>
+            <div className="text-center">
+              <div className="w-4 h-4 rounded-full bg-emerald-500 animate-pulse mx-auto mb-1" />
+              <span className="text-lg font-bold text-emerald-400">Aktywny</span>
+            </div>
+          </div>
+        </div>
+      )}
 
-        {/* MAPA Z DYNAMICZNĄ SZEROKOŚCIĄ */}
-        <Card className="h-screen w-[72%] fixed right-0 top-0 border-l border-white/5 bg-slate-900 flex flex-col overflow-hidden shadow-2xl">
+      {/* MAPA */}
+      <div className={`h-screen ${isMobile ? 'w-full' : 'w-[72%] fixed right-0'} top-0 bg-slate-900 flex flex-col overflow-hidden`}>
+        <div
+          ref={scrollContainerRef}
+          className={`relative flex-1 ${isGameStarted ? 'overflow-auto' : 'overflow-hidden'} custom-scrollbar`}
+        >
           <div
-              ref={scrollContainerRef}
-              className={`relative flex-1 cursor-crosshair custom-scrollbar ${isGameStarted ? 'overflow-auto' : 'overflow-hidden'}`}
+            className="relative bg-slate-800 shadow-inner"
+            style={{
+              width: mapWidth * cell,
+              height: mapHeight * cell,
+              backgroundImage: `url(${ground})`,
+              backgroundSize: `${cell}px ${cell}px`
+            }}
           >
-            <div
-                className="relative bg-slate-800 shadow-inner rounded-sm overflow-hidden"
-                style={{
-                  width: mapWidth * cell,
-                  height: mapHeight * cell,
-                  backgroundImage: `url(${ground})`, // Tło ziemi powtarzalne
-                  backgroundSize: `${cell}px ${cell}px`
-                }}
-            >
-              {/* Renderujemy tło torów tylko dla wierszy, które je mają (znaczna poprawa wydajności) */}
-              {level.map((row, ry) => {
-                const hasRails = row.some(tile => tile === "-" || tile === "P" || tile === "T");
-                if (!hasRails) return null;
-                return (
-                    <div
-                        key={`rail-row-${ry}`}
-                        className="absolute left-0 w-full opacity-90 pointer-events-none"
-                        style={{
-                          top: ry * cell,
-                          height: cell,
-                          backgroundImage: `url(${rails})`,
-                          backgroundSize: `${cell}px ${cell}px`,
-                          backgroundRepeat: 'repeat-x'
-                        }}
-                    />
-                );
-              })}
-
-              {level.map((row, ry) =>
-                  row.map((tile, rx) => {
-                    if (tile === " " || tile === "-") return null; // NIE RENDERUJEMY PUSTYCH DIVÓW
-
-                    const key = `${rx}-${ry}`;
-                    const isSwitch = tile === "T";
-                    const switchState = switchDirs[key] || "straight";
-
-                    return (
-                        <div
-                            key={key}
-                            onClick={isSwitch ? () => chooseDirection(rx, ry) : undefined}
-                            className={
-                              isSwitch
-                                  ? "cursor-pointer transition-all border-4 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)] z-20 bg-amber-500/10"
-                                  : "z-10"
-                            }
-                            style={{
-                              width: cell,
-                              height: cell,
-                              position: "absolute",
-                              top: ry * cell,
-                              left: rx * cell,
-                            }}
-                        >
-                          {isSwitch && (
-                              <img
-                                  src={switchState === "up" ? switchToTop : switchState === "down" ? switchToBottom : switchImg}
-                                  alt="switch"
-                                  className="w-full h-full object-contain pixelated"
-                              />
-                          )}
-
-                          {tile === "P" && (
-                              <div className="w-full h-full flex items-center justify-center relative">
-                                <div className="w-6 h-6 bg-primary rounded-full border-4 border-white shadow-[0_0_20px_rgba(59,130,246,0.8)] animate-pulse" />
-                              </div>
-                          )}
-
-                          {tile === "E" && <img src={exitLevel} className="w-full h-full object-contain pixelated" />}
-                          {tile === "S" && <img src={enterLevel} className="w-full h-full object-contain pixelated" />}
-                        </div>
-                    );
-                  })
-              )}
-
-              {/* POCIĄG NA SAMYM WIERZCHU */}
-              <div className="relative z-50">
-                <Train x={x} y={y} rotation={rotation} />
-              </div>
-            </div>
-
-              {/* PANEL ZMIANY ZWROTNICY */}
-              {activeSwitch && !isQuizActive && (
+            {level.map((row, ry) => {
+              const hasRails = row.some(tile => tile === "-" || tile === "P" || tile === "T");
+              if (!hasRails) return null;
+              return (
                 <div
-                  className="absolute bg-slate-900 p-5 border-4 border-primary z-[60] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in zoom-in-95 text-white"
+                  key={`rail-row-${ry}`}
+                  className="absolute left-0 w-full opacity-90 pointer-events-none"
                   style={{
-                    top: activeSwitch.ry * cell + 40,
-                    left: activeSwitch.rx * cell,
+                    top: ry * cell,
+                    height: cell,
+                    backgroundImage: `url(${rails})`,
+                    backgroundSize: `${cell}px ${cell}px`,
+                    backgroundRepeat: 'repeat-x'
                   }}
-                >
-                  <p className="text-[10px] font-black mb-4 uppercase text-primary tracking-[0.3em] text-center border-b border-primary/20 pb-2">
-                    Przestaw:
-                  </p>
-                  <div className="flex gap-3">
-                    <Button
-                      size="sm"
-                      className="bg-emerald-600 hover:bg-emerald-700 text-xs font-black arcade-button h-12 w-20"
-                      onClick={() => startDirectionQuiz("up")}
-                    >
-                      Góra
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="bg-blue-600 hover:bg-blue-700 text-xs font-black arcade-button h-12 w-20"
-                      onClick={() => startDirectionQuiz("straight")}
-                    >
-                      Prosto
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="bg-red-600 hover:bg-red-700 text-xs font-black arcade-button h-12 w-20"
-                      onClick={() => startDirectionQuiz("down")}
-                    >
-                      Dół
-                    </Button>
+                />
+              );
+            })}
+
+            {level.map((row, ry) =>
+              row.map((tile, rx) => {
+                if (tile === " " || tile === "-") return null;
+
+                const key = `${rx}-${ry}`;
+                const isSwitch = tile === "T";
+                const switchState = switchDirs[key] || "straight";
+
+                return (
+                  <div
+                    key={key}
+                    onClick={isSwitch ? () => chooseDirection(rx, ry) : undefined}
+                    className={`
+                      ${isSwitch
+                        ? "cursor-pointer z-30 animate-pulse border-8 border-amber-400 rounded-xl shadow-[0_0_40px_rgba(251,191,36,0.9)] bg-amber-500/30"
+                        : "z-10"
+                      }
+                    `}
+                    style={{
+                      width: cell,
+                      height: cell,
+                      position: "absolute",
+                      top: ry * cell,
+                      left: rx * cell,
+                    }}
+                  >
+                    {isSwitch && (
+                      <img
+                        src={switchState === "up" ? switchToTop : switchState === "down" ? switchToBottom : switchImg}
+                        alt="switch"
+                        className="w-full h-full object-contain pixelated drop-shadow-2xl"
+                      />
+                    )}
+                    {tile === "P" && (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-6 h-6 bg-primary rounded-full border-4 border-white shadow-[0_0_20px_rgba(59,130,246,0.8)] animate-pulse" />
+                      </div>
+                    )}
+                    {tile === "E" && <img src={exitLevel} className="w-full h-full object-contain pixelated" />}
+                    {tile === "S" && <img src={enterLevel} className="w-full h-full object-contain pixelated" />}
                   </div>
-                </div>
-              )}
+                );
+              })
+            )}
+
+            <div className="relative z-50">
+              <Train x={x} y={y} rotation={rotation} />
             </div>
 
-            {!isGameStarted && (
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
-                <Button
-                  onClick={() => setIsGameStarted(true)}
-                  className="h-24 px-16 bg-primary hover:bg-primary/90 text-3xl font-black arcade-button shadow-[0_0_50px_rgba(59,130,246,0.4)] uppercase tracking-tighter italic"
+            {/* POPUP WYBORU KIERUNKU – TERAZ W PEŁNI RESPONSYWNY */}
+            <AnimatePresence>
+              {activeSwitch && !isQuizActive && (
+                <motion.div
+                  initial={{ y: 300 }}
+                  animate={{ y: 0 }}
+                  exit={{ y: 300 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  className="fixed inset-x-0 bottom-0 z-[60] px-4 pb-4"
                 >
-                  Start
+                  <div className="bg-slate-900/95 backdrop-blur-xl border-t-8 border-primary rounded-t-3xl shadow-2xl p-6">
+                    <h3 className="text-center text-2xl sm:text-3xl font-black uppercase text-primary mb-6">
+                      Wybierz kierunek zwrotnicy
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                      <Button
+                        onClick={() => startDirectionQuiz("up")}
+                        className="h-20 text-2xl font-black bg-emerald-600 hover:bg-emerald-700 shadow-lg"
+                      >
+                        ↑ Góra
+                      </Button>
+                      <Button
+                        onClick={() => startDirectionQuiz("straight")}
+                        className="h-20 text-2xl font-black bg-blue-600 hover:bg-blue-700 shadow-lg"
+                      >
+                        → Prosto
+                      </Button>
+                      <Button
+                        onClick={() => startDirectionQuiz("down")}
+                        className="h-20 text-2xl font-black bg-red-600 hover:bg-red-700 shadow-lg"
+                      >
+                        ↓ Dół
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {!isMobile && !isGameStarted && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
+              <Button
+                onClick={() => setIsGameStarted(true)}
+                className="h-24 px-16 bg-primary hover:bg-primary/90 text-3xl font-black uppercase shadow-2xl"
+              >
+                Start
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* QUIZ – TERAZ W PEŁNI RESPONSYWNY, BEZ PRZEWIJANIA W POZIOMIE */}
+      {isQuizActive && (
+        <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[200] flex items-center justify-center p-4">
+          <Card className="w-full max-w-3xl max-h-[90dvh] overflow-y-auto overflow-x-hidden bg-slate-900 border-0 rounded-2xl shadow-2xl p-6">
+            <div className="text-center mb-8">
+              <ShieldCheck className="w-16 h-16 text-primary mx-auto mb-4" />
+              <h3 className="text-3xl sm:text-4xl font-black uppercase">Autoryzacja Manewru</h3>
+            </div>
+
+            <p className="text-xl sm:text-2xl font-bold text-center mb-8 leading-relaxed break-words px-2">
+              {quizQuestion?.question}
+            </p>
+
+            <div className="grid gap-3 mb-8 px-2">
+              {quizQuestion?.options.map((opt, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  disabled={!!quizFeedback}
+                  onClick={() => handleQuizAnswer(i)}
+                  className="h-auto py-5 px-6 text-lg sm:text-xl font-bold border-4 rounded-2xl hover:bg-primary/10 break-words whitespace-normal text-left"
+                >
+                  {opt}
                 </Button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 px-2 max-w-full">
+              <Button
+                variant="outline"
+                disabled={showHint || score < 2 || !!quizFeedback}
+                onClick={applyHint}
+                className="h-auto min-w-0 py-3 px-4 text-base sm:text-lg font-black border-2 whitespace-normal break-words text-left flex items-center gap-2"
+              >
+                <Lightbulb className="w-7 h-7 flex-shrink-0 text-amber-400" />
+                <span className="block break-words whitespace-normal">
+                  Podpowiedź (-2)
+                </span>
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => setShowUsefulness(!showUsefulness)}
+                disabled={!!quizFeedback}
+                className="h-auto min-w-0 py-3 px-4 text-base sm:text-lg font-black border-2 whitespace-normal break-words text-left flex items-center gap-2"
+              >
+                <HelpCircle className="w-7 h-7 flex-shrink-0 text-blue-400" />
+                <span className="block break-words whitespace-normal">
+                  Zastosowanie
+                </span>
+              </Button>
+            </div>
+
+            {showHint && (
+              <div className="p-5 bg-amber-500/10 border-4 border-amber-500/30 rounded-2xl text-center mb-5 mx-2">
+                <p className="text-lg font-bold text-amber-200 break-words whitespace-normal max-w-full">
+                  {quizQuestion?.hint}
+                </p>
               </div>
             )}
-        </Card>
 
-
-        {/* GAME OVER / WON */}
-        {(gameOver || gameWon) && (
-            <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-950/95 text-white z-[200] backdrop-blur-2xl p-12 text-center">
-              <div className="max-w-2xl w-full">
-                <h2 className="text-8xl font-black uppercase tracking-tighter mb-4 italic">
-                  {gameWon ? "Trasa Zabezpieczona!" : "Katastrofa!"}
-                </h2>
-                <div className="bg-primary/10 border-2 border-primary/30 p-8 rounded-3xl mb-12">
-                  <p className="text-xl text-muted-foreground uppercase tracking-widest mb-2 font-bold">Raport Końcowy Dyżurnego:</p>
-                  <div className="text-6xl font-black text-primary italic drop-shadow-sm">{score} PKT</div>
-                </div>
-                <Button
-                  onClick={() => {
-                    resetGame(0, true);
-                    setIsGameStarted(false);
-                  }}
-                  className="h-24 px-16 bg-primary hover:bg-primary/90 text-3xl font-black arcade-button shadow-[0_0_50px_rgba(59,130,246,0.4)] uppercase tracking-tighter italic"
-                >
-                  Spróbuj Ponownie
-                </Button>
+            {showUsefulness && (
+              <div className="p-5 bg-blue-500/10 border-4 border-blue-500/30 rounded-2xl text-center mb-5 mx-2">
+                <p className="text-base sm:text-lg text-blue-100 leading-relaxed break-words">{quizQuestion?.usefulness}</p>
               </div>
+            )}
+
+            {quizFeedback && (
+              <div className={`p-6 rounded-2xl text-center border-8 ${quizFeedback.ok ? "bg-emerald-500/20 border-emerald-500" : "bg-red-500/20 border-red-500"}`}>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+                  {quizFeedback.ok ? <CheckCircle2 className="w-16 h-16" /> : <XCircle className="w-16 h-16" />}
+                  <span className="text-3xl sm:text-4xl font-black uppercase">{quizFeedback.ok ? "Autoryzowano" : "Odrzucono"}</span>
+                </div>
+                <p className="text-xl sm:text-2xl font-bold">{quizFeedback.msg}</p>
+              </div>
+            )}
+          </Card>
+        </div>
+      )}
+
+      {/* WYGRANA / PRZEGRANA */}
+      {(gameOver || gameWon) && (
+        <div className="fixed inset-0 flex items-center justify-center bg-slate-950/95 z-[300] p-6 text-center">
+          <Card className="w-full max-w-2xl max-h-[95vh] overflow-y-auto p-12 bg-slate-900 border-4 border-primary/40 shadow-2xl">
+            <h2 className="text-5xl sm:text-6xl font-black uppercase mb-10 text-primary">
+              {gameWon ? "Trasa Zabezpieczona!" : "Katastrofa!"}
+            </h2>
+
+            <div className="bg-primary/10 border-4 border-primary/30 p-10 rounded-3xl mb-12">
+              <p className="text-3xl font-bold uppercase text-primary mb-4">Twój wynik:</p>
+              <p className="text-6xl sm:text-7xl font-black text-primary">{score} PKT</p>
             </div>
-        )}
-      </div>
+
+            {gameWon && (
+              <div className="bg-gradient-to-br from-primary/20 to-amber-500/20 border-4 border-primary/50 p-10 rounded-3xl mb-12">
+                <p className="text-xl sm:text-2xl leading-relaxed text-slate-100 font-medium italic">
+                  Brawo! Pokazałeś, że masz głowę do bezpieczeństwa i precyzji.
+                  Zawód technika transportu kolejowego to stabilna przyszłość, realny wpływ na ruch pociągów i praca, która nigdy nie znika.
+                  Kolej czeka na takich ludzi jak Ty.
+                </p>
+              </div>
+            )}
+
+            <Button
+              onClick={() => {
+                resetGame(0, true);
+                setIsGameStarted(false);
+                if (isMobile) setShowIntroPopup(true);
+              }}
+              className="w-full h-20 text-3xl font-black uppercase bg-primary hover:bg-primary/90 shadow-2xl"
+            >
+              Nowa Gra
+            </Button>
+          </Card>
+        </div>
+      )}
+    </div>
   );
 }
