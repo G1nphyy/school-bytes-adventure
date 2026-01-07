@@ -448,7 +448,7 @@ export default function DSDGame() {
   }, [bots, waitingForOthers, playerScore, playerFinishedAt]);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-slate-950 font-sans text-slate-50">
+    <div className="relative w-full min-h-[80vh] overflow-hidden bg-slate-950 font-sans text-slate-50">
       <Card className="h-screen w-full fixed top-0 left-0 bg-slate-900 overflow-hidden">
         <div className="relative h-full w-full flex items-center justify-center">
           <div className="w-[80%] md:w-[70%] h-[80%] ml-64 md:ml-96 bg-gradient-to-b from-gray-200 to-gray-300 rounded-lg border-4 border-gray-400 shadow-2xl p-8 flex flex-col items-center justify-start relative overflow-hidden">
