@@ -112,7 +112,7 @@ const CareerGame = () => {
                                     </Button>
                                 </Link>
 
-                                <div className="relative px-4 md:px-10 py-2 md:py-3 border-x-4 border-primary/50 flex items-center gap-3 md:gap-6 italic font-black uppercase tracking-widest">
+                                <div className="relative px-4 md:px-10 py-2 md:py-3 border-x-4 border-primary/50 flex items-center gap-3 md:gap-6 md:max-w-[58dvw] italic font-black uppercase tracking-widest">
                                     <div className="hidden xs:flex flex-col gap-1.5">
                                         <div className="w-1 h-1 md:w-1.5 md:h-1.5 bg-primary animate-pulse" />
                                         <div className="w-1 h-1 md:w-1.5 md:h-1.5 bg-primary/20" />
