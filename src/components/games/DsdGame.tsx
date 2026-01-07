@@ -17,7 +17,6 @@ function AnimatedCounter({ value }: { value: number }) {
 
   return <motion.span>{display}</motion.span>;
 }
-
 // -------------------------------------------------
 
 export default function DSDGame() {
@@ -321,6 +320,7 @@ export default function DSDGame() {
     }
   }, [currentQuestionIndex, gameStarted, questions]);
 
+  // Klawiatura
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const keyUpper = e.key.toUpperCase();
@@ -359,6 +359,7 @@ export default function DSDGame() {
     }
   };
 
+  // Countdown
   useEffect(() => {
     if (showCountdown && countdownNumber > 0) {
       const timer = setTimeout(() => setCountdownNumber(prev => prev - 1), 1000);
@@ -424,215 +425,216 @@ export default function DSDGame() {
     .sort(sortParticipants);
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden bg-slate-950 font-sans text-slate-50">
-      <Card className="h-screen w-full fixed top-0 left-0 bg-slate-900 overflow-hidden flex flex-col">
+    <div className="relative w-full min-h-screen bg-slate-950 font-sans text-slate-50">
 
-        <div className="relative flex-1 flex flex-col items-center justify-center">
+      {/* TABLICA */}
+      <div className="fixed inset-0 bg-gradient-to-b from-gray-200 to-gray-300 p-4 md:p-8 flex flex-col">
 
-          {/* TABLICA Z TREŚCIĄ */}
-          <div className="relative w-full h-full bg-gradient-to-b from-gray-200 to-gray-300 rounded-none border-0 shadow-none p-4 md:p-8 flex flex-col items-center justify-start overflow-hidden">
+        <div className={`relative flex-1 flex flex-col items-center justify-center ${showCountdown ? '' : 'overflow-y-auto'}`}>
 
-            {showCountdown ? (
-              <motion.div
-                key={countdownNumber}
-                initial={{ scale: 0.5, opacity: 0, rotate: -180 }}
-                animate={{ scale: 2, opacity: 1, rotate: 0 }}
-                transition={{ duration: 1, type: "spring" }}
-                className="text-8xl md:text-9xl font-extrabold drop-shadow-2xl flex items-center justify-center w-full h-full text-blue-500 select-none"
-              >
-                {countdownNumber > 0 ? countdownNumber : 'Start!'}
-              </motion.div>
-            ) : gameStarted && !showDialog ? (
-              showResult ? (
-                <div className="w-full h-full flex flex-col items-center justify-start gap-6 py-8 px-4">
-                  <div className="text-black text-3xl md:text-5xl font-bold text-center">
-                    Twój wynik: <AnimatedCounter value={playerScore} /> pkt
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-                    <Button onClick={restartGame} className="bg-green-500 hover:bg-green-600 text-white text-lg px-8 py-5 rounded-xl shadow-lg flex-1">
-                      Powtórz grę
-                    </Button>
-                    <Button onClick={() => window.location.href = '/'} className="bg-purple-500 hover:bg-purple-600 text-white text-lg px-8 py-5 rounded-xl shadow-lg flex-1">
-                      Inne gry
-                    </Button>
-                  </div>
-
-                  <div className="text-black text-2xl md:text-3xl font-bold mt-6">Ranking</div>
-
-                  {/* Scrollowalny ranking */}
-                  <div className="w-full max-w-2xl max-h-96 overflow-y-auto px-2 space-y-3">
-                    <AnimatePresence>
-                      {allParticipants.map((entry, index) => (
-                        <motion.div
-                          key={entry.name}
-                          initial={{ opacity: 0, x: -30 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                          className={`
-                            w-full px-5 py-4 rounded-xl shadow-md text-black font-semibold flex items-center justify-between
-                            ${index === 0 ? 'bg-yellow-300 text-2xl' : index === 1 ? 'bg-gray-300' : index === 2 ? 'bg-orange-300' : 'bg-white/90'}
-                          `}
-                        >
-                          <div className="flex items-center gap-4">
-                            <span className="text-2xl font-bold">{index + 1}.</span>
-                            <span className="truncate max-w-40">{entry.name}</span>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-xl font-bold"><AnimatedCounter value={entry.score} /> pkt</div>
-                            {entry.answered < questions.length && <div className="text-sm text-orange-600 italic">odpowiada...</div>}
-                          </div>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </div>
+          {showCountdown ? (
+            <motion.div
+              key={countdownNumber}
+              initial={{ scale: 0.5, opacity: 0, rotate: -180 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              transition={{ duration: 1, type: "spring" }}
+              className={`
+                font-extrabold drop-shadow-2xl flex items-center justify-center w-full h-full text-blue-500 select-none
+                ${countdownNumber > 0
+                  ? (isMobile ? 'text-7xl' : 'text-8xl md:text-9xl')
+                  : (isMobile ? 'text-6xl' : 'text-8xl md:text-9xl')
+                }
+              `}
+            >
+              {countdownNumber > 0 ? countdownNumber : 'Start!'}
+            </motion.div>
+          ) : gameStarted && !showDialog ? (
+            showResult ? (
+              <div className="w-full h-full flex flex-col items-center justify-start gap-6 py-8 px-4">
+                <div className="text-black text-3xl md:text-5xl font-bold text-center">
+                  Twój wynik: <AnimatedCounter value={playerScore} /> pkt
                 </div>
-              ) : (
-                <div className="w-full h-full flex flex-col justify-between select-none relative">
 
-                  {/* Prawy górny przycisk podpowiedzi */}
-                  <div className="absolute top-4 right-4 z-50">
-                    <Button
-                      onClick={handleHint}
-                      disabled={hintsLeft === 0 || isAnswerCooldown}
-                      className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-4 rounded-full text-2xl font-bold shadow-2xl disabled:opacity-50"
-                    >
-                      💡 {hintsLeft}
-                    </Button>
-                  </div>
+                <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+                  <Button onClick={restartGame} className="bg-green-500 hover:bg-green-600 text-white text-lg px-8 py-5 rounded-xl shadow-lg flex-1">
+                    Powtórz grę
+                  </Button>
+                  <Button onClick={() => window.location.href = '/'} className="bg-purple-500 hover:bg-purple-600 text-white text-lg px-8 py-5 rounded-xl shadow-lg flex-1">
+                    Inne gry
+                  </Button>
+                </div>
 
-                  <div className="flex flex-col items-center gap-4 mt-8">
-                    <div className="text-black text-lg md:text-xl font-bold text-center">
-                      Pytanie {currentQuestionIndex + 1}/{questions.length} | Twój wynik: <AnimatedCounter value={playerScore} />
-                    </div>
-                    <div className={`text-3xl md:text-4xl font-extrabold ${timeLeft <= 5 ? 'text-red-600 animate-pulse' : 'text-black'}`}>
-                      Czas: {timeLeft}s
-                    </div>
-                  </div>
+                <div className="text-black text-2xl md:text-3xl font-bold mt-6">Ranking</div>
 
-                  <motion.div
-                    key={currentQuestionIndex}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-black text-xl md:text-4xl font-bold text-center px-4 leading-tight break-words hyphens-auto"
-                  >
-                    {questions[currentQuestionIndex]?.question}
-                  </motion.div>
-
-                  <div className="w-full px-4 mt-8 mb-12 overflow-hidden">
-                    <div className="flex flex-wrap justify-center gap-6 md:gap-8">
-                      {['A', 'B', 'C', 'D'].map((letter, idx) => (
-                        <Button
-                          key={letter}
-                          onClick={() => handleAnswer(letter)}
-                          disabled={isAnswerCooldown}
-                          className={`
-                            ${optionColors[letter as keyof typeof optionColors]}
-                            text-black font-bold
-                            p-8 md:p-12 rounded-3xl shadow-2xl
-                            flex flex-col items-center justify-center
-                            text-center whitespace-normal break-words leading-tight
-                            min-w-80 max-w-md flex-1 basis-80 flex-shrink-0
-                            min-h-48 md:min-h-56
-                            ${isAnswerCooldown ? 'opacity-50' : 'hover:scale-105 transition-transform'}
-                          `}
-                          onMouseDown={preventCopy}
-                          onContextMenu={preventCopy}
-                        >
-                          <span className="text-5xl md:text-6xl mb-6 font-extrabold">{letter}</span>
-                          <span className="text-2xl md:text-3xl lg:text-4xl leading-snug">
-                            {displayedOptions[idx]}
-                          </span>
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
+                <div className="w-full max-w-2xl max-h-96 overflow-y-auto px-2 space-y-3">
                   <AnimatePresence>
-                    {pointsAnim !== null && (
+                    {allParticipants.map((entry, index) => (
                       <motion.div
-                        initial={{ y: 0, opacity: 1, scale: 1 }}
-                        animate={{ y: -120, opacity: 0, scale: 1.8 }}
-                        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                        key={entry.name}
+                        initial={{ opacity: 0, x: -30 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className={`
+                          w-full px-5 py-4 rounded-xl shadow-md text-black font-semibold flex items-center justify-between
+                          ${index === 0 ? 'bg-yellow-300 text-2xl' : index === 1 ? 'bg-gray-300' : index === 2 ? 'bg-orange-300' : 'bg-white/90'}
+                        `}
                       >
-                        <span className="text-6xl font-extrabold text-green-600 drop-shadow-2xl">
-                          +{pointsAnim}
-                        </span>
+                        <div className="flex items-center gap-4">
+                          <span className="text-2xl font-bold">{index + 1}.</span>
+                          <span className="truncate max-w-40">{entry.name}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xl font-bold"><AnimatedCounter value={entry.score} /> pkt</div>
+                          {entry.answered < questions.length && <div className="text-sm text-orange-600 italic">odpowiada...</div>}
+                        </div>
                       </motion.div>
-                    )}
+                    ))}
                   </AnimatePresence>
                 </div>
-              )
-            ) : null}
-          </div>
+              </div>
+            ) : (
+              <div className="w-full flex flex-col justify-between select-none relative min-h-full pb-8">
+
+                <div className="absolute top-4 right-4 z-50">
+                  <Button
+                    onClick={handleHint}
+                    disabled={hintsLeft === 0 || isAnswerCooldown}
+                    className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-4 rounded-full text-2xl font-bold shadow-2xl disabled:opacity-50"
+                  >
+                    💡 {hintsLeft}
+                  </Button>
+                </div>
+
+                <div className="flex flex-col items-center gap-4 mt-8">
+                  <div className="text-black text-lg md:text-xl font-bold text-center">
+                    Pytanie {currentQuestionIndex + 1}/{questions.length} | Twój wynik: <AnimatedCounter value={playerScore} />
+                  </div>
+                  <div className={`text-3xl md:text-4xl font-extrabold ${timeLeft <= 5 ? 'text-red-600 animate-pulse' : 'text-black'}`}>
+                    Czas: {timeLeft}s
+                  </div>
+                </div>
+
+                <motion.div
+                  key={currentQuestionIndex}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-black text-xl md:text-4xl font-bold text-center px-4 leading-tight break-words hyphens-auto mt-8"
+                >
+                  {questions[currentQuestionIndex]?.question}
+                </motion.div>
+
+                {/* ODPOWIEDZI */}
+                <div className="w-full px-4 grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                  {['A', 'B', 'C', 'D'].map((letter, idx) => (
+                    <Button
+                      key={letter}
+                      onClick={() => handleAnswer(letter)}
+                      disabled={isAnswerCooldown}
+                      className={`
+                        ${optionColors[letter as keyof typeof optionColors]}
+                        text-black font-bold
+                        p-10 md:p-12 rounded-3xl shadow-2xl
+                        flex flex-col items-center justify-center
+                        text-center whitespace-normal break-words leading-tight
+                        min-h-48 md:min-h-56
+                        ${letter === 'D' ? 'mb-12 md:mb-0' : ''}
+                        ${isAnswerCooldown ? 'opacity-50' : 'hover:scale-105 transition-transform'}
+                      `}
+                      onMouseDown={preventCopy}
+                      onContextMenu={preventCopy}
+                    >
+                      <span className="text-5xl md:text-6xl mb-6 font-extrabold">{letter}</span>
+                      <span className="text-2xl md:text-3xl lg:text-4xl leading-snug clamp-text">
+                        {displayedOptions[idx]}
+                      </span>
+                    </Button>
+                  ))}
+                </div>
+
+                <AnimatePresence>
+                  {pointsAnim !== null && (
+                    <motion.div
+                      initial={{ y: 0, opacity: 1, scale: 1 }}
+                      animate={{ y: -120, opacity: 0, scale: 1.8 }}
+                      className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                    >
+                      <span className="text-6xl font-extrabold text-green-600 drop-shadow-2xl">
+                        +{pointsAnim}
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )
+          ) : null}
         </div>
+      </div>
 
-        {/* PODPOWIEDŹ */}
-        <AnimatePresence>
-          {showHintDialog && (
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="fixed inset-0 z-[100] flex items-center justify-center px-6 pointer-events-none"
-            >
-              <div className="pointer-events-auto w-full max-w-2xl relative rounded-3xl p-8 shadow-2xl bg-white/90 backdrop-blur-xl border border-white/40">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400" />
-                <div className="relative flex gap-6 items-center">
-                  <div className="relative flex-shrink-0">
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-300/40 to-purple-300/40 blur-xl" />
-                    <img src={teacher} alt="Nauczycielka" className="relative w-28 h-28 object-contain rounded-2xl border-2 border-white/50 shadow-xl" />
-                  </div>
-                  <div className="text-slate-900 text-2xl leading-relaxed font-bold drop-shadow-sm">
-                    {hintText}
-                  </div>
+      {/* PODPOWIEDŹ */}
+      <AnimatePresence>
+        {showHintDialog && (
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center px-6 pointer-events-none"
+          >
+            <div className="pointer-events-auto w-full max-w-2xl relative rounded-3xl p-8 shadow-2xl bg-white/90 backdrop-blur-xl border border-white/40">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400" />
+              <div className="relative flex gap-6 items-center">
+                <div className="relative flex-shrink-0">
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-300/40 to-purple-300/40 blur-xl" />
+                  <img src={teacher} alt="Nauczycielka" className="relative w-28 h-28 object-contain rounded-2xl border-2 border-white/50 shadow-xl" />
+                </div>
+                <div className="text-slate-900 text-2xl leading-relaxed font-bold drop-shadow-sm">
+                  {hintText}
                 </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* DIALOG POCZĄTKOWY */}
-        <AnimatePresence>
-          {showDialog && (
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="fixed inset-0 z-[100] flex items-center justify-center px-6 pointer-events-none"
+      {/* DIALOG POCZĄTKOWY */}
+      <AnimatePresence>
+        {showDialog && (
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center px-6 pointer-events-none"
+          >
+            <div
+              onClick={handleSkipOrNext}
+              className="pointer-events-auto w-full max-w-2xl relative rounded-3xl p-8 shadow-2xl bg-white/90 backdrop-blur-xl border border-white/40 cursor-pointer"
             >
-              <div
-                onClick={handleSkipOrNext}
-                className="pointer-events-auto w-full max-w-2xl relative rounded-3xl p-8 shadow-2xl bg-white/90 backdrop-blur-xl border border-white/40 cursor-pointer"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400" />
-                <div className="relative flex gap-6 items-center">
-                  <div className="relative flex-shrink-0">
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-300/40 to-purple-300/40 blur-xl" />
-                    <img src={currentDialogImage} alt="Postać" className="relative w-28 h-28 object-contain rounded-2xl border-2 border-white/50 shadow-xl" />
-                  </div>
-                  <div className="flex-1 text-slate-900 text-2xl leading-relaxed font-bold drop-shadow-sm">
-                    {displayText}
-                    {isTyping && <span className="animate-pulse">|</span>}
-                    {!isMobile && (
-                      <div className="mt-4 text-lg text-slate-600 font-bold">
-                        {isTyping ? "Kliknij lub naciśnij spację, aby pominąć..." : "Kliknij lub naciśnij spację, aby kontynuować..."}
-                      </div>
-                    )}
-                    {isMobile && (
-                      <div className="mt-4 text-lg text-slate-600 font-bold">
-                        Dotknij, aby kontynuować...
-                      </div>
-                    )}
-                  </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400" />
+              <div className="relative flex gap-6 items-center">
+                <div className="relative flex-shrink-0">
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-300/40 to-purple-300/40 blur-xl" />
+                  <img src={currentDialogImage} alt="Postać" className="relative w-28 h-28 object-contain rounded-2xl border-2 border-white/50 shadow-xl" />
+                </div>
+                <div className="flex-1 text-slate-900 text-2xl leading-relaxed font-bold drop-shadow-sm">
+                  {displayText}
+                  {isTyping && <span className="animate-pulse">|</span>}
+                  {!isMobile && (
+                    <div className="mt-4 text-lg text-slate-600 font-bold">
+                      {isTyping ? "Kliknij lub naciśnij spację, aby pominąć..." : "Kliknij lub naciśnij spację, aby kontynuować..."}
+                    </div>
+                  )}
+                  {isMobile && (
+                    <div className="mt-4 text-lg text-slate-600 font-bold">
+                      Dotknij, aby kontynuować...
+                    </div>
+                  )}
                 </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </Card>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
