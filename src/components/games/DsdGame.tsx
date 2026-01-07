@@ -359,7 +359,6 @@ export default function DSDGame() {
     }
   };
 
-  // Countdown
   useEffect(() => {
     if (showCountdown && countdownNumber > 0) {
       const timer = setTimeout(() => setCountdownNumber(prev => prev - 1), 1000);
