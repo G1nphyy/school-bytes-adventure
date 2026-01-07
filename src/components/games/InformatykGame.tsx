@@ -4,14 +4,13 @@ import { Card } from "@/components/ui/card";
 import { Shield, Cable, CheckCircle2, XCircle, Lightbulb, Cpu, MemoryStick, HardDrive, Trophy} from "lucide-react";
 import RJ45_T568B from '@/assets/Utp_T568B.gif';
 
-
 // IMPORT GRAFIK KOMPUTEROWYCH
 import MB_IMG from '@/assets/graphics/computer/motherboard.png';
+import PC_IMG from '@/assets/graphics/computer/pc.png'; // pc image — render under motherboard
 import CPU_IMG from '@/assets/graphics/computer/cpu.png';
 import RAM_IMG from '@/assets/graphics/computer/ram.png';
 import GPU_IMG from '@/assets/graphics/computer/gpu.png';
 import COOLER_IMG from '@/assets/graphics/computer/cooling.png';
-
 
 // DND IMPORTS
 import { DndProvider, useDrag, useDrop } from "react-dnd";
@@ -51,7 +50,6 @@ const ItemTypes = {
   CABLE: 'cable',
   COMPONENT: 'component',
 } as const;
-
 
 // -------------------------- QUIZ DATA ---------------------------------
 const securityQuestions = [
@@ -172,8 +170,6 @@ const securityQuestions = [
 
 // Shuffling options
 
-
-
 // -------------------------- PC ASSEMBLY DATA ---------------------------------
 
 const assemblyComponents: AssemblyComponentType[] = [
@@ -200,7 +196,6 @@ const assemblyHintsData = [
 
 const assemblyUsefulness = "Umiejętność montażu podzespołów (CPU, RAM, GPU) w komputerze osobistym jest kluczową kompetencją praktyczną w kwalifikacji INF.02. Prawidłowy montaż gwarantuje stabilną pracę systemu i uniknięcie uszkodzenia sprzętu.";
 
-
 // -------------------------- RJ GAME DATA ---------------------------------
 
 const cables: CableType[] = [
@@ -223,7 +218,6 @@ const rj45Hints = [
 ];
 
 const rjUsefulness = "Zaciskanie kabli według standardów T568B/A to podstawowa umiejętność technika. Błędne okablowanie jest najczęstszą przyczyną problemów z połączeniem w sieciach LAN, wymagana w kwalifikacji INF.02.";
-
 
 // -------------------------- HELPER FUNCTIONS ---------------------------------
 
@@ -255,9 +249,7 @@ const prepareRandomizedQuestions = () => {
   });
 };
 
-
 const getCableById = (id: number) => cables.find(c => c.id === id);
-
 const getAssemblyComponentById = (id: number) => assemblyComponents.find(c => c.id === id);
 
 const getCableColor = (color: CableColor) => {
@@ -392,7 +384,6 @@ const CableSource: React.FC<CableSourceProps> = ({ cable, isUsed }) => {
   );
 };
 
-
 // -------------------------- DND COMPONENTS (PC ASSEMBLY) ---------------------------------
 
 interface DraggableComponentProps {
@@ -438,13 +429,13 @@ const DraggableComponent: React.FC<DraggableComponentProps> = ({ component, curr
               alt={component.name}
               className={`${currentSlot
                   ? (component.type === 'COOLER'
-                      ? 'w-[250%] h-[200%] -left-[20%] -top-[85%] z-30 max-w-none max-h-none absolute -rotate-90 overflow-visible object-contain'
+                      ? 'w-[400%] h-[300%] -left-[75%] -top-[206.5%] z-30 max-w-none max-h-none absolute -rotate-90 overflow-visible object-contain'
                       : component.type === 'GPU'
                           ? 'w-[120%] h-[400%] bottom-0 left-0 max-w-none max-h-none absolute object-contain'
-                          : 'w-full h-full object-fill') : 
-                          ( component.type === 'CPU'
-                              ? 'z-20'
-                              : 'w-16 h-16 mb-1 object-contain ')
+                          : 'w-full h-full object-fill') :
+                  ( component.type === 'CPU'
+                      ? 'z-20'
+                      : 'w-16 h-16 mb-1 object-contain ')
               }`}
           />
           {!currentSlot && <span className="text-[10px] leading-none text-center px-1">{component.name}</span>}
@@ -477,11 +468,11 @@ interface ComponentDropZoneProps {
 
 const ComponentDropZone: React.FC<ComponentDropZoneProps> = ({ slotName, slotData, componentId, onDrop, onRemove }) => {
   const component = componentId !== null ? getAssemblyComponentById(componentId) : null;
-  const slotType = slotData.type;
 
+  // IMPORTANT: allow dropping any component type into any slot so the user can make mistakes
   const [{ isOver, canDrop }, drop] = useDrop<ComponentItem, unknown, { isOver: boolean; canDrop: boolean }>(() => ({
     accept: ItemTypes.COMPONENT,
-    canDrop: (item) => item.type === slotType && componentId === null,
+    canDrop: () => true,
     drop: (item) => onDrop(item.id, slotName, item.sourceSlot),
     collect: (monitor) => ({
       isOver: monitor.isOver(),
@@ -528,17 +519,8 @@ const ComponentDropZone: React.FC<ComponentDropZoneProps> = ({ slotName, slotDat
   );
 };
 
-interface ComponentDropZoneProps {
-  slotName: string;
-  slotData: { type: 'CPU' | 'RAM' | 'GPU' | 'COOLER', label: string };
-  componentId: number | null;
-  onDrop: (componentId: number, targetSlotName: string, sourceSlotName: string | null) => void;
-  onRemove: (componentId: number, slotName: string) => void;
-}
 // -------------------------- GŁÓWNY KOMPONENT GRY ---------------------------------
-// Zarządzanie stanem gry
-// Każdy etap ma własną logikę punktacji, system podpowiedzi z karami punktowymi
-// oraz flagi ukończenia.
+
 const InformatykGame = () => {
 
   // QUIZ STATES
@@ -568,6 +550,10 @@ const InformatykGame = () => {
   const [assemblyAttempts, setAssemblyAttempts] = useState(0);
   const [assemblyHints, setAssemblyHints] = useState(0);
   const [showAssemblySummary, setShowAssemblySummary] = useState(false);
+
+  // New state: whether cooler drop zone should be shown
+  // showCoolerSlot pojawia się tylko wtedy gdy w slot CPU znajduje się komponent typu CPU.
+  const [showCoolerSlot, setShowCoolerSlot] = useState(false);
 
 
   // RJ GAME STATES
@@ -611,6 +597,7 @@ const InformatykGame = () => {
     setAssemblyAttempts(0);
     setAssemblyHints(0);
     setShowAssemblySummary(false);
+    setShowCoolerSlot(false);
 
     // Reset RJ-45
     setRjComplete(false);
@@ -680,7 +667,7 @@ const InformatykGame = () => {
           newSlots[sourceSlotIndex] = null;
           newSlots[targetSlotIndex] = cableId;
         }
-    // Jeśli przeciągamy nowy kabel z palety wyboru (sourceSlotIndex === -1)
+        // Jeśli przeciągamy nowy kabel z palety wyboru (sourceSlotIndex === -1)
       } else if (sourceSlotIndex === -1) {
         if (newSlots[targetSlotIndex] === null) {
           newSlots[targetSlotIndex] = cableId;
@@ -752,7 +739,7 @@ const InformatykGame = () => {
   };
 
   // -------------------------- LOGIKA SKŁADANIA KOMPUTERA ---------------------------------
-  // TODO: Zrobić żeby było można dropnąć element na każdy slot, nie tylko poprawny
+  // Now allow dropping ANY component into ANY slot (so the user can make mistakes)
   const handleAssemblyDrop = useCallback((componentId: number, targetSlotName: string, sourceSlotName: string | null) => {
     if (showAssemblyResult && assemblyAttempts >= 1) return;
 
@@ -761,17 +748,24 @@ const InformatykGame = () => {
       const component = getAssemblyComponentById(componentId);
       if (!component) return prevSlots;
 
-      const targetSlotType = assemblySlots[targetSlotName as keyof typeof assemblySlots].type;
-
-      if (component.type !== targetSlotType) {
-        return prevSlots;
+      // If moving from another slot, perform swap (so user can move pieces between slots)
+      if (sourceSlotName && sourceSlotName !== targetSlotName) {
+        const targetPrev = newSlots[targetSlotName];
+        // place dragged component into target
+        newSlots[targetSlotName] = componentId;
+        // move previous occupant (if any) into source slot (swap)
+        newSlots[sourceSlotName] = targetPrev ?? null;
+      } else {
+        // dragged from palette (sourceSlotName === null) or dropped into same slot:
+        // simply place component in target (and overwrite previous occupant if present,
+        // which makes that previous component available again)
+        newSlots[targetSlotName] = componentId;
       }
 
-      if (sourceSlotName) {
-        newSlots[sourceSlotName] = null;
-      }
+      // Show cooler slot only if CPU slot contains an actual CPU-type component
+      const cpuInCpuSlot = newSlots.CPU !== null && getAssemblyComponentById(newSlots.CPU!)?.type === 'CPU';
+      setShowCoolerSlot(cpuInCpuSlot);
 
-      newSlots[targetSlotName] = componentId;
       return newSlots;
     });
 
@@ -780,11 +774,30 @@ const InformatykGame = () => {
   }, [showAssemblyResult, assemblyAttempts]);
 
   const handleRemoveComponent = useCallback((componentId: number, slotName: string) => {
-    if (showAssemblyResult && assemblyAttempts >= 1) return;
-    setComponentSlots(prevSlots => ({
-      ...prevSlots,
-      [slotName]: null
-    }));
+    // Allow removing even after showing results (we still limit via assemblyAttempts elsewhere if needed)
+    setComponentSlots(prev => {
+      const newSlots = { ...prev };
+
+      if (slotName === 'CPU') {
+        // removing CPU should also clear cooler and hide cooler slot
+        newSlots.CPU = null;
+        newSlots.COOLER = null;
+        // hide cooler slot so it doesn't block CPU area after removal
+        setShowCoolerSlot(false);
+      } else if (slotName === 'COOLER') {
+        // remove cooler and hide cooler slot immediately so CPU area is accessible
+        newSlots.COOLER = null;
+        setShowCoolerSlot(false);
+      } else {
+        newSlots[slotName] = null;
+        // for other slots, decide visibility based on whether CPU remains present
+        const cpuInCpuSlot = newSlots.CPU !== null && getAssemblyComponentById(newSlots.CPU!)?.type === 'CPU';
+        setShowCoolerSlot(cpuInCpuSlot);
+      }
+
+      return newSlots;
+    });
+
     setShowAssemblyResult(false);
     setShowUsefulness(false);
   }, [showAssemblyResult, assemblyAttempts]);
@@ -803,9 +816,9 @@ const InformatykGame = () => {
     setAssemblyAttempts(prev => prev + 1);
 
     // Weryfikacja poprawności montażu zgodnie z logiką techniczną:
-      // 1. Sprawdzenie zgodności ID procesora z gniazdem.
-      // 2. Walidacja trybu Dual-Channel (czy użyto dwóch różnych kości RAM w odpowiednich slotach).
-      // 3. Logika zależności: Chłodzenie (Cooler) jest uznane za poprawne tylko, gdy procesor jest już w gnieździe.
+    // 1. Sprawdzenie zgodności ID procesora z gniazdem.
+    // 2. Walidacja trybu Dual-Channel (czy użyto dwóch różnych kości RAM w odpowiednich slotach).
+    // 3. Logika zależności: Chłodzenie (Cooler) jest uznane za poprawne tylko, gdy procesor jest już w gnieździe.
     const isCpuCorrect = componentSlots.CPU === assemblyComponents.find(c => c.type === 'CPU')?.id;
     const ramSticks = assemblyComponents.filter(c => c.type === 'RAM').map(c => c.id);
     const isRamCorrect = componentSlots.RAM1 !== null && componentSlots.RAM2 !== null && componentSlots.RAM1 !== componentSlots.RAM2 && ramSticks.includes(componentSlots.RAM1!) && ramSticks.includes(componentSlots.RAM2!);
@@ -837,6 +850,7 @@ const InformatykGame = () => {
     setComponentSlots({ CPU: null, RAM1: null, RAM2: null, PCIEX16: null, COOLER: null });
     setShowAssemblyResult(false);
     setShowUsefulness(false);
+    setShowCoolerSlot(false);
   }
 
   const showAssemblyHint = () => {
@@ -867,94 +881,94 @@ const InformatykGame = () => {
             <div className="text-center mb-6 mt-4">
               <div className="relative inline-block">
                 <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-2 animate-bounce drop-shadow-md" />
-              {percentage >= 70 && (
-                  <div className="absolute -top-2 -right-4 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-1 rounded-full animate-pulse">
-                    TOP WYNIK!
-                  </div>
-              )}
-            </div>
-            <h2 className="text-2xl font-bold text-foreground tracking-tight">GRATULACJE!</h2>
-            <p className="text-muted-foreground text-sm uppercase tracking-widest">Ukończono ścieżkę Informatyka</p>
-          </div>
-
-          {/* Baner z wynikiem głównym */}
-          <div className="bg-primary/5 border-2 border-primary/20 rounded-xl p-6 text-center mb-8 relative overflow-hidden">
-            <div className="absolute inset-0 bg-primary/5 blur-xl"></div>
-            <span className="relative z-10 text-xs text-muted-foreground font-bold uppercase">Twój Wynik Końcowy</span>
-            <div className="relative z-10 text-5xl font-black text-primary mt-2 drop-shadow-sm">{totalScore} <span className="text-xl font-medium text-foreground/60">PKT</span></div>
-          </div>
-
-          {/* Szczegółowe statystyki */}
-          <div className="space-y-3 mb-8">
-            <h3 className="text-xs font-bold text-muted-foreground ml-1 mb-2">SZCZEGÓŁY PUNKTACJI</h3>
-
-            {/* Quiz Stat */}
-            <div className="flex items-center justify-between p-3 border border-border/50 rounded-lg bg-card hover:bg-accent/5 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-500/10 rounded-md border border-blue-500/20">
-                  <Shield className="w-5 h-5 text-blue-500"/>
-                </div>
-                <div>
-                  <p className="font-bold text-sm leading-none mb-1">Cyberbezpieczeństwo</p>
-                  <p className="text-[10px] text-muted-foreground">Wiedza teoretyczna</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="font-bold text-foreground">{quizScore}</span>
-                <span className="text-xs text-muted-foreground"> / {maxQuizScore}</span>
-              </div>
-            </div>
-
-            {/* Assembly Stat */}
-            <div className="flex items-center justify-between p-3 border border-border/50 rounded-lg bg-card hover:bg-accent/5 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-500/10 rounded-md border border-purple-500/20">
-                  <Cpu className="w-5 h-5 text-purple-500"/>
-                </div>
-                <div>
-                  <p className="font-bold text-sm leading-none mb-1">Sprzęt Komputerowy</p>
-                  <p className="text-[10px] text-muted-foreground">Montaż jednostki PC</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="font-bold text-foreground">{assemblyScore}</span>
-                <span className="text-xs text-muted-foreground"> / {maxAssemblyScore}</span>
-              </div>
-            </div>
-
-            {/* Network Stat */}
-            <div className="flex items-center justify-between p-3 border border-border/50 rounded-lg bg-card hover:bg-accent/5 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-500/10 rounded-md border border-orange-500/20">
-                  <Cable className="w-5 h-5 text-orange-500"/>
-                </div>
-                <div>
-                  <p className="font-bold text-sm leading-none mb-1">Sieci Komputerowe</p>
-                  <p className="text-[10px] text-muted-foreground">Zarabianie kabla RJ-45</p>
-                </div>
-              </div>
-              <div className="text-right">
-                {rjCorrect ? (
-                    <span className="text-green-500 font-bold text-xs flex items-center gap-1 bg-green-500/10 px-2 py-1 rounded-full border border-green-500/20">
-                      <CheckCircle2 className="w-3 h-3"/> ZALICZONE
-                    </span>
-                ) : (
-                    <span className="text-destructive font-bold text-xs flex items-center gap-1 bg-destructive/10 px-2 py-1 rounded-full border border-destructive/20">
-                      <XCircle className="w-3 h-3"/> BŁĄD ({rjAttempts} próby)
-                    </span>
+                {percentage >= 70 && (
+                    <div className="absolute -top-2 -right-4 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-1 rounded-full animate-pulse">
+                      TOP WYNIK!
+                    </div>
                 )}
               </div>
+              <h2 className="text-2xl font-bold text-foreground tracking-tight">GRATULACJE!</h2>
+              <p className="text-muted-foreground text-sm uppercase tracking-widest">Ukończono ścieżkę Informatyka</p>
             </div>
-          </div>
 
-          {/* Feedback */}
-          <div className="bg-muted/50 p-4 rounded-lg mb-6 text-xs leading-relaxed text-center border border-border/50 italic text-muted-foreground">
-            {percentage >= 70
-                ? "Wyśmienicie! Masz solidne podstawy do pracy jako Technik Informatyk. Świetnie radzisz sobie zarówno z teorią, jak i praktyką."
-                : percentage >= 50
-                    ? "Dobra robota! Masz potencjał, ale warto powtórzyć standardy sieciowe i zagadnienia z bezpieczeństwa, aby osiągnąć mistrzostwo."
-                    : "Początki bywają trudne. Informatyka wymaga precyzji i cierpliwości. Spróbuj jeszcze raz, zwracając większą uwagę na podpowiedzi!"}
-          </div>
+            {/* Baner z wynikiem głównym */}
+            <div className="bg-primary/5 border-2 border-primary/20 rounded-xl p-6 text-center mb-8 relative overflow-hidden">
+              <div className="absolute inset-0 bg-primary/5 blur-xl"></div>
+              <span className="relative z-10 text-xs text-muted-foreground font-bold uppercase">Twój Wynik Końcowy</span>
+              <div className="relative z-10 text-5xl font-black text-primary mt-2 drop-shadow-sm">{totalScore} <span className="text-xl font-medium text-foreground/60">PKT</span></div>
+            </div>
+
+            {/* Szczegółowe statystyki */}
+            <div className="space-y-3 mb-8">
+              <h3 className="text-xs font-bold text-muted-foreground ml-1 mb-2">SZCZEGÓŁY PUNKTACJI</h3>
+
+              {/* Quiz Stat */}
+              <div className="flex items-center justify-between p-3 border border-border/50 rounded-lg bg-card hover:bg-accent/5 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-500/10 rounded-md border border-blue-500/20">
+                    <Shield className="w-5 h-5 text-blue-500"/>
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm leading-none mb-1">Cyberbezpieczeństwo</p>
+                    <p className="text-[10px] text-muted-foreground">Wiedza teoretyczna</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="font-bold text-foreground">{quizScore}</span>
+                  <span className="text-xs text-muted-foreground"> / {maxQuizScore}</span>
+                </div>
+              </div>
+
+              {/* Assembly Stat */}
+              <div className="flex items-center justify-between p-3 border border-border/50 rounded-lg bg-card hover:bg-accent/5 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-500/10 rounded-md border border-purple-500/20">
+                    <Cpu className="w-5 h-5 text-purple-500"/>
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm leading-none mb-1">Sprzęt Komputerowy</p>
+                    <p className="text-[10px] text-muted-foreground">Montaż jednostki PC</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="font-bold text-foreground">{assemblyScore}</span>
+                  <span className="text-xs text-muted-foreground"> / {maxAssemblyScore}</span>
+                </div>
+              </div>
+
+              {/* Network Stat */}
+              <div className="flex items-center justify-between p-3 border border-border/50 rounded-lg bg-card hover:bg-accent/5 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-orange-500/10 rounded-md border border-orange-500/20">
+                    <Cable className="w-5 h-5 text-orange-500"/>
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm leading-none mb-1">Sieci Komputerowe</p>
+                    <p className="text-[10px] text-muted-foreground">Zarabianie kabla RJ-45</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  {rjCorrect ? (
+                      <span className="text-green-500 font-bold text-xs flex items-center gap-1 bg-green-500/10 px-2 py-1 rounded-full border border-green-500/20">
+                      <CheckCircle2 className="w-3 h-3"/> ZALICZONE
+                    </span>
+                  ) : (
+                      <span className="text-destructive font-bold text-xs flex items-center gap-1 bg-destructive/10 px-2 py-1 rounded-full border border-destructive/20">
+                      <XCircle className="w-3 h-3"/> BŁĄD ({rjAttempts} próby)
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Feedback */}
+            <div className="bg-muted/50 p-4 rounded-lg mb-6 text-xs leading-relaxed text-center border border-border/50 italic text-muted-foreground">
+              {percentage >= 70
+                  ? "Wyśmienicie! Masz solidne podstawy do pracy jako Technik Informatyk. Świetnie radzisz sobie zarówno z teorią, jak i praktyką."
+                  : percentage >= 50
+                      ? "Dobra robota! Masz potencjał, ale warto powtórzyć standardy sieciowe i zagadnienia z bezpieczeństwa, aby osiągnąć mistrzostwo."
+                      : "Początki bywają trudne. Informatyka wymaga precyzji i cierpliwości. Spróbuj jeszcze raz, zwracając większą uwagę na podpowiedzi!"}
+            </div>
 
             <div className="mt-auto">
               <Button
@@ -979,86 +993,86 @@ const InformatykGame = () => {
           <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
             <div className="mb-6 text-center">
               <Cable className={`w-12 h-12 ${rjCorrect ? "text-accent" : 'text-destructive' } mx-auto mb-4 animate-bounce`} />
-            <h2 className="text-lg text-foreground mb-2">PODSUMOWANIE ETAPU RJ-45</h2>
-            <p className={`text-xl font-bold ${rjCorrect ? 'text-accent' : 'text-destructive'}`}>
-              {rjResultMsg}
-            </p>
-          </div>
+              <h2 className="text-lg text-foreground mb-2">PODSUMOWANIE ETAPU RJ-45</h2>
+              <p className={`text-xl font-bold ${rjCorrect ? 'text-accent' : 'text-destructive'}`}>
+                {rjResultMsg}
+              </p>
+            </div>
 
-          <div className="mb-8">
-            <div className="bg-muted border-4 border-border p-6 mx-auto max-w-md">
-              <div className="text-xs text-muted-foreground mb-2 text-center font-bold">
-                PRAWIDŁOWA KOLEJNOŚĆ T568B (1-8)
-              </div>
-              {/* --------------------- ZDJĘCIE --------------------*/}
-              <img src={RJ45_T568B} alt="T568B" className="w-full mb-4"/>
-              {/* --------------- Ustawianie poprawnej kolejności kabli w rjtce ----------------- */}
-              <div className="flex gap-2 justify-center opacity-70 pointer-events-none">
-                {finalSlots.map((cableId, index) => {
-                  const cable = getCableById(cableId);
-                  if (!cable) return null;
-                  return (
-                      <div key={index} className="flex flex-col items-center">
-                        <div className={`w-10 h-24 border-2 border-border relative bg-background`}>
-                          <div className={`w-full h-full border border-border ${getCableColor(cable.color)} absolute`}>
-                            <div className="h-full flex items-center justify-center">
+            <div className="mb-8">
+              <div className="bg-muted border-4 border-border p-6 mx-auto max-w-md">
+                <div className="text-xs text-muted-foreground mb-2 text-center font-bold">
+                  PRAWIDŁOWA KOLEJNOŚĆ T568B (1-8)
+                </div>
+                {/* --------------------- ZDJĘCIE --------------------*/}
+                <img src={RJ45_T568B} alt="T568B" className="w-full mb-4"/>
+                {/* --------------- Ustawianie poprawnej kolejności kabli w rjtce ----------------- */}
+                <div className="flex gap-2 justify-center opacity-70 pointer-events-none">
+                  {finalSlots.map((cableId, index) => {
+                    const cable = getCableById(cableId);
+                    if (!cable) return null;
+                    return (
+                        <div key={index} className="flex flex-col items-center">
+                          <div className={`w-10 h-24 border-2 border-border relative bg-background`}>
+                            <div className={`w-full h-full border border-border ${getCableColor(cable.color)} absolute`}>
+                              <div className="h-full flex items-center justify-center">
                                           <span className="text-[8px] text-black font-bold writing-mode-vertical transform">
                                               {cable.label_short}
                                           </span>
+                              </div>
                             </div>
                           </div>
+                          <span className="text-[8px] text-muted-foreground mt-1">{index + 1}</span>
                         </div>
-                        <span className="text-[8px] text-muted-foreground mt-1">{index + 1}</span>
-                      </div>
-                  )
-                })}
-              </div>
-              {/* ------------------------------------------------------------------------------------- */}
-            </div>
-          </div>
-
-          <div className="mb-6 space-y-3">
-            <Button
-                onClick={toggleUsefulness}
-                variant="outline"
-                size="sm"
-                className={`w-full border-2 ${showUsefulness ? 'border-primary/50 bg-primary/20' : 'border-border hover:border-primary/50'} text-foreground arcade-button hover:bg-primary/10 hover:text-primary-foreground h-auto py-3 whitespace-normal`}
-            >
-              <Lightbulb className="w-4 h-4 mr-2" />
-              DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
-            </Button>
-          </div>
-
-          {showUsefulness && (
-              <div className="mb-6 animate-slide-in-up">
-                <div className="p-4 border-2 border-primary/50 bg-primary/10 text-primary-foreground">
-                  <p className="text-xs leading-relaxed text-foreground/80 font-semibold">{rjUsefulness}</p>
+                    )
+                  })}
                 </div>
+                {/* ------------------------------------------------------------------------------------- */}
               </div>
-          )}
-
-
-          <div className="mb-6 animate-slide-in-up flex-grow">
-            <div
-                className={`p-4 border-2 ${
-                    rjCorrect
-                        ? "border-accent bg-accent/20 text-accent"
-                        : "border-destructive bg-destructive/20 text-destructive"
-                }`}
-            >
-              <p className="text-xs mb-2 font-bold">
-                {rjCorrect ? "✓ WYNIK: PRAWIDŁOWO!" : "✗ WYNIK: NIEPRAWIDŁOWO"}
-              </p>
-              <p className="text-xs leading-relaxed">
-                {rjCorrect
-                    ? "Gratulacje! Norma T568B to standard stosowany w większości sieci."
-                    : `Błąd. Prawidłowa kolejność T568B to: ${cables.map(c => c.label_short).join(', ')}. Konieczność nauki standardów to podstawa.`}
-              </p>
-              <p className="text-xs font-bold mt-2">
-                Liczba prób: {rjAttempts}. Użyte podpowiedzi: {rjHintLevel}.
-              </p>
             </div>
-          </div>
+
+            <div className="mb-6 space-y-3">
+              <Button
+                  onClick={toggleUsefulness}
+                  variant="outline"
+                  size="sm"
+                  className={`w-full border-2 ${showUsefulness ? 'border-primary/50 bg-primary/20' : 'border-border hover:border-primary/50'} text-foreground arcade-button hover:bg-primary/10 hover:text-primary-foreground h-auto py-3 whitespace-normal`}
+              >
+                <Lightbulb className="w-4 h-4 mr-2" />
+                DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
+              </Button>
+            </div>
+
+            {showUsefulness && (
+                <div className="mb-6 animate-slide-in-up">
+                  <div className="p-4 border-2 border-primary/50 bg-primary/10 text-primary-foreground">
+                    <p className="text-xs leading-relaxed text-foreground/80 font-semibold">{rjUsefulness}</p>
+                  </div>
+                </div>
+            )}
+
+
+            <div className="mb-6 animate-slide-in-up flex-grow">
+              <div
+                  className={`p-4 border-2 ${
+                      rjCorrect
+                          ? "border-accent bg-accent/20 text-accent"
+                          : "border-destructive bg-destructive/20 text-destructive"
+                  }`}
+              >
+                <p className="text-xs mb-2 font-bold">
+                  {rjCorrect ? "✓ WYNIK: PRAWIDŁOWO!" : "✗ WYNIK: NIEPRAWIDŁOWO"}
+                </p>
+                <p className="text-xs leading-relaxed">
+                  {rjCorrect
+                      ? "Gratulacje! Norma T568B to standard stosowany w większości sieci."
+                      : `Błąd. Prawidłowa kolejność T568B to: ${cables.map(c => c.label_short).join(', ')}. Konieczność nauki standardów to podstawa.`}
+                </p>
+                <p className="text-xs font-bold mt-2">
+                  Liczba prób: {rjAttempts}. Użyte podpowiedzi: {rjHintLevel}.
+                </p>
+              </div>
+            </div>
 
             <Button
                 onClick={() => {
@@ -1086,115 +1100,115 @@ const InformatykGame = () => {
             <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
               <div className="mb-6 text-center">
                 <Cable className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
-              <h2 className="text-lg text-foreground mb-2">ETAP 3: OKABLOWANIE RJ-45</h2>
-              <p className="text-lg font-bold text-primary mb-2">Punkty: {totalScore}</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Przeciągnij i upuść 8 kabli w złączu, zgodnie z normą T568B.
-              </p>
-            </div>
-
-            <div className="mb-8">
-              <div className="bg-muted border-4 border-border p-6 mx-auto max-w-md">
-                <div className="text-xs text-muted-foreground mb-2 text-center">
-                  ZŁĄCZE RJ-45 | Pozostałe próby: {attemptsLeft > 0 ? attemptsLeft : 0}
-                </div>
-
-                <div className="flex gap-2 justify-center">
-                  {cableSlots.map((cableId, index) => (
-                      <CableSlot
-                          key={index}
-                          index={index}
-                          cableId={cableId}
-                          onDrop={handleRjDrop}
-                          onRemove={handleRemoveCable}
-                      />
-                  ))}
-                </div>
+                <h2 className="text-lg text-foreground mb-2">ETAP 3: OKABLOWANIE RJ-45</h2>
+                <p className="text-lg font-bold text-primary mb-2">Punkty: {totalScore}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Przeciągnij i upuść 8 kabli w złączu, zgodnie z normą T568B.
+                </p>
               </div>
-            </div>
 
-            <div className="mb-6 flex-grow">
-              <p className="text-xs text-muted-foreground mb-3 text-center">
-                Dostępne kable: ({usedCableIds.length}/{correctOrder.length} użyte)
-              </p>
-              <motion.div layout className="flex flex-wrap gap-3 justify-center">
-                <AnimatePresence>
-                  {shuffledCables.map((cable) => (
-                      <CableSource
-                          key={cable.id}
-                          cable={cable}
-                          isUsed={usedCableIds.includes(cable.id)}
-                      />
-                  ))}
-                </AnimatePresence>
-              </motion.div>
-            </div>
+              <div className="mb-8">
+                <div className="bg-muted border-4 border-border p-6 mx-auto max-w-md">
+                  <div className="text-xs text-muted-foreground mb-2 text-center">
+                    ZŁĄCZE RJ-45 | Pozostałe próby: {attemptsLeft > 0 ? attemptsLeft : 0}
+                  </div>
 
-            <div className="space-y-4 animate-slide-in-up">
-              {rjHintLevel < rj45Hints.length && canAttempt && (
-                  <Button
-                      onClick={showRjHint}
-                      variant="outline"
-                      size="sm"
-                      className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal"
-                  >
-                    💡 POKAŻ PODPOWIEDŹ ({rjHintLevel + 1}/{rj45Hints.length}) (KOSZT: 5 PKT)
-                  </Button>
-              )}
-
-              {rjHintLevel > 0 && (
-                  <div className="space-y-2">
-                    {rj45Hints.slice(0, rjHintLevel).map((hint, index) => (
-                        <div
+                  <div className="flex gap-2 justify-center">
+                    {cableSlots.map((cableId, index) => (
+                        <CableSlot
                             key={index}
-                            className="p-3 border-2 border-secondary bg-secondary/20 text-secondary animate-slide-in-up"
-                        >
-                          <p className="text-xs">
-                            <span className="font-bold">Podpowiedź {index + 1}:</span> {hint}
-                          </p>
-                        </div>
+                            index={index}
+                            cableId={cableId}
+                            onDrop={handleRjDrop}
+                            onRemove={handleRemoveCable}
+                        />
                     ))}
                   </div>
-              )}
+                </div>
+              </div>
 
-              {showRjResult && (
-                  <div className={`p-4 border-4 mb-4 text-center ${rjCorrect ? "border-accent bg-accent/20" : "border-destructive bg-destructive/20"}`}>
-                    {rjCorrect ? (
-                        <>
-                          <CheckCircle2 className="w-8 h-8 text-accent mx-auto mb-2" />
-                          <h3 className="text-lg text-accent mb-1">PRAWIDŁOWO!</h3>
-                          <p className="text-xs text-accent">Zaraz przejdziesz do podsumowania, aby zobaczyć wyjaśnienia.</p>
-                        </>
-                    ) : (
-                        <>
-                          <XCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
-                          <h3 className="text-lg text-destructive mb-1">BŁĄD W OKABLOWANIU</h3>
-                          {attemptsLeft > 0 ? (
-                              <p className="text-xs text-destructive">Spróbuj ponownie. Próba: {rjAttempts}/{3}</p>
-                          ) : (
-                              <p className="text-xs text-destructive font-bold">WYKORZYSTANO MAKSYMALNĄ LICZBĘ PRÓB (3). Przejdź do podsumowania, aby zobaczyć rozwiązanie.</p>
-                          )}
+              <div className="mb-6 flex-grow">
+                <p className="text-xs text-muted-foreground mb-3 text-center">
+                  Dostępne kable: ({usedCableIds.length}/{correctOrder.length} użyte)
+                </p>
+                <motion.div layout className="flex flex-wrap gap-3 justify-center">
+                  <AnimatePresence>
+                    {shuffledCables.map((cable) => (
+                        <CableSource
+                            key={cable.id}
+                            cable={cable}
+                            isUsed={usedCableIds.includes(cable.id)}
+                        />
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
+              </div>
 
-                          <Button
-                              onClick={handleRjReset}
-                              disabled={!canAttempt}
-                              className="mt-3 w-full bg-destructive/80 text-primary-foreground hover:bg-destructive"
+              <div className="space-y-4 animate-slide-in-up">
+                {rjHintLevel < rj45Hints.length && canAttempt && (
+                    <Button
+                        onClick={showRjHint}
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal"
+                    >
+                      💡 POKAŻ PODPOWIEDŹ ({rjHintLevel + 1}/{rj45Hints.length}) (KOSZT: 5 PKT)
+                    </Button>
+                )}
+
+                {rjHintLevel > 0 && (
+                    <div className="space-y-2">
+                      {rj45Hints.slice(0, rjHintLevel).map((hint, index) => (
+                          <div
+                              key={index}
+                              className="p-3 border-2 border-secondary bg-secondary/20 text-secondary animate-slide-in-up"
                           >
-                            {canAttempt ? "WYCZYŚĆ I SPRÓBUJ PONOWNIE" : " Nawet dla mnie to jest trudne... "}
-                          </Button>
-                        </>
-                    )}
-                  </div>
-              )}
+                            <p className="text-xs">
+                              <span className="font-bold">Podpowiedź {index + 1}:</span> {hint}
+                            </p>
+                          </div>
+                      ))}
+                    </div>
+                )}
 
-              <Button
-                  onClick={handleCheckRjOrder}
-                  disabled={!isRjReady && canAttempt}
-                  className={`w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 ${!isRjReady && canAttempt ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {rjCorrect ? "PRZEJDŹ DO PODSUMOWANIA " : (canAttempt ? "AKCEPTUJ KOLEJNOŚĆ" : "ZOBACZ PODSUMOWANIE ")}
-              </Button>
-            </div>
+                {showRjResult && (
+                    <div className={`p-4 border-4 mb-4 text-center ${rjCorrect ? "border-accent bg-accent/20" : "border-destructive bg-destructive/20"}`}>
+                      {rjCorrect ? (
+                          <>
+                            <CheckCircle2 className="w-8 h-8 text-accent mx-auto mb-2" />
+                            <h3 className="text-lg text-accent mb-1">PRAWIDŁOWO!</h3>
+                            <p className="text-xs text-accent">Zaraz przejdziesz do podsumowania, aby zobaczyć wyjaśnienia.</p>
+                          </>
+                      ) : (
+                          <>
+                            <XCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
+                            <h3 className="text-lg text-destructive mb-1">BŁĄD W OKABLOWANIU</h3>
+                            {attemptsLeft > 0 ? (
+                                <p className="text-xs text-destructive">Spróbuj ponownie. Próba: {rjAttempts}/{3}</p>
+                            ) : (
+                                <p className="text-xs text-destructive font-bold">WYKORZYSTANO MAKSYMALNĄ LICZBĘ PRÓB (3). Przejdź do podsumowania, aby zobaczyć rozwiązanie.</p>
+                            )}
+
+                            <Button
+                                onClick={handleRjReset}
+                                disabled={!canAttempt}
+                                className="mt-3 w-full bg-destructive/80 text-primary-foreground hover:bg-destructive"
+                            >
+                              {canAttempt ? "WYCZYŚĆ I SPRÓBUJ PONOWNIE" : " Nawet dla mnie to jest trudne... "}
+                            </Button>
+                          </>
+                      )}
+                    </div>
+                )}
+
+                <Button
+                    onClick={handleCheckRjOrder}
+                    disabled={!isRjReady && canAttempt}
+                    className={`w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 ${!isRjReady && canAttempt ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {rjCorrect ? "PRZEJDŹ DO PODSUMOWANIA " : (canAttempt ? "AKCEPTUJ KOLEJNOŚĆ" : "ZOBACZ PODSUMOWANIE ")}
+                </Button>
+              </div>
             </Card>
           </div>
         </DndProvider>
@@ -1223,53 +1237,53 @@ const InformatykGame = () => {
           <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
             <div className="mb-6 text-center">
               <Cpu className={`w-12 h-12 ${isPerfect ? 'text-accent' : 'text-destructive'} mx-auto mb-4 animate-bounce`} />
-            <h2 className="text-lg text-foreground mb-2">PODSUMOWANIE MONTAŻU PC</h2>
-            <p className={`text-xl font-bold ${isPerfect ? 'text-accent' : 'text-destructive'}`}>
-              {assemblyResultMsg}
-            </p>
-            <p className="text-3xl font-bold text-primary mt-2">{assemblyScore} PKT</p>
-          </div>
-
-          <div className="mb-6 space-y-3">
-            <Button
-                onClick={toggleUsefulness}
-                variant="outline"
-                size="sm"
-                className={`w-full border-2 ${showUsefulness ? 'border-primary/50 bg-primary/20' : 'border-border hover:border-primary/50'} text-foreground arcade-button hover:bg-primary/10 hover:text-primary-foreground h-auto py-3 whitespace-normal`}
-            >
-              <Lightbulb className="w-4 h-4 mr-2" />
-              DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
-            </Button>
-          </div>
-
-          {showUsefulness && (
-              <div className="mb-6 animate-slide-in-up">
-                <div className="p-4 border-2 border-primary/50 bg-primary/10 text-primary-foreground">
-                  <p className="text-xs leading-relaxed text-foreground/80 font-semibold">{assemblyUsefulness}</p>
-                </div>
-              </div>
-          )}
-
-
-          <div className="mb-6 animate-slide-in-up flex-grow">
-            <div
-                className={`p-4 border-2 ${
-                    isPerfect
-                        ? "border-accent bg-accent/20 text-accent"
-                        : "border-destructive bg-destructive/20 text-destructive"
-                }`}
-            >
-              <p className="text-xs mb-2 font-bold">
-                {isPerfect ? "✓ WYNIK: PRAWIDŁOWO!" : "✗ WYNIK: NIEPRAWIDŁOWO"}
+              <h2 className="text-lg text-foreground mb-2">PODSUMOWANIE MONTAŻU PC</h2>
+              <p className={`text-xl font-bold ${isPerfect ? 'text-accent' : 'text-destructive'}`}>
+                {assemblyResultMsg}
               </p>
-              <p className="text-xs leading-relaxed">
-                {getAssemblyExplanation()}
-              </p>
-              <p className="text-xs font-bold mt-2">
-                Liczba prób: {assemblyAttempts}. Użyte podpowiedzi: {assemblyHints}.
-              </p>
+              <p className="text-3xl font-bold text-primary mt-2">{assemblyScore} PKT</p>
             </div>
-          </div>
+
+            <div className="mb-6 space-y-3">
+              <Button
+                  onClick={toggleUsefulness}
+                  variant="outline"
+                  size="sm"
+                  className={`w-full border-2 ${showUsefulness ? 'border-primary/50 bg-primary/20' : 'border-border hover:border-primary/50'} text-foreground arcade-button hover:bg-primary/10 hover:text-primary-foreground h-auto py-3 whitespace-normal`}
+              >
+                <Lightbulb className="w-4 h-4 mr-2" />
+                DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
+              </Button>
+            </div>
+
+            {showUsefulness && (
+                <div className="mb-6 animate-slide-in-up">
+                  <div className="p-4 border-2 border-primary/50 bg-primary/10 text-primary-foreground">
+                    <p className="text-xs leading-relaxed text-foreground/80 font-semibold">{assemblyUsefulness}</p>
+                  </div>
+                </div>
+            )}
+
+
+            <div className="mb-6 animate-slide-in-up flex-grow">
+              <div
+                  className={`p-4 border-2 ${
+                      isPerfect
+                          ? "border-accent bg-accent/20 text-accent"
+                          : "border-destructive bg-destructive/20 text-destructive"
+                  }`}
+              >
+                <p className="text-xs mb-2 font-bold">
+                  {isPerfect ? "✓ WYNIK: PRAWIDŁOWO!" : "✗ WYNIK: NIEPRAWIDŁOWO"}
+                </p>
+                <p className="text-xs leading-relaxed">
+                  {getAssemblyExplanation()}
+                </p>
+                <p className="text-xs font-bold mt-2">
+                  Liczba prób: {assemblyAttempts}. Użyte podpowiedzi: {assemblyHints}.
+                </p>
+              </div>
+            </div>
 
             <Button
                 onClick={() => {
@@ -1292,24 +1306,34 @@ const InformatykGame = () => {
     const canAttempt = assemblyAttempts < 3;
     const assemblyHintsAvailable = assemblyHintsData.length;
 
+    // prepare list of available components to render
+    const availableComponents = assemblyComponents.filter(c => !Object.values(componentSlots).includes(c.id));
+
     return (
         <DndProvider backend={HTML5Backend}>
           <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
             <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
               <div className="mb-6 text-center">
-                  <Cpu className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
-              <h2 className="text-lg text-foreground mb-2">ETAP 2: MONTAŻ PC</h2>
-              <p className="text-lg font-bold text-primary mb-2">Punkty: {totalScore}</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Przeciągnij i upuść podzespoły na płytę główną.
-                Pozostałe próby: {attemptsLeft > 0 ? attemptsLeft : 0}
-              </p>
+                <Cpu className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
+                <h2 className="text-lg text-foreground mb-2">ETAP 2: MONTAŻ PC</h2>
+                <p className="text-lg font-bold text-primary mb-2">Punkty: {totalScore}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Przeciągnij i upuść podzespoły na płytę główną.
+                  Pozostałe próby: {attemptsLeft > 0 ? attemptsLeft : 0}
+                </p>
 
               </div>
 
 
-              {/* Płyta Główna (Grafika jako tło) */}
+              {/* Płyta Główna */}
               <div className="flex justify-center mb-8 bg-slate-950 relative border-4 md:border-8 border-slate-800 rounded-2xl overflow-hidden shadow-2xl aspect-video w-full max-w-3xl mx-auto">
+                {/*/!* render PC under MB so you can tweak PC_IMG sizing easily (TODO spots are in prior versions) *!/*/}
+                {/*<img*/}
+                {/*    src={PC_IMG}*/}
+                {/*    alt="PC background"*/}
+                {/*    className="absolute inset-0 w-full h-full object-contain opacity-70"*/}
+                {/*/>*/}
+
                 <img
                     src={MB_IMG}
                     alt="Motherboard"
@@ -1318,115 +1342,117 @@ const InformatykGame = () => {
 
                 {/* Nakładka pozycjonująca (proporcje 16:9) */}
                 <div className="absolute inset-0 w-full h-full">
-                  {Object.keys(assemblySlots).map((slotName) => (
-                      <ComponentDropZone
-                          key={slotName}
-                          slotName={slotName}
-                          slotData={assemblySlots[slotName as keyof typeof assemblySlots] as any}
-                          componentId={componentSlots[slotName]}
-                          onDrop={handleAssemblyDrop}
-                          onRemove={handleRemoveComponent}
-                      />
-                  ))}
+                  {Object.keys(assemblySlots)
+                      // Render COOLER slot only when showCoolerSlot is true; this makes it appear when CPU is placed
+                      .filter(slotName => slotName !== 'COOLER' || showCoolerSlot)
+                      .map((slotName) => (
+                          <ComponentDropZone
+                              key={slotName}
+                              slotName={slotName}
+                              slotData={assemblySlots[slotName as keyof typeof assemblySlots] as any}
+                              componentId={componentSlots[slotName]}
+                              onDrop={handleAssemblyDrop}
+                              onRemove={handleRemoveComponent}
+                          />
+                      ))}
                 </div>
               </div>
 
               {/* Dostępne Komponenty */}
-            <div className="mb-6 flex-grow">
-              <p className="text-xs text-muted-foreground mb-3 text-center">
-                Dostępne podzespoły:
-              </p>
-              {/*TODO: Zrobić napis "Wykorzystałeś wszystkie podzespoły !!!!!!"*/}
-              <div className="flex flex-wrap gap-3 justify-center">
-                {assemblyComponents.map((component) => {
-                  // Sprawdzamy, czy ten komponent jest już użyty (w dowolnym slocie)
-                  const isUsed = Object.values(componentSlots).includes(component.id);
-
-                  if (isUsed) return null;
-
-                  return (
-                      <DraggableComponent
-                          key={component.id}
-                          component={component}
-                          currentSlot={null}
-                          onRemove={handleRemoveComponent}
-                      />
-                  );
-                })}
+              <div className="mb-6 flex-grow">
+                <p className="text-xs text-muted-foreground mb-3 text-center">
+                  Dostępne podzespoły:
+                </p>
+                {/* jeśli brak dostępnych elementów -> pokaż komunikat */}
+                <div className="flex flex-wrap gap-3 justify-center">
+                  {availableComponents.length === 0 ? (
+                      <div className="p-4 border-2 border-border rounded-lg text-sm text-muted-foreground">
+                        Brak przedmiotów
+                      </div>
+                  ) : (
+                      availableComponents.map((component) => (
+                          <DraggableComponent
+                              key={component.id}
+                              component={component}
+                              currentSlot={null}
+                              onRemove={handleRemoveComponent}
+                          />
+                      ))
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Sekcja Akcji */}
-            <div className="space-y-4 animate-slide-in-up">
-              {assemblyHints < assemblyHintsAvailable && canAttempt && (
-                  <Button
-                      onClick={showAssemblyHint}
-                      variant="outline"
-                      size="sm"
-                      className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal"
-                  >
-                    💡 POKAŻ PODPOWIEDŹ ({assemblyHints + 1}/{assemblyHintsAvailable}) (KOSZT: 5 PKT)
-                  </Button>
-              )}
+              {/* Sekcja Akcji */}
+              <div className="space-y-4 animate-slide-in-up">
+                {assemblyHints < assemblyHintsAvailable && canAttempt && (
+                    <Button
+                        onClick={showAssemblyHint}
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal"
+                    >
+                      💡 POKAŻ PODPOWIEDŹ ({assemblyHints + 1}/{assemblyHintsAvailable}) (KOSZT: 5 PKT)
+                    </Button>
+                )}
 
-              {assemblyHints > 0 && (
-                  <div className="space-y-2">
-                    {assemblyHintsData.slice(0, assemblyHints).map((hint, index) => (
-                        <div
-                            key={index}
-                            className="p-3 border-2 border-secondary bg-secondary/20 text-secondary animate-slide-in-up"
-                        >
-                          <p className="text-xs">
-                            <span className="font-bold">Podpowiedź {index + 1}:</span> {hint}
-                          </p>
-                        </div>
-                    ))}
-                  </div>
-              )}
-
-              {showAssemblyResult && (
-                  <div className={`p-4 border-4 mb-4 text-center ${assemblyScore >= 25 ? "border-accent bg-accent/20" : "border-destructive bg-destructive/20"}`}>
-                    {assemblyScore >= 25 ? (
-                        <>
-                          <CheckCircle2 className="w-8 h-8 text-accent mx-auto mb-2" />
-                          <h3 className="text-lg text-accent mb-1">PRAWIDŁOWO!</h3>
-                          <p className="text-xs text-accent">Zaraz przejdziesz do podsumowania, aby zobaczyć wyjaśnienia.</p>
-                        </>
-                    ) : (
-                        <>
-                          <XCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
-                          <h3 className="text-lg text-destructive mb-1">BŁĄD W MONTAŻU</h3>
-                          {attemptsLeft > 0 ? (
-                              <p className="text-xs text-destructive">Spróbuj ponownie. Próba: {assemblyAttempts}/{3}</p>
-                          ) : (
-                              <p className="text-xs text-destructive font-bold">WYKORZYSTANO MAKSYMALNĄ LICZBĘ PRÓB (3). Przejdź do podsumowania, aby zobaczyć rozwiązanie.</p>
-                          )}
-
-                          <Button
-                              onClick={handleAssemblyReset}
-                              disabled={!canAttempt}
-                              className="mt-3 w-full bg-destructive/80 text-primary-foreground hover:bg-destructive"
+                {assemblyHints > 0 && (
+                    <div className="space-y-2">
+                      {assemblyHintsData.slice(0, assemblyHints).map((hint, index) => (
+                          <div
+                              key={index}
+                              className="p-3 border-2 border-secondary bg-secondary/20 text-secondary animate-slide-in-up"
                           >
-                            {canAttempt ? "WYCZYŚĆ I SPRÓBUJ PONOWNIE" : "ZOBACZ PODSUMOWANIE "}
-                          </Button>
-                        </>
-                    )}
-                  </div>
-              )}
+                            <p className="text-xs">
+                              <span className="font-bold">Podpowiedź {index + 1}:</span> {hint}
+                            </p>
+                          </div>
+                      ))}
+                    </div>
+                )}
 
-              <Button
-                  onClick={checkAssembly}
-                  disabled={!isAssemblyReady && canAttempt}
-                  className={`w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12`}
-              >
-                {assemblyScore >= 25 ? "PRZEJDŹ DO PODSUMOWANIA " : (canAttempt ? "ZATWIERDŹ MONTAŻ" : "ZOBACZ PODSUMOWANIE ")}
-              </Button>
-            </div>
-              </Card>
-            </div>
-          </DndProvider>
-          );
-      }
+                {showAssemblyResult && (
+                    <div className={`p-4 border-4 mb-4 text-center ${assemblyScore >= 25 ? "border-accent bg-accent/20" : "border-destructive bg-destructive/20"}`}>
+                      {assemblyScore >= 25 ? (
+                          <>
+                            <CheckCircle2 className="w-8 h-8 text-accent mx-auto mb-2" />
+                            <h3 className="text-lg text-accent mb-1">PRAWIDŁOWO!</h3>
+                            <p className="text-xs text-accent">Zaraz przejdziesz do podsumowania, aby zobaczyć wyjaśnienia.</p>
+                          </>
+                      ) : (
+                          <>
+                            <XCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
+                            <h3 className="text-lg text-destructive mb-1">BŁĄD W MONTAŻU</h3>
+                            {attemptsLeft > 0 ? (
+                                <p className="text-xs text-destructive">Spróbuj ponownie. Próba: {assemblyAttempts}/{3}</p>
+                            ) : (
+                                <p className="text-xs text-destructive font-bold">WYKORZYSTANO MAKSYMALNĄ LICZBĘ PRÓB (3). Przejdź do podsumowania, aby zobaczyć rozwiązanie.</p>
+                            )}
+
+                            <Button
+                                onClick={handleAssemblyReset}
+                                disabled={!canAttempt}
+                                className="mt-3 w-full bg-destructive/80 text-primary-foreground hover:bg-destructive"
+                            >
+                              {canAttempt ? "WYCZYŚĆ I SPRÓBUJ PONOWNIE" : "ZOBACZ PODSUMOWANIE "}
+                            </Button>
+                          </>
+                      )}
+                    </div>
+                )}
+
+                <Button
+                    onClick={checkAssembly}
+                    disabled={!isAssemblyReady && canAttempt}
+                    className={`w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12`}
+                >
+                  {assemblyScore >= 25 ? "PRZEJDŹ DO PODSUMOWANIA " : (canAttempt ? "ZATWIERDŹ MONTAŻ" : "ZOBACZ PODSUMOWANIE ")}
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </DndProvider>
+    );
+  }
 
   // 6. QUIZ
 
@@ -1435,154 +1461,154 @@ const InformatykGame = () => {
         <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
           <div className="mb-6 text-center">
             <Shield className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
-          <h2 className="text-lg text-foreground mb-2">ETAP 1: QUIZ BEZPIECZEŃSTWA</h2>
-          <p className="text-lg font-bold text-primary mb-2">Punkty: {totalScore}</p>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Pytanie {currentQuestion + 1}/{securityQuestions.length}. Poprawna odpowiedź: 10 PKT.
-          </p>
-        </div>
+            <h2 className="text-lg text-foreground mb-2">ETAP 1: QUIZ BEZPIECZEŃSTWA</h2>
+            <p className="text-lg font-bold text-primary mb-2">Punkty: {totalScore}</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Pytanie {currentQuestion + 1}/{securityQuestions.length}. Poprawna odpowiedź: 10 PKT.
+            </p>
+          </div>
 
 
-        <div className="mb-6 flex-grow">
-          <h3 className="text-md font-semibold mb-4 text-foreground">
-            {question.question}
-          </h3>
-          <div className="space-y-3">
-            {question.options.map((option, index) => {
-              const isCorrectAnswer = index === question.correctAnswer;
-              const isSelected = selectedAnswer === index;
-              const showCorrect = showResult && isCorrectAnswer;
-              const showWrong = showResult && isSelected && !isCorrectAnswer;
-              const baseClasses = "w-full justify-start text-left arcade-button transition-all rounded-xl duration-200 cursor-pointer p-4 text-sm h-auto whitespace-normal";
+          <div className="mb-6 flex-grow">
+            <h3 className="text-md font-semibold mb-4 text-foreground">
+              {question.question}
+            </h3>
+            <div className="space-y-3">
+              {question.options.map((option, index) => {
+                const isCorrectAnswer = index === question.correctAnswer;
+                const isSelected = selectedAnswer === index;
+                const showCorrect = showResult && isCorrectAnswer;
+                const showWrong = showResult && isSelected && !isCorrectAnswer;
+                const baseClasses = "w-full justify-start text-left arcade-button transition-all rounded-xl duration-200 cursor-pointer p-4 text-sm h-auto whitespace-normal";
 
-              let stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30";
+                let stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30";
 
-              if (showResult) {
-                if (showCorrect) {
-                  stateClasses = "border-accent bg-accent/20 text-accent font-bold cursor-not-allowed";
-                } else if (showWrong) {
-                  stateClasses = "border-destructive bg-destructive/20 text-destructive font-bold cursor-not-allowed";
-                } else if (isCorrectAnswer) {
-                  stateClasses = "border-accent bg-accent/10 text-accent cursor-not-allowed";
+                if (showResult) {
+                  if (showCorrect) {
+                    stateClasses = "border-accent bg-accent/20 text-accent font-bold cursor-not-allowed";
+                  } else if (showWrong) {
+                    stateClasses = "border-destructive bg-destructive/20 text-destructive font-bold cursor-not-allowed";
+                  } else if (isCorrectAnswer) {
+                    stateClasses = "border-accent bg-accent/10 text-accent cursor-not-allowed";
+                  } else {
+                    stateClasses = "border-border bg-background/50 text-muted-foreground opacity-60 cursor-not-allowed";
+                  }
+                } else if (isSelected) {
+                  stateClasses = "border-primary bg-primary/20 text-primary font-bold";
                 } else {
-                  stateClasses = "border-border bg-background/50 text-muted-foreground opacity-60 cursor-not-allowed";
+                  stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30 hover:bg-background/5 hover:text-foreground";
                 }
-              } else if (isSelected) {
-                stateClasses = "border-primary bg-primary/20 text-primary font-bold";
-              } else {
-                stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30 hover:bg-background/5 hover:text-foreground";
-              }
 
-              return (
-                  <Button
-                      key={index}
-                      onClick={() => handleAnswerClick(index)}
-                      variant="outline"
-                      disabled={showResult}
-                      className={`${baseClasses} ${stateClasses}`}
-                  >
-                    <div className="flex items-center justify-between w-full">
+                return (
+                    <Button
+                        key={index}
+                        onClick={() => handleAnswerClick(index)}
+                        variant="outline"
+                        disabled={showResult}
+                        className={`${baseClasses} ${stateClasses}`}
+                    >
+                      <div className="flex items-center justify-between w-full">
                     <span className="flex-grow">
                         {option}
                     </span>
-                      {showCorrect && <CheckCircle2 className="w-5 h-5 ml-2" />}
-                      {showWrong && <XCircle className="w-5 h-5 ml-2" />}
-                    </div>
-                  </Button>
-              );
-            })}
+                        {showCorrect && <CheckCircle2 className="w-5 h-5 ml-2" />}
+                        {showWrong && <XCircle className="w-5 h-5 ml-2" />}
+                      </div>
+                    </Button>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
           <div className="space-y-4 animate-slide-in-up">
 
             {hintLevel < question.podpowiedzi.length && !showResult && (
-              <Button
-                  onClick={showQuizHint}
-                  variant="outline"
-                  size="sm"
-                  className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal"
-              >
-                💡 POKAŻ PODPOWIEDŹ ({hintLevel + 1}/{question.podpowiedzi.length}) (KOSZT: 2 PKT)
-              </Button>
-          )}
-
-          {hintLevel > 0 && !showResult && (
-              <div className="space-y-2">
-                {question.podpowiedzi.slice(0, hintLevel).map((hint, index) => (
-                    <div
-                        key={index}
-                        className="p-3 border-2 border-secondary bg-secondary/20 text-secondary animate-slide-in-up"
-                    >
-                      <p className="text-xs">
-                        <span className="font-bold">Podpowiedź {index + 1}:</span> {hint}
-                      </p>
-                    </div>
-                ))}
-              </div>
-          )}
-
-          {showResult && (
-              <>
-                <div
-                    className={`p-4 border-4 mb-4 text-center ${
-                        selectedAnswer === question.correctAnswer
-                            ? "border-accent bg-accent/20"
-                            : "border-destructive bg-destructive/20"
-                    }`}
-                >
-                  {selectedAnswer === question.correctAnswer ? (
-                      <>
-                        <CheckCircle2 className="w-8 h-8 text-accent mx-auto mb-2" />
-                        <h3 className="text-lg text-accent mb-1">PRAWIDŁOWO!</h3>
-                        <p className="text-xs text-accent">+10 pkt za odpowiedź.</p>
-                      </>
-                  ) : (
-                      <>
-                        <XCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
-                        <h3 className="text-lg text-destructive mb-1">BŁĄD!</h3>
-                        <p className="text-xs text-destructive">Wyjaśnienie: {question.explanation}</p>
-                      </>
-                  )}
-                </div>
-
-                {/* PRZENIESIONY PRZYCISK I WIDOK 'USEFULNESS' */}
                 <Button
-                    onClick={toggleUsefulness}
+                    onClick={showQuizHint}
                     variant="outline"
                     size="sm"
-                    className={`w-full border-2 ${showUsefulness ? 'border-primary/50 bg-primary/20' : 'border-border hover:border-primary/50'} text-foreground arcade-button hover:bg-primary/10 hover:text-primary-foreground h-auto py-3 whitespace-normal`}
+                    className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal"
                 >
-                  <Lightbulb className="w-4 h-4 mr-2" />
-                  DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
+                  💡 POKAŻ PODPOWIEDŹ ({hintLevel + 1}/{question.podpowiedzi.length}) (KOSZT: 2 PKT)
                 </Button>
+            )}
 
-                {showUsefulness && (
-                    <div className="p-4 border-2 border-primary/50 bg-primary/10 text-primary-foreground animate-slide-in-up">
-                      <p className="text-xs leading-relaxed text-foreground/80 font-semibold">{question.usefulness}</p>
-                    </div>
-                )}
-              </>
-          )}
+            {hintLevel > 0 && !showResult && (
+                <div className="space-y-2">
+                  {question.podpowiedzi.slice(0, hintLevel).map((hint, index) => (
+                      <div
+                          key={index}
+                          className="p-3 border-2 border-secondary bg-secondary/20 text-secondary animate-slide-in-up"
+                      >
+                        <p className="text-xs">
+                          <span className="font-bold">Podpowiedź {index + 1}:</span> {hint}
+                        </p>
+                      </div>
+                  ))}
+                </div>
+            )}
 
-          {showResult && (
-              <Button
-                  onClick={() => {
-                    if (currentQuestion < securityQuestions.length - 1) {
-                      handleNext();
-                    } else {
-                      setQuizComplete(true);
-                      setSelectedAnswer(null);
-                      setShowResult(false);
-                      setShowUsefulness(false);
-                      setHintLevel(0);
-                    }
-                  }}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 text-md tracking-wider font-bold shadow-lg shadow-primary/20"
-              >
-                {currentQuestion < securityQuestions.length - 1 ? "NASTĘPNE PYTANIE " : "ZACZNIJ MONTAŻ PC "}
-              </Button>
-          )}
+            {showResult && (
+                <>
+                  <div
+                      className={`p-4 border-4 mb-4 text-center ${
+                          selectedAnswer === question.correctAnswer
+                              ? "border-accent bg-accent/20"
+                              : "border-destructive bg-destructive/20"
+                      }`}
+                  >
+                    {selectedAnswer === question.correctAnswer ? (
+                        <>
+                          <CheckCircle2 className="w-8 h-8 text-accent mx-auto mb-2" />
+                          <h3 className="text-lg text-accent mb-1">PRAWIDŁOWO!</h3>
+                          <p className="text-xs text-accent">+10 pkt za odpowiedź.</p>
+                        </>
+                    ) : (
+                        <>
+                          <XCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
+                          <h3 className="text-lg text-destructive mb-1">BŁĄD!</h3>
+                          <p className="text-xs text-destructive">Wyjaśnienie: {question.explanation}</p>
+                        </>
+                    )}
+                  </div>
+
+                  {/* PRZENIESIONY PRZYCISK I WIDOK 'USEFULNESS' */}
+                  <Button
+                      onClick={toggleUsefulness}
+                      variant="outline"
+                      size="sm"
+                      className={`w-full border-2 ${showUsefulness ? 'border-primary/50 bg-primary/20' : 'border-border hover:border-primary/50'} text-foreground arcade-button hover:bg-primary/10 hover:text-primary-foreground h-auto py-3 whitespace-normal`}
+                  >
+                    <Lightbulb className="w-4 h-4 mr-2" />
+                    DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
+                  </Button>
+
+                  {showUsefulness && (
+                      <div className="p-4 border-2 border-primary/50 bg-primary/10 text-primary-foreground animate-slide-in-up">
+                        <p className="text-xs leading-relaxed text-foreground/80 font-semibold">{question.usefulness}</p>
+                      </div>
+                  )}
+                </>
+            )}
+
+            {showResult && (
+                <Button
+                    onClick={() => {
+                      if (currentQuestion < securityQuestions.length - 1) {
+                        handleNext();
+                      } else {
+                        setQuizComplete(true);
+                        setSelectedAnswer(null);
+                        setShowResult(false);
+                        setShowUsefulness(false);
+                        setHintLevel(0);
+                      }
+                    }}
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 text-md tracking-wider font-bold shadow-lg shadow-primary/20"
+                >
+                  {currentQuestion < securityQuestions.length - 1 ? "NASTĘPNE PYTANIE " : "ZACZNIJ MONTAŻ PC "}
+                </Button>
+            )}
           </div>
         </Card>
       </div>

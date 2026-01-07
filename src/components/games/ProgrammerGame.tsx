@@ -687,7 +687,7 @@ export default function ProgrammerGame() {
                 } else if (showWrong) {
                   stateClasses = "border-destructive bg-destructive/20 text-destructive font-bold cursor-not-allowed";
                 } else if (isCorrectAnswer) {
-                  // Pokaż poprawną, jeśli użytkownik wybrał źle
+                  // Pokaż poprawną, jeśli użytkownik wybra�� źle
                   stateClasses = "border-accent bg-accent/10 text-accent cursor-not-allowed";
                 } else {
                   stateClasses = "border-border bg-background/50 text-muted-foreground opacity-60 cursor-not-allowed";
@@ -724,14 +724,27 @@ export default function ProgrammerGame() {
           <div className="space-y-3">
             {q.answers.map((a) => {
               const isSelected = (val || []).includes(a.id);
-              // Stylizacja checkboxa
-              const containerClass = isSelected
+              const isCorrectOption = (q.correct || []).includes(a.id);
+
+              // Stylizacja checkboxa i kontenera z uwzględnieniem pokazywania poprawnej odpowiedzi
+              let containerClass = isSelected
                   ? "border-primary bg-primary/10"
                   : "border-border hover:border-primary/50 bg-background hover:shadow-md hover:shadow-primary/30";
 
+              // Jeśli wynik jest pokazany — pokaż poprawne/niepoprawne
+              if (showResult) {
+                if (isCorrectOption) {
+                  containerClass = "border-accent bg-accent/10 text-accent font-semibold";
+                } else if (isSelected && !isCorrectOption) {
+                  containerClass = "border-destructive bg-destructive/10 text-destructive font-semibold";
+                } else {
+                  containerClass = "border-border bg-background/50 text-muted-foreground opacity-70";
+                }
+              }
+
               return (
                   <div key={a.id}
-                       className={`flex items-center gap-3 p-4 border-2 rounded-xl arcade-button transition-all cursor-pointer h-auto whitespace-normal ${showResult ? 'opacity-80 pointer-events-none' : ''} ${containerClass}`}
+                       className={`flex items-center gap-3 p-4 border-2 rounded-xl arcade-button transition-all cursor-pointer h-auto whitespace-normal ${showResult ? 'pointer-events-none' : ''} ${containerClass}`}
                        onClick={() => {
                          if(showResult) return;
                          const arr = val || [];
@@ -744,9 +757,26 @@ export default function ProgrammerGame() {
                         className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground border-primary"
                     />
                     <span className="text-xs">{a.text}</span>
+
+                    {/* Ikony: pokaż check dla poprawnych i X dla błędnych wybranych */}
+                    {showResult && isCorrectOption && <CheckCircle2 className="w-5 h-5 ml-auto text-accent" />}
+                    {showResult && isSelected && !isCorrectOption && <XCircle className="w-5 h-5 ml-auto text-destructive" />}
                   </div>
               )
             })}
+
+            {/* Jeśli odpowiedź niepoprawna, wyświetl krótki podpowiedź-show poprawne elementy (tekstowe) */}
+            {showResult && feedback && !feedback.ok && (
+                <div className="p-3 mt-2 border-2 border-secondary/40 bg-secondary/10 rounded text-xs">
+                  <strong>Poprawne odpowiedzi:</strong>
+                  <div className="mt-1 ml-3">
+                    {(q.correct || []).map((id: string) => {
+                      const ans = q.answers.find((x: any) => x.id === id);
+                      return <div key={id}>• {ans?.text}</div>
+                    })}
+                  </div>
+                </div>
+            )}
           </div>
       );
     }
@@ -760,6 +790,19 @@ export default function ProgrammerGame() {
                 disabled={showResult}
                 className="border-2 border-primary/50 focus-visible:ring-0 focus-visible:border-primary text-lg p-6 rounded-xl"
             />
+
+            {/* Po pokazaniu wyniku i gdy odpowiedź była niepoprawna, pokaż poprawną odpowiedź (lub kilka wariantów) */}
+            {showResult && feedback && !feedback.ok && (
+                <div className="p-3 mt-2 border-2 border-secondary/40 bg-secondary/10 rounded text-xs">
+                  <div className="font-bold mb-1">Poprawna odpowiedź:</div>
+                  <div className="ml-2">
+                    <div>{q.correctText}</div>
+                    {(q.acceptable || []).length > 0 && (
+                        <div className="text-muted-foreground text-[13px] mt-1">Akceptowane alternatywy: {(q.acceptable || []).join(", ")}</div>
+                    )}
+                  </div>
+                </div>
+            )}
           </div>
       );
     }
@@ -781,18 +824,50 @@ export default function ProgrammerGame() {
             <div className="space-y-1">
               <label className="text-xs text-muted-foreground font-bold uppercase">Opis działania:</label>
               <div className="grid grid-cols-1 gap-2">
-                {q.answers.map((a, index) => (
-                    <button
-                        key={a.id}
-                        onClick={() => updateAnswer(a.id)}
-                        disabled={showResult}
-                        className={`p-4 border rounded-xl h-auto whitespace-normal text-left text-sm transition-all arcade-button hover:shadow-md hover:shadow-primary/30 ${answers[q.id] === a.id ? "bg-primary/20 border-primary text-primary font-bold" : "bg-background border-border hover:border-primary"}`}
-                    >
-                      {a.text}
-                    </button>
-                ))}
+                {q.answers.map((a, index) => {
+                  const isChosen = answers[q.id] === a.id;
+                  const isCorrect = !!a.correct;
+
+                  let btnClass = "p-4 border rounded-xl h-auto whitespace-normal text-left text-sm transition-all arcade-button hover:shadow-md hover:shadow-primary/30";
+                  if (showResult) {
+                    if (isCorrect) btnClass += " bg-accent/10 border-accent text-accent font-semibold";
+                    else if (isChosen && !isCorrect) btnClass += " bg-destructive/10 border-destructive text-destructive font-semibold";
+                    else btnClass += " bg-background/50 text-muted-foreground";
+                  } else {
+                    btnClass += isChosen ? " bg-primary/20 border-primary text-primary font-bold" : " bg-background border-border hover:border-primary";
+                  }
+
+                  return (
+                      <button
+                          key={a.id}
+                          onClick={() => updateAnswer(a.id)}
+                          disabled={showResult}
+                          className={btnClass}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span>{a.text}</span>
+                          {showResult && isCorrect && <CheckCircle2 className="w-5 h-5 ml-2 text-accent" />}
+                          {showResult && isChosen && !isCorrect && <XCircle className="w-5 h-5 ml-2 text-destructive" />}
+                        </div>
+                      </button>
+                  )
+                })}
               </div>
             </div>
+
+            {/* Jeśli niepoprawne, pokaż co było oczekiwane */}
+            {showResult && feedback && !feedback.ok && (
+                <div className="p-3 mt-2 border-2 border-secondary/40 bg-secondary/10 rounded text-xs">
+                  <div className="font-bold mb-1">Poprawne rozwiązanie:</div>
+                  <div className="ml-2">
+                    <div>Wartość zwrotna: <strong>{q.correctText}</strong></div>
+                    <div className="mt-1">Opis działania: <strong>{q.answers.find((a: any) => a.correct)?.text}</strong></div>
+                    {(q.acceptable || []).length > 0 && (
+                        <div className="text-muted-foreground text-[13px] mt-1">Akceptowane alternatywy wartości: {(q.acceptable || []).join(", ")}</div>
+                    )}
+                  </div>
+                </div>
+            )}
           </div>
       );
     }

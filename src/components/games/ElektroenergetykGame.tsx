@@ -94,7 +94,7 @@ const quizQuestions = [
 
 /* ----------------- ETAP 2: DIAGNOSTYKA OBWODU (PRAW0 OHMA) ----------------- */
 function DiagnosticMathGame({ onFinish, addScore }: { onFinish: () => void; addScore: (points: number) => void }) {
-    // system kar – w energetyce błąd kosztuje, więc tutaj uciekają punkty.
+  // system kar – w energetyce błąd kosztuje, więc tutaj uciekają punkty.
   const [maxStagePoints, setMaxStagePoints] = useState(80);
   const [userInput, setUserInput] = useState("");
   const [status, setStatus] = useState<"idle" | "error" | "success">("idle");
@@ -227,7 +227,7 @@ function ShuffledTrakcjaGame({ onFinish, addScore }: { onFinish: () => void; add
             `}
               >
                 <el.icon size={32} />
-                <span className="text-[9px] font-black uppercase text-center leading-tight">{el.name}</span>
+                <span className="text-[9px] font-black uppercase tracking-tight leading-tight">{el.name}</span>
               </button>
           ))}
         </div>
@@ -258,14 +258,14 @@ export default function ElektroenergetykGame() {
 // żeby nie zasypać użytkownika ścianą tekstu na jednym ekranie.
   const reasons = [
     { title: "Deficyt Specjalistów", text: "Brakuje tysięcy pracowników w sektorze energetycznym i kolejowym. To gwarancja stabilnej pracy i wysokich zarobków tuż po szkole.", icon: HardHat },
-    { title: "Współpraca z KW", text: "Szkoła współpracuje z Kolejami Wielkopolskimi. Najlepsi uczniowie mają szansę na stypendia i pewny start zawodowy w Poznaniu.", icon: TrainFront },
-    { title: "Uprawnienia SEP", text: "W ramach nauki zdobędziesz prestiżowe uprawnienia SEP uznawane w całej UE. To klucz do pracy przy wysokich napięciach.", icon: Zap },
+    { title: "Współpraca z KW", text: "Szkoła współpracuje z Kolejami Wielkopolskimi. Najlepsi uczniowie mają szans�� na stypendia i pewny start zawodowy w Poznaniu.", icon: TrainFront },
+    { title: "Uprawnienia SEP", text: "W ramach nauki zdobędziesz prestiżowe uprawnienia SEP uznawane w całej UE. To klucz do pracy przy wysokich napięciami.", icon: Zap },
     { title: "Zielona Energia", text: "Kolej to najbardziej ekologiczny transport. Pracując tutaj, realnie dbasz o środowisko, budując infrastrukturę przyszłości.", icon: Gauge },
   ];
 
   const q = quizQuestions[qIndex];
 
- // Mechanizm blokady, żeby uczeń nie mógł "wyklikać" wszystkich odpowiedzi na raz
+  // Mechanizm blokady, żeby uczeń nie mógł "wyklikać" wszystkich odpowiedzi na raz
   // zanim system (i animacja) przetworzy wynik.
   const handleSingleChoice = (answerId: string) => {
     if (showResult || locked) return;
@@ -355,22 +355,39 @@ export default function ElektroenergetykGame() {
                           </Button>
                       ))}
 
-                      {q.type === "multiple" && q.answers.map(a => (
-                          <div
-                              key={a.id}
-                              onClick={() => {
-                                if (showResult) return;
-                                const prev = answers[q.id] || [];
-                                setAnswers({ ...answers, [q.id]: prev.includes(a.id) ? prev.filter((x: any) => x !== a.id) : [...prev, a.id] });
-                              }}
-                              className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer arcade-button transition-all hover:border-blue-500 hover:shadow-md hover:shadow-blue-500/20 ${
-                                  (answers[q.id] || []).includes(a.id) ? "border-blue-500 bg-blue-500/10 shadow-md shadow-blue-500/20" : "border-border bg-background"
-                              } ${showResult ? "opacity-60 pointer-events-none" : ""}`}
-                          >
-                            <Checkbox checked={(answers[q.id] || []).includes(a.id)} onCheckedChange={() => {}} className="border-blue-500" />
-                            <span className="text-sm font-bold uppercase tracking-tight">{a.text}</span>
-                          </div>
-                      ))}
+                      {q.type === "multiple" && q.answers.map(a => {
+                        const isSelected = (answers[q.id] || []).includes(a.id);
+                        const isCorrectOption = (q.correct || []).includes(a.id);
+
+                        // Styl z uwzględnieniem wyników po sprawdzeniu
+                        let baseClass = `flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer arcade-button transition-all hover:border-blue-500 hover:shadow-md hover:shadow-blue-500/20 ${
+                            isSelected ? "border-blue-500 bg-blue-500/10 shadow-md shadow-blue-500/20" : "border-border bg-background"
+                        }`;
+
+                        if (showResult) {
+                          if (isCorrectOption) baseClass = "flex items-center gap-3 p-4 border-2 rounded-xl arcade-button transition-all border-accent bg-accent/10 text-accent font-semibold";
+                          else if (isSelected && !isCorrectOption) baseClass = "flex items-center gap-3 p-4 border-2 rounded-xl arcade-button transition-all border-destructive bg-destructive/10 text-destructive font-semibold";
+                          else baseClass = "flex items-center gap-3 p-4 border-2 rounded-xl arcade-button transition-all border-border bg-background/50 text-muted-foreground opacity-70";
+                        }
+
+                        return (
+                            <div
+                                key={a.id}
+                                onClick={() => {
+                                  if (showResult) return;
+                                  const prev = answers[q.id] || [];
+                                  setAnswers({ ...answers, [q.id]: prev.includes(a.id) ? prev.filter((x: any) => x !== a.id) : [...prev, a.id] });
+                                }}
+                                className={baseClass + (showResult ? " pointer-events-none" : "")}
+                            >
+                              <Checkbox checked={isSelected} onCheckedChange={() => {}} className="border-blue-500" />
+                              <span className="text-sm font-bold uppercase tracking-tight">{a.text}</span>
+
+                              {showResult && isCorrectOption && <CheckCircle2 className="w-5 h-5 ml-auto text-accent" />}
+                              {showResult && isSelected && !isCorrectOption && <XCircle className="w-5 h-5 ml-auto text-destructive" />}
+                            </div>
+                        )
+                      })}
 
                       {q.type === "short" && (
                           <div className="space-y-4">
@@ -385,6 +402,16 @@ export default function ElektroenergetykGame() {
                               <Radio className="text-blue-500 animate-pulse" size={24} />
                               <p className="text-[10px] text-blue-600 font-bold uppercase italic leading-tight">Zgłoś gotowość pociągu nr 405 przez radio...</p>
                             </div>
+
+                            {/* Po niepoprawnej odpowiedzi pokaż poprawną frazę i ewentualne wskazówki */}
+                            {showResult && feedback && !feedback.ok && (
+                                <div className="p-3 mt-2 border-2 border-secondary/40 bg-secondary/10 rounded text-xs">
+                                  <div className="font-bold mb-1">Poprawna fraza:</div>
+                                  <div className="ml-2">
+                                    <div className="font-mono">{q.correctText}</div>
+                                  </div>
+                                </div>
+                            )}
                           </div>
                       )}
                     </div>
@@ -411,6 +438,20 @@ export default function ElektroenergetykGame() {
                           <div className={`p-4 border-4 text-center rounded-xl font-black uppercase ${feedback?.ok ? "border-accent bg-accent/20 text-accent" : "border-destructive bg-destructive/20 text-destructive"}`}>
                             {feedback?.msg}
                           </div>
+
+                          {/* Jeśli pytanie wielokrotnego wyboru było błędne, pokaż listę poprawnych opcji */}
+                          {q.type === "multiple" && feedback && !feedback.ok && (
+                              <div className="p-3 mt-2 border-2 border-secondary/40 bg-secondary/10 rounded text-xs">
+                                <strong>Poprawne odpowiedzi:</strong>
+                                <div className="mt-1 ml-3">
+                                  {(q.correct || []).map((id: string) => {
+                                    const ans = q.answers.find((x: any) => x.id === id);
+                                    return <div key={id}>• {ans?.text}</div>
+                                  })}
+                                </div>
+                              </div>
+                          )}
+
                           <Button
                               variant="outline" className="w-full border-2 hover:bg-blue-500/10 arcade-button"
                               onClick={() => setShowUsefulness(!showUsefulness)}
