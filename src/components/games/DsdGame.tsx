@@ -2,25 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { motion, AnimatePresence, useSpring, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import teacher0 from "@/assets/graphics/dsd/teacher0.png";
-import teacher1 from "@/assets/graphics/dsd/teacher1.png";
-import teacher2 from "@/assets/graphics/dsd/teacher2.png";
-import teacher3 from "@/assets/graphics/dsd/teacher3.png";
-import teacher4 from "@/assets/graphics/dsd/teacher4.png";
-import teacher5 from "@/assets/graphics/dsd/teacher5.png";
-import teacher6 from "@/assets/graphics/dsd/teacher6.png";
-import teacher7 from "@/assets/graphics/dsd/teacher7.png";
-
 import ask_me from "@/assets/graphics/dsd/ask_me.png";
 import confident from "@/assets/graphics/dsd/confident.png";
-import surprised from "@/assets/graphics/dsd/surprised.png";
-import showing from "@/assets/graphics/dsd/showing.png";
-import annoyed from "@/assets/graphics/dsd/annoyed.png";
 import greetings from "@/assets/graphics/dsd/chill.png";
-import thinking from "@/assets/graphics/dsd/thinking.png";
+import teacher from "@/assets/graphics/dsd/teacher.png";
 
 // --- KOMPONENT POMOCNICZY DO PŁYNNEGO LICZNIKA ---
-function AnimatedCounter({ value }) {
+function AnimatedCounter({ value }: { value: number }) {
   const spring = useSpring(value, { mass: 0.8, stiffness: 75, damping: 15 });
   const display = useTransform(spring, (current) => Math.round(current));
 
@@ -33,9 +21,8 @@ function AnimatedCounter({ value }) {
 // -------------------------------------------------
 
 export default function DSDGame() {
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
-  const [currentTeacher, setCurrentTeacher] = useState(0);
-  const [isJumping, setIsJumping] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isPortrait, setIsPortrait] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const [showDialog, setShowDialog] = useState(true);
   const [dialogPhase, setDialogPhase] = useState(0);
@@ -45,29 +32,27 @@ export default function DSDGame() {
   const [currentDialogImage, setCurrentDialogImage] = useState(greetings);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [playerScore, setPlayerScore] = useState(0);
-  const [playerFinishedAt, setPlayerFinishedAt] = useState(null);
+  const [playerFinishedAt, setPlayerFinishedAt] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const [displayedOptions, setDisplayedOptions] = useState([]);
+  const [displayedOptions, setDisplayedOptions] = useState<string[]>([]);
   const [showCountdown, setShowCountdown] = useState(false);
   const [countdownNumber, setCountdownNumber] = useState(3);
-  const [bots, setBots] = useState([]);
+  const [bots, setBots] = useState<any[]>([]);
   const [hintsLeft, setHintsLeft] = useState(3);
   const [showHintDialog, setShowHintDialog] = useState(false);
   const [hintText, setHintText] = useState("");
   const [timeLeft, setTimeLeft] = useState(30);
-  const [pointsAnim, setPointsAnim] = useState(null);
+  const [pointsAnim, setPointsAnim] = useState<number | null>(null);
   const [isRestarting, setIsRestarting] = useState(false);
-  const [isAnswerCooldown, setIsAnswerCooldown] = useState(false); // Cooldown po odpowiedzi
+  const [isAnswerCooldown, setIsAnswerCooldown] = useState(false);
 
   const simulationStarted = useRef(false);
-
-  const teachers = [teacher0, teacher1, teacher2, teacher3, teacher4, teacher5, teacher6, teacher7];
 
   const firstPlayDialogs = [
     "Witaj! Dzisiaj wchodzisz do świata DSD I PRO – niemieckiego, który naprawdę się przydaje w życiu.",
     "W tym quizie liczy się refleks i wiedza… ale spokojnie, to nie podręcznikowe nudy. To niemiecki z praktyki: praca, praktyki, prawdziwe sytuacje.",
     "Pytania będą dotyczyć rzeczy, które faktycznie możesz powiedzieć w firmie, na praktykach albo w mailu do pracodawcy.",
-    "Masz trzy podpowiedzi ode mnie. Używaj ich mądrze, bo czas leci, a w pracy nikt nie zatrzyma zegara!",
+    "Masz trzy podpowiedzi od nauczycielki. Używaj ich mądrze, bo czas leci, a w pracy nikt nie zatrzyma zegara!",
     "Gotowy, żeby sprawdzić, jak dobrze ogarniasz niemiecki z życia wzięty? Startujemy!"
   ];
 
@@ -75,7 +60,7 @@ export default function DSDGame() {
     "Wracasz do gry? W końcu DSD I PRO to praktyka, a praktyka czyni mistrza!",
     "Tym razem pójdzie jeszcze lepiej. W końcu te zwroty to rzeczy, które naprawdę wykorzystasz w pracy i na praktykach.",
     "Pamiętaj, że szybka i poprawna odpowiedź to klucz, tak jak w prawdziwych sytuacjach zawodowych.",
-    "Podpowiedzi nadal masz, a język formalny i zawodowy zaraz będzie dla Ciebie bułką z masłem.",
+    "Podpowiedzi od nauczycielki nadal masz, a język formalny i zawodowy zaraz będzie dla Ciebie bułką z masłem.",
     "No to lecimy dalej po punkty, po refleks i po niemiecki, który naprawdę jest przydatny!"
   ];
 
@@ -128,7 +113,7 @@ export default function DSDGame() {
     { question: "Jak rozmówca ocenia pomysł?", correct: "Das ist eine gute Idee.", wrongs: ["Das ist eine schlechte Idee.", "Das ist egal.", "Das ist teuer."] }
   ];
 
-  const [questions, setQuestions] = useState([]);
+  const [questions, setQuestions] = useState<any[]>([]);
 
   useEffect(() => {
     if (gameStarted && questions.length === 0) {
@@ -144,7 +129,6 @@ export default function DSDGame() {
     D: 'bg-red-200 hover:bg-red-300'
   };
 
-  // Polskie nazwy botów
   const levels = [
     "A1 Początkujący",
     "A2 Odkrywca",
@@ -198,12 +182,26 @@ export default function DSDGame() {
     e.preventDefault();
   };
 
+  // Detekcja mobile + orientacji
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const checkDevice = () => {
+      const mobile = window.innerWidth < 768;
+      const portrait = window.innerHeight > window.innerWidth;
+      setIsMobile(mobile);
+      setIsPortrait(portrait);
+    };
+
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    window.addEventListener('orientationchange', checkDevice);
+
+    return () => {
+      window.removeEventListener('resize', checkDevice);
+      window.removeEventListener('orientationchange', checkDevice);
+    };
   }, []);
 
+  // Typing effect
   useEffect(() => {
     if (isTyping && typingIndex < currentDialogs[dialogPhase].length) {
       const timeout = setTimeout(() => {
@@ -222,24 +220,7 @@ export default function DSDGame() {
     if (dialogPhase === 0) setCurrentDialogImage(greetings);
   }, [dialogPhase]);
 
-  useEffect(() => {
-    if (showDialog) {
-      const initial = Math.random() > 0.5 ? 4 : 5;
-      setCurrentTeacher(initial);
-      const interval = setInterval(() => {
-        setCurrentTeacher(6);
-        setTimeout(() => setCurrentTeacher(Math.random() > 0.5 ? 4 : 5), 3000);
-      }, 15000);
-      return () => clearInterval(interval);
-    } else if (gameStarted) {
-      setCurrentTeacher(0);
-    }
-  }, [showDialog, gameStarted]);
-
-  useEffect(() => {
-    if (showResult) setCurrentTeacher(7);
-  }, [showResult]);
-
+  // Boty
   useEffect(() => {
     if (gameStarted && bots.length === 0) {
       const newBots = levels.map((level, index) => ({
@@ -247,13 +228,14 @@ export default function DSDGame() {
         score: 0,
         answered: 0,
         finishedAt: null,
-        logic: levelLogics[level],
+        logic: levelLogics[level as keyof typeof levelLogics],
         speedGroup: index < 5 ? 'fast' : 'slow'
       }));
       setBots(newBots);
     }
   }, [gameStarted]);
 
+  // Timer pytania
   useEffect(() => {
     if (gameStarted && !showResult && currentQuestionIndex < questions.length && !isAnswerCooldown) {
       setTimeLeft(30);
@@ -262,7 +244,6 @@ export default function DSDGame() {
         setTimeLeft((prev) => {
           if (prev <= 1) {
             clearInterval(timerInterval);
-            setCurrentTeacher((t) => Math.max(0, t - 1));
 
             if (currentQuestionIndex < questions.length - 1) {
               setCurrentQuestionIndex((i) => i + 1);
@@ -280,6 +261,7 @@ export default function DSDGame() {
     }
   }, [currentQuestionIndex, gameStarted, showResult, questions.length, isAnswerCooldown]);
 
+  // Symulacja botów
   useEffect(() => {
     if (gameStarted && bots.length > 0 && !simulationStarted.current) {
       simulationStarted.current = true;
@@ -330,6 +312,7 @@ export default function DSDGame() {
     }
   }, [gameStarted, bots, questions.length]);
 
+  // Losowanie odpowiedzi
   useEffect(() => {
     if (gameStarted && questions.length > 0) {
       const q = questions[currentQuestionIndex];
@@ -339,11 +322,13 @@ export default function DSDGame() {
     }
   }, [currentQuestionIndex, gameStarted, questions]);
 
+  // Klawiatura
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       const keyUpper = e.key.toUpperCase();
+
       if (showDialog) {
-        if (keyUpper === ' ') handleSkipOrNext();
+        if (!isMobile && keyUpper === ' ') handleSkipOrNext();
       } else if (gameStarted && !showResult && !showCountdown && !showHintDialog && !isAnswerCooldown) {
         let ans;
         if (keyUpper === 'A') ans = 'A';
@@ -356,7 +341,7 @@ export default function DSDGame() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isTyping, dialogPhase, showDialog, gameStarted, showResult, currentQuestionIndex, showCountdown, showHintDialog, isAnswerCooldown]);
+  }, [isTyping, dialogPhase, showDialog, gameStarted, showResult, currentQuestionIndex, showCountdown, showHintDialog, isAnswerCooldown, isMobile]);
 
   const handleSkipOrNext = () => {
     if (isTyping) {
@@ -376,6 +361,7 @@ export default function DSDGame() {
     }
   };
 
+  // Countdown
   useEffect(() => {
     if (showCountdown && countdownNumber > 0) {
       const timer = setTimeout(() => setCountdownNumber(prev => prev - 1), 1000);
@@ -388,7 +374,7 @@ export default function DSDGame() {
     }
   }, [showCountdown, countdownNumber]);
 
-  const handleAnswer = (letter) => {
+  const handleAnswer = (letter: string) => {
     if (isAnswerCooldown) return;
 
     const assignedText = displayedOptions[['A', 'B', 'C', 'D'].indexOf(letter)];
@@ -399,27 +385,19 @@ export default function DSDGame() {
     if (isCorrect) {
       setPlayerScore(prev => prev + points);
       setPointsAnim(points);
-      setCurrentTeacher(prev => Math.min(3, prev + 1));
-      setIsJumping(true);
       setTimeout(() => {
-        setIsJumping(false);
         setPointsAnim(null);
       }, 1000);
-    } else {
-      setCurrentTeacher(prev => Math.max(0, prev - 1));
     }
 
     setIsAnswerCooldown(true);
 
     if (currentQuestionIndex < questions.length - 1) {
-      // Natychmiast nowe pytanie
       setCurrentQuestionIndex(prev => prev + 1);
-      // Cooldown 2s na odpowiedzi na nowym pytaniu
       setTimeout(() => {
         setIsAnswerCooldown(false);
       }, 2000);
     } else {
-      // Dla ostatniego pytania – po 2s wynik
       setTimeout(() => {
         setPlayerFinishedAt(Date.now());
         setShowResult(true);
@@ -432,14 +410,13 @@ export default function DSDGame() {
     if (hintsLeft > 0) {
       setHintsLeft(prev => prev - 1);
       const correctLetter = ['A', 'B', 'C', 'D'].find(l => displayedOptions[['A', 'B', 'C', 'D'].indexOf(l)] === questions[currentQuestionIndex].correct);
-      setHintText(`Mhhhhhhhhm myślę że... ${correctLetter}`);
+      setHintText(`Sądzę, że poprawną odpowiedzią będzie ${correctLetter}.`);
       setShowHintDialog(true);
-      setCurrentDialogImage(thinking);
-      setTimeout(() => setShowHintDialog(false), 3000);
+      setTimeout(() => setShowHintDialog(false), 3500);
     }
   };
 
-  const sortParticipants = (a, b) => {
+  const sortParticipants = (a: any, b: any) => {
     if (b.score !== a.score) return b.score - a.score;
     const timeA = a.finishedAt || Infinity;
     const timeB = b.finishedAt || Infinity;
@@ -450,87 +427,63 @@ export default function DSDGame() {
     .sort(sortParticipants);
 
   return (
-    <div className="relative w-full min-h-[80vh] overflow-hidden bg-slate-950 font-sans text-slate-50">
-      <Card className="h-screen w-full fixed top-0 left-0 bg-slate-900 overflow-hidden">
-        <div className="relative h-full w-full flex items-center justify-center">
-          <div className="w-[80%] md:w-[70%] h-[80%] ml-64 md:ml-96 bg-gradient-to-b from-gray-200 to-gray-300 rounded-lg border-4 border-gray-400 shadow-2xl p-8 flex flex-col items-center justify-start relative overflow-hidden">
+    <div className="relative w-full min-h-screen overflow-hidden bg-slate-950 font-sans text-slate-50">
+      <Card className="h-screen w-full fixed top-0 left-0 bg-slate-900 overflow-hidden flex flex-col">
+
+        <div className="relative flex-1 flex flex-col items-center justify-center">
+
+          {/* TABLICA Z TREŚCIĄ */}
+          <div className="relative w-full h-full bg-gradient-to-b from-gray-200 to-gray-300 rounded-none border-0 shadow-none p-4 md:p-8 flex flex-col items-center justify-start overflow-hidden">
+
             {showCountdown ? (
               <motion.div
                 key={countdownNumber}
                 initial={{ scale: 0.5, opacity: 0, rotate: -180 }}
                 animate={{ scale: 2, opacity: 1, rotate: 0 }}
                 transition={{ duration: 1, type: "spring" }}
-                className="text-9xl font-extrabold drop-shadow-2xl flex items-center justify-center w-full h-full text-blue-500 select-none"
+                className="text-8xl md:text-9xl font-extrabold drop-shadow-2xl flex items-center justify-center w-full h-full text-blue-500 select-none"
               >
                 {countdownNumber > 0 ? countdownNumber : 'Start!'}
               </motion.div>
             ) : gameStarted && !showDialog ? (
               showResult ? (
-                <div className="w-full h-full flex flex-col items-center justify-start gap-8 py-8 px-4 overflow-hidden">
-                  <div className="text-black text-4xl md:text-5xl font-bold text-center">
+                <div className="w-full h-full flex flex-col items-center justify-start gap-6 py-8 px-4">
+                  <div className="text-black text-3xl md:text-5xl font-bold text-center">
                     Twój wynik: <AnimatedCounter value={playerScore} /> pkt
                   </div>
 
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <Button
-                      onClick={restartGame}
-                      className="bg-green-500 hover:bg-green-600 text-white text-xl px-10 py-6 rounded-xl shadow-lg"
-                    >
+                  <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+                    <Button onClick={restartGame} className="bg-green-500 hover:bg-green-600 text-white text-lg px-8 py-5 rounded-xl shadow-lg flex-1">
                       Powtórz grę
                     </Button>
-
-                    <Button
-                      onClick={() => window.location.href = '/'}
-                      className="bg-purple-500 hover:bg-purple-600 text-white text-xl px-10 py-6 rounded-xl shadow-lg"
-                    >
+                    <Button onClick={() => window.location.href = '/'} className="bg-purple-500 hover:bg-purple-600 text-white text-lg px-8 py-5 rounded-xl shadow-lg flex-1">
                       Inne gry
                     </Button>
                   </div>
 
-                  <div className="text-black text-3xl font-bold">
-                    Ranking
-                  </div>
+                  <div className="text-black text-2xl md:text-3xl font-bold mt-6">Ranking</div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl">
+                  {/* Scrollowalny ranking */}
+                  <div className="w-full max-w-2xl max-h-96 overflow-y-auto px-2 space-y-3">
                     <AnimatePresence>
                       {allParticipants.map((entry, index) => (
                         <motion.div
                           key={entry.name}
-                          initial={{ opacity: 0, x: -50 }}
+                          initial={{ opacity: 0, x: -30 }}
                           animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.4, delay: index * 0.05 }}
-                          className={`flex items-center justify-between px-6 py-4 rounded-lg shadow-md text-black font-semibold ${
-                            index === 0 ? 'bg-yellow-200 text-2xl' :
-                            index === 1 ? 'bg-gray-200 text-xl' :
-                            index === 2 ? 'bg-orange-200 text-xl' :
-                            'bg-white/80'
-                          }`}
+                          transition={{ delay: index * 0.05 }}
+                          className={`
+                            w-full px-5 py-4 rounded-xl shadow-md text-black font-semibold flex items-center justify-between
+                            ${index === 0 ? 'bg-yellow-300 text-2xl' : index === 1 ? 'bg-gray-300' : index === 2 ? 'bg-orange-300' : 'bg-white/90'}
+                          `}
                         >
-                          <div className="flex items-center gap-4 min-w-0">
-                            <span className="text-2xl font-bold flex-shrink-0">
-                              {index + 1}.
-                            </span>
-                            <span className="truncate">{entry.name}</span>
+                          <div className="flex items-center gap-4">
+                            <span className="text-2xl font-bold">{index + 1}.</span>
+                            <span className="truncate max-w-40">{entry.name}</span>
                           </div>
-
-                          <div className="flex items-center gap-4 flex-shrink-0">
-                            <span className="text-xl font-bold">
-                              <AnimatedCounter value={entry.score} /> pkt
-                            </span>
-
-                            <AnimatePresence mode="wait">
-                              {entry.answered < questions.length && (
-                                <motion.span
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  exit={{ opacity: 0, transition: { duration: 0.3 } }}
-                                  className="text-orange-600 italic"
-                                >
-                                  (odpowiada...)
-                                </motion.span>
-                              )}
-                            </AnimatePresence>
+                          <div className="text-right">
+                            <div className="text-xl font-bold"><AnimatedCounter value={entry.score} /> pkt</div>
+                            {entry.answered < questions.length && <div className="text-sm text-orange-600 italic">odpowiada...</div>}
                           </div>
                         </motion.div>
                       ))}
@@ -538,110 +491,104 @@ export default function DSDGame() {
                   </div>
                 </div>
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-between space-y-8 py-4 relative select-none">
-                  {hintsLeft > 0 && (
+                <div className="w-full h-full flex flex-col justify-between select-none relative">
+
+                  {/* Prawy górny przycisk podpowiedzi */}
+                  <div className="absolute top-4 right-4 z-50">
                     <Button
                       onClick={handleHint}
-                      className="absolute top-4 right-4 bg-yellow-400 text-black w-12 h-12 rounded-full flex items-center justify-center"
+                      disabled={hintsLeft === 0 || isAnswerCooldown}
+                      className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-4 rounded-full text-2xl font-bold shadow-2xl disabled:opacity-50"
                     >
-                      💡
+                      💡 {hintsLeft}
                     </Button>
-                  )}
+                  </div>
 
-                  <div className="text-black text-xl font-bold flex flex-col items-center gap-4">
-                    <div>
+                  {/* GÓRA: pytanie + info */}
+                  <div className="flex flex-col items-center gap-4 mt-8">
+                    <div className="text-black text-lg md:text-xl font-bold text-center">
                       Pytanie {currentQuestionIndex + 1}/{questions.length} | Twój wynik: <AnimatedCounter value={playerScore} />
                     </div>
-                    <div className={`text-4xl font-extrabold ${timeLeft <= 5 ? 'text-red-600 animate-pulse' : 'text-black'}`}>
+                    <div className={`text-3xl md:text-4xl font-extrabold ${timeLeft <= 5 ? 'text-red-600 animate-pulse' : 'text-black'}`}>
                       Czas: {timeLeft}s
                     </div>
                   </div>
 
+                  {/* PYTANIE */}
                   <motion.div
                     key={currentQuestionIndex}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="text-black text-2xl md:text-4xl font-bold text-center select-none"
-                    onMouseDown={preventCopy}
-                    onContextMenu={preventCopy}
+                    className="text-black text-xl md:text-4xl font-bold text-center px-4 leading-tight break-words hyphens-auto"
                   >
                     {questions[currentQuestionIndex]?.question}
                   </motion.div>
 
-                  <motion.div
-                    key={`options-${currentQuestionIndex}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                    className="grid grid-cols-2 gap-6 w-full max-w-4xl flex-1 mt-8 items-stretch relative select-none"
-                  >
+                  {/* ODPOWIEDZI – większe kafelki + auto-skalowanie tekstu */}
+                  <div className="w-full px-4 grid grid-cols-1 md:grid-cols-2 gap-8 mt-8 mb-12">
                     {['A', 'B', 'C', 'D'].map((letter, idx) => (
                       <Button
                         key={letter}
                         onClick={() => handleAnswer(letter)}
                         disabled={isAnswerCooldown}
-                        className={`${optionColors[letter]} text-black text-lg md:text-2xl font-bold p-6 rounded-xl shadow-md flex flex-col items-center justify-center h-full text-center !whitespace-normal break-words ${isAnswerCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`
+                          ${optionColors[letter as keyof typeof optionColors]}
+                          text-black font-bold
+                          p-10 md:p-12 rounded-3xl shadow-2xl
+                          flex flex-col items-center justify-center
+                          text-center whitespace-normal break-words leading-tight
+                          min-h-48 md:min-h-56
+                          ${isAnswerCooldown ? 'opacity-50' : 'hover:scale-105 transition-transform'}
+                        `}
                         onMouseDown={preventCopy}
                         onContextMenu={preventCopy}
                       >
-                        <span className="text-2xl md:text-3xl mb-2">{letter}</span>
-                        <span className="text-base md:text-lg leading-tight">{displayedOptions[idx]}</span>
+                        <span className="text-5xl md:text-6xl mb-6 font-extrabold">{letter}</span>
+                        <span className="text-2xl md:text-3xl lg:text-4xl leading-snug clamp-text">
+                          {displayedOptions[idx]}
+                        </span>
                       </Button>
                     ))}
+                  </div>
 
-                    <AnimatePresence>
-                      {pointsAnim !== null && (
-                        <motion.div
-                          initial={{ y: 0, opacity: 1, scale: 1 }}
-                          animate={{ y: -100, opacity: 0, scale: 1.5 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 1 }}
-                          className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                        >
-                          <span className="text-6xl font-extrabold text-green-600 drop-shadow-lg">
-                            +{pointsAnim}
-                          </span>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
+                  {/* Animacja punktów */}
+                  <AnimatePresence>
+                    {pointsAnim !== null && (
+                      <motion.div
+                        initial={{ y: 0, opacity: 1, scale: 1 }}
+                        animate={{ y: -120, opacity: 0, scale: 1.8 }}
+                        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                      >
+                        <span className="text-6xl font-extrabold text-green-600 drop-shadow-2xl">
+                          +{pointsAnim}
+                        </span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )
             ) : null}
           </div>
-
-          <motion.div
-            className={`absolute bottom-0 ${showResult ? '-left-20' : 'left-0'} z-0 pointer-events-none`}
-            animate={isJumping ? { y: [-10, 0] } : {}}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-          >
-            <img
-              src={teachers[currentTeacher]}
-              alt="Nauczycielka"
-              className="w-96 md:w-[800px] h-auto object-contain pointer-events-none"
-            />
-          </motion.div>
         </div>
 
+        {/* PODPOWIEDŹ – z nauczycielką i formalnym tekstem */}
         <AnimatePresence>
           {showHintDialog && (
             <motion.div
-              initial={{ y: 120, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 120, opacity: 0 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              className="fixed bottom-0 left-0 w-full px-6 pb-8 z-[100] pointer-events-none"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center px-6 pointer-events-none"
             >
-              <div className="pointer-events-auto w-full max-w-6xl mx-auto relative rounded-3xl p-6 md:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.45)] bg-white/80 backdrop-blur-2xl border border-white/40 overflow-hidden">
+              <div className="pointer-events-auto w-full max-w-2xl relative rounded-3xl p-8 shadow-2xl bg-white/90 backdrop-blur-xl border border-white/40">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400" />
-                <div className="relative flex gap-6 items-start">
-                  <div className="relative">
+                <div className="relative flex gap-6 items-center">
+                  <div className="relative flex-shrink-0">
                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-300/40 to-purple-300/40 blur-xl" />
-                    <img src={thinking} alt="Thinking" className="relative w-24 h-24 md:w-32 md:h-32 object-contain rounded-2xl border-2 border-white/50 shadow-xl" />
+                    <img src={teacher} alt="Nauczycielka" className="relative w-28 h-28 object-contain rounded-2xl border-2 border-white/50 shadow-xl" />
                   </div>
-                  <div className="flex-1 text-slate-900 text-lg md:text-2xl leading-relaxed font-semibold drop-shadow-sm">
+                  <div className="text-slate-900 text-2xl leading-relaxed font-bold drop-shadow-sm">
                     {hintText}
                   </div>
                 </div>
@@ -650,32 +597,39 @@ export default function DSDGame() {
           )}
         </AnimatePresence>
 
+        {/* DIALOG POCZĄTKOWY – wyśrodkowany */}
         <AnimatePresence>
           {showDialog && (
             <motion.div
-              initial={{ y: 120, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 120, opacity: 0 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              className="fixed bottom-0 left-0 w-full px-6 pb-8 z-[100] pointer-events-none"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center px-6 pointer-events-none"
             >
               <div
                 onClick={handleSkipOrNext}
-                className="pointer-events-auto w-full max-w-6xl mx-auto relative rounded-3xl p-6 md:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.45)] bg-white/80 backdrop-blur-2xl border border-white/40 overflow-hidden cursor-pointer"
+                className="pointer-events-auto w-full max-w-2xl relative rounded-3xl p-8 shadow-2xl bg-white/90 backdrop-blur-xl border border-white/40 cursor-pointer"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400" />
-                <div className="relative flex gap-6 items-start">
-                  <div className="relative">
+                <div className="relative flex gap-6 items-center">
+                  <div className="relative flex-shrink-0">
                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-300/40 to-purple-300/40 blur-xl" />
-                    <img src={currentDialogImage} alt="Dialog avatar" className="relative w-24 h-24 md:w-32 md:h-32 object-contain rounded-2xl border-2 border-white/50 shadow-xl" />
+                    <img src={currentDialogImage} alt="Nauczycielka" className="relative w-28 h-28 object-contain rounded-2xl border-2 border-white/50 shadow-xl" />
                   </div>
-                  <div className="flex-1 text-slate-900 text-lg md:text-2xl leading-relaxed font-semibold drop-shadow-sm">
+                  <div className="flex-1 text-slate-900 text-2xl leading-relaxed font-bold drop-shadow-sm">
                     {displayText}
                     {isTyping && <span className="animate-pulse">|</span>}
-                    <div className="mt-3 text-sm text-slate-600 font-bold">
-                      {isTyping ? "Naciśnij spację lub kliknij, aby pominąć..." : dialogPhase < currentDialogs.length - 1 ? "Naciśnij spację lub kliknij, aby kontynuować..." : "Naciśnij spację lub kliknij, aby rozpocząć..."}
-                    </div>
+                    {!isMobile && (
+                      <div className="mt-4 text-lg text-slate-600 font-bold">
+                        {isTyping ? "Kliknij lub naciśnij spację, aby pominąć..." : "Kliknij lub naciśnij spację, aby kontynuować..."}
+                      </div>
+                    )}
+                    {isMobile && (
+                      <div className="mt-4 text-lg text-slate-600 font-bold">
+                        Dotknij, aby kontynuować...
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -683,20 +637,6 @@ export default function DSDGame() {
           )}
         </AnimatePresence>
       </Card>
-
-      {isMobile && (
-        <div className="fixed bottom-0 left-0 w-full bg-slate-950/95 p-4 flex justify-center space-x-2 z-[100]">
-          {gameStarted && !showDialog && !showResult ? (
-            <>
-              <Button onClick={() => handleAnswer('A')} disabled={isAnswerCooldown} className="bg-blue-500">A</Button>
-              <Button onClick={() => handleAnswer('B')} disabled={isAnswerCooldown} className="bg-blue-500">B</Button>
-              <Button onClick={() => handleAnswer('C')} disabled={isAnswerCooldown} className="bg-blue-500">C</Button>
-              <Button onClick={() => handleAnswer('D')} disabled={isAnswerCooldown} className="bg-blue-500">D</Button>
-              {hintsLeft > 0 && <Button onClick={handleHint} className="bg-yellow-400 text-black">💡</Button>}
-            </>
-          ) : null}
-        </div>
-      )}
     </div>
   );
 }
