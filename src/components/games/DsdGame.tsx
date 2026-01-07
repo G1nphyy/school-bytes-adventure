@@ -7,7 +7,6 @@ import confident from "@/assets/graphics/dsd/confident.png";
 import greetings from "@/assets/graphics/dsd/chill.png";
 import teacher from "@/assets/graphics/dsd/teacher.png";
 
-// --- KOMPONENT POMOCNICZY DO PŁYNNEGO LICZNIKA ---
 function AnimatedCounter({ value }: { value: number }) {
   const spring = useSpring(value, { mass: 0.8, stiffness: 75, damping: 15 });
   const display = useTransform(spring, (current) => Math.round(current));
@@ -18,6 +17,7 @@ function AnimatedCounter({ value }: { value: number }) {
 
   return <motion.span>{display}</motion.span>;
 }
+
 // -------------------------------------------------
 
 export default function DSDGame() {
@@ -182,7 +182,6 @@ export default function DSDGame() {
     e.preventDefault();
   };
 
-  // Detekcja mobile + orientacji
   useEffect(() => {
     const checkDevice = () => {
       const mobile = window.innerWidth < 768;
@@ -322,7 +321,6 @@ export default function DSDGame() {
     }
   }, [currentQuestionIndex, gameStarted, questions]);
 
-  // Klawiatura
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const keyUpper = e.key.toUpperCase();
@@ -361,7 +359,6 @@ export default function DSDGame() {
     }
   };
 
-  // Countdown
   useEffect(() => {
     if (showCountdown && countdownNumber > 0) {
       const timer = setTimeout(() => setCountdownNumber(prev => prev - 1), 1000);
@@ -504,7 +501,6 @@ export default function DSDGame() {
                     </Button>
                   </div>
 
-                  {/* GÓRA: pytanie + info */}
                   <div className="flex flex-col items-center gap-4 mt-8">
                     <div className="text-black text-lg md:text-xl font-bold text-center">
                       Pytanie {currentQuestionIndex + 1}/{questions.length} | Twój wynik: <AnimatedCounter value={playerScore} />
@@ -514,7 +510,6 @@ export default function DSDGame() {
                     </div>
                   </div>
 
-                  {/* PYTANIE */}
                   <motion.div
                     key={currentQuestionIndex}
                     initial={{ opacity: 0, y: 20 }}
@@ -524,34 +519,35 @@ export default function DSDGame() {
                     {questions[currentQuestionIndex]?.question}
                   </motion.div>
 
-                  {/* ODPOWIEDZI – większe kafelki + auto-skalowanie tekstu */}
-                  <div className="w-full px-4 grid grid-cols-1 md:grid-cols-2 gap-8 mt-8 mb-12">
-                    {['A', 'B', 'C', 'D'].map((letter, idx) => (
-                      <Button
-                        key={letter}
-                        onClick={() => handleAnswer(letter)}
-                        disabled={isAnswerCooldown}
-                        className={`
-                          ${optionColors[letter as keyof typeof optionColors]}
-                          text-black font-bold
-                          p-10 md:p-12 rounded-3xl shadow-2xl
-                          flex flex-col items-center justify-center
-                          text-center whitespace-normal break-words leading-tight
-                          min-h-48 md:min-h-56
-                          ${isAnswerCooldown ? 'opacity-50' : 'hover:scale-105 transition-transform'}
-                        `}
-                        onMouseDown={preventCopy}
-                        onContextMenu={preventCopy}
-                      >
-                        <span className="text-5xl md:text-6xl mb-6 font-extrabold">{letter}</span>
-                        <span className="text-2xl md:text-3xl lg:text-4xl leading-snug clamp-text">
-                          {displayedOptions[idx]}
-                        </span>
-                      </Button>
-                    ))}
+                  <div className="w-full px-4 mt-8 mb-12 overflow-hidden">
+                    <div className="flex flex-wrap justify-center gap-6 md:gap-8">
+                      {['A', 'B', 'C', 'D'].map((letter, idx) => (
+                        <Button
+                          key={letter}
+                          onClick={() => handleAnswer(letter)}
+                          disabled={isAnswerCooldown}
+                          className={`
+                            ${optionColors[letter as keyof typeof optionColors]}
+                            text-black font-bold
+                            p-8 md:p-12 rounded-3xl shadow-2xl
+                            flex flex-col items-center justify-center
+                            text-center whitespace-normal break-words leading-tight
+                            min-w-80 max-w-md flex-1 basis-80 flex-shrink-0
+                            min-h-48 md:min-h-56
+                            ${isAnswerCooldown ? 'opacity-50' : 'hover:scale-105 transition-transform'}
+                          `}
+                          onMouseDown={preventCopy}
+                          onContextMenu={preventCopy}
+                        >
+                          <span className="text-5xl md:text-6xl mb-6 font-extrabold">{letter}</span>
+                          <span className="text-2xl md:text-3xl lg:text-4xl leading-snug">
+                            {displayedOptions[idx]}
+                          </span>
+                        </Button>
+                      ))}
+                    </div>
                   </div>
 
-                  {/* Animacja punktów */}
                   <AnimatePresence>
                     {pointsAnim !== null && (
                       <motion.div
@@ -571,7 +567,7 @@ export default function DSDGame() {
           </div>
         </div>
 
-        {/* PODPOWIEDŹ – z nauczycielką i formalnym tekstem */}
+        {/* PODPOWIEDŹ */}
         <AnimatePresence>
           {showHintDialog && (
             <motion.div
@@ -597,7 +593,7 @@ export default function DSDGame() {
           )}
         </AnimatePresence>
 
-        {/* DIALOG POCZĄTKOWY – wyśrodkowany */}
+        {/* DIALOG POCZĄTKOWY */}
         <AnimatePresence>
           {showDialog && (
             <motion.div
@@ -615,7 +611,7 @@ export default function DSDGame() {
                 <div className="relative flex gap-6 items-center">
                   <div className="relative flex-shrink-0">
                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-300/40 to-purple-300/40 blur-xl" />
-                    <img src={currentDialogImage} alt="Nauczycielka" className="relative w-28 h-28 object-contain rounded-2xl border-2 border-white/50 shadow-xl" />
+                    <img src={currentDialogImage} alt="Postać" className="relative w-28 h-28 object-contain rounded-2xl border-2 border-white/50 shadow-xl" />
                   </div>
                   <div className="flex-1 text-slate-900 text-2xl leading-relaxed font-bold drop-shadow-sm">
                     {displayText}
