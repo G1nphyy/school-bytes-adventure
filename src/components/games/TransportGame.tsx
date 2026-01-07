@@ -333,7 +333,7 @@ export default function TransportGame() {
 
   return (
     <div className="relative w-full min-h-screen overflow-hidden bg-slate-950 font-sans text-slate-50">
-      {/* INTRO POPUP – MOBILE */}
+      {/* POPUP NA TELEFONY */}
       {isMobile && showIntroPopup && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-slate-950/95 backdrop-blur-xl">
           <Card className="w-full h-full mx-0 my-0 p-8 bg-slate-900 border-0 rounded-none shadow-none flex flex-col justify-between">
@@ -364,7 +364,7 @@ export default function TransportGame() {
         </div>
       )}
 
-      {/* LEWE MENU – DESKTOP */}
+      {/* LEWE MENU */}
       {!isMobile && (
         <Card className="h-screen w-[28%] fixed left-0 top-0 border-r border-white/5 bg-card/95 text-card-foreground flex flex-col p-6 overflow-hidden z-20">
           <div className="pt-12 flex-1 overflow-y-auto custom-scrollbar">
@@ -416,7 +416,7 @@ export default function TransportGame() {
         </Card>
       )}
 
-      {/* DOLNE MENU – MOBILE */}
+      {/* DOLNE MENU NA TELEFONY */}
       {isMobile && isGameStarted && !gameOver && !gameWon && (
         <div className="fixed bottom-0 left-0 right-0 z-50">
           <div className="bg-black/80 backdrop-blur-xl border-t border-white/10 px-6 py-5 flex items-center justify-around shadow-2xl">
@@ -518,7 +518,6 @@ export default function TransportGame() {
               <Train x={x} y={y} rotation={rotation} />
             </div>
 
-            {/* POPUP WYBORU KIERUNKU – TERAZ W PEŁNI RESPONSYWNY */}
             <AnimatePresence>
               {activeSwitch && !isQuizActive && (
                 <motion.div
@@ -571,7 +570,7 @@ export default function TransportGame() {
         </div>
       </div>
 
-      {/* QUIZ – TERAZ W PEŁNI RESPONSYWNY, BEZ PRZEWIJANIA W POZIOMIE */}
+      {/* PYTANIA */}
       {isQuizActive && (
         <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[200] flex items-center justify-center p-4">
           <Card className="w-full max-w-3xl max-h-[90dvh] overflow-y-auto overflow-x-hidden bg-slate-900 border-0 rounded-2xl shadow-2xl p-6">
