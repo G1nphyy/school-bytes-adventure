@@ -667,11 +667,9 @@ export default function TransportGame() {
             </div>
 
             {gameWon && (
-              <div className="bg-gradient-to-br from-primary/20 to-amber-500/20 border-4 border-primary/50 p-10 rounded-3xl mb-12">
+              <div className="backdrop-blur-xl bg-white/5 border border-white/10 p-10 rounded-3xl shadow-2xl mb-12">
                 <p className="text-xl sm:text-2xl leading-relaxed text-slate-100 font-medium italic">
-                  Brawo! Pokazałeś, że masz głowę do bezpieczeństwa i precyzji.
-                  Zawód technika transportu kolejowego to stabilna przyszłość, realny wpływ na ruch pociągów i praca, która nigdy nie znika.
-                  Kolej czeka na takich ludzi jak Ty.
+                  Technik transportu kolejowego to kierunek dla osób, które lubią odpowiedzialność, nowoczesne technologie i pracę, która naprawdę ma znaczenie. Kolej to jedna z najszybciej rozwijających się branż w Polsce i Europie, bo potrzebuje ludzi, którzy potrafią myśleć logicznie, reagować szybko i dbać o bezpieczeństwo pasażerów.
                 </p>
               </div>
             )}
