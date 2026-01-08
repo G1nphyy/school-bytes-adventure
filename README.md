@@ -86,6 +86,7 @@ npm install
 npm run dev
 ```
 Gra występuję pod adresem `http://localhost:8080`
+__Możliwe że wystąpią błędy z potrzebnymi frameworkami (wtedy wystarczy je pobrać - W błedzie pokaże się którego brakuje)__
 
 ## Struktura projektu
 ```
