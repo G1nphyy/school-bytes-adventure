@@ -496,58 +496,57 @@ export default function KomunikacjaGame() {
                 <div className="text-center">
                   <Trophy size={64} className="mx-auto text-yellow-500 mb-4 animate-bounce drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]" />
                   <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic">Misja Ukończona!</h2>
-                  <p className="text-muted-foreground uppercase tracking-[0.2em] text-sm font-bold">Technik Komunikacji Elektronicznej</p>
+                  <p className="text-muted-foreground uppercase tracking-[0.2em] text-sm font-bold">Technik szerokopasmowej komunikacji elektronicznej</p>
                 </div>
-
-                <div className="bg-primary/10 border-2 border-primary/30 rounded-3xl p-8 text-center max-w-md mx-auto relative group">
-                  <div className="absolute inset-0 bg-primary/5 blur-xl group-hover:bg-primary/10 transition-colors rounded-full" />
-                  <p className="relative z-10 text-xs font-bold text-muted-foreground uppercase mb-2">Twój Wynik Końcowy</p>
-                  <div className="relative z-10 text-7xl font-black text-primary drop-shadow-sm">
-                    {score} <span className="text-2xl font-medium text-foreground/60">PKT</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start pt-4">
-                  <div className="space-y-3 flex flex-col items-center lg:items-stretch">
-                    <h4 className="text-[10px] font-black uppercase text-muted-foreground mb-4 tracking-[0.2em] border-b border-border pb-2 flex items-center gap-2 justify-center lg:justify-start">
-                      <Info size={14} /> Dlaczego warto wybrać ten zawód?
-                    </h4>
-
-                    {reasons.map((r, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setSummaryIndex(i)}
-                        className={`w-full max-w-[420px] lg:max-w-none mx-auto flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left arcade-button ${
-                          summaryIndex === i
-                            ? "border-primary bg-primary/10 shadow-md shadow-primary/20"
-                            : "border-border hover:border-primary/50 hover:bg-muted/50"
-                        }`}
-                      >
-                        <r.icon className={`w-6 h-6 ${summaryIndex === i ? "text-primary" : "text-muted-foreground"}`} />
-                        <span className="text-sm font-bold uppercase tracking-tight break-words">{r.title}</span>
-                      </button>
-                    ))}
+                  <div className="bg-primary/10 border-2 border-primary/30 rounded-3xl p-8 text-center max-w-md mx-auto relative group">
+                    <div className="absolute inset-0 bg-primary/5 blur-xl group-hover:bg-primary/10 transition-colors rounded-full" />
+                    <p className="relative z-10 text-xs font-bold text-muted-foreground uppercase mb-2">Twój Wynik Końcowy</p>
+                    <div className="relative z-10 text-7xl font-black text-primary drop-shadow-sm">
+                      {score} <span className="text-2xl font-medium text-foreground/60">PKT</span>
+                    </div>
                   </div>
 
-                  <div className="bg-background/50 rounded-2xl border-2 border-border p-6 md:p-8 min-h-[200px] flex flex-col justify-center shadow-inner relative animate-fade-in text-center lg:text-left">
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={summaryIndex}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        className="space-y-4 max-w-prose mx-auto lg:mx-0"
-                      >
-                        <h4 className="text-xl font-black uppercase text-primary italic underline decoration-primary/30 underline-offset-8">
-                          {reasons[summaryIndex].title}
-                        </h4>
-                        <p className="text-lg text-muted-foreground leading-relaxed font-medium break-words">
-                          {reasons[summaryIndex].text}
-                        </p>
-                      </motion.div>
-                    </AnimatePresence>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start pt-4">
+                    <div className="space-y-3 flex flex-col items-center lg:items-stretch">
+                      <h4 className="text-[10px] font-black uppercase text-muted-foreground mb-4 tracking-[0.2em] border-b border-border pb-2 flex items-center gap-2 justify-center lg:justify-start">
+                        <Info size={14} /> Dlaczego warto wybrać ten zawód?
+                      </h4>
+                      {reasons.map((r, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setSummaryIndex(i)}
+                          className={`w-full max-w-[420px] lg:max-w-none mx-auto flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left arcade-button ${
+                            summaryIndex === i
+                              ? "border-primary bg-primary/10 shadow-md shadow-primary/20"
+                              : "border-border hover:border-primary/50 hover:bg-muted/50"
+                          }`}
+                        >
+                          <r.icon className={`w-6 h-6 ${summaryIndex === i ? "text-primary" : "text-muted-foreground"}`} />
+                          <span className="text-sm font-bold uppercase tracking-tight break-words">{r.title}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* === ZMIENIONY BLOK: wymuszamy wyśrodkowanie i poprawne łamanie tekstu === */}
+                    <div className="bg-background/50 rounded-2xl border-2 border-border p-6 md:p-8 min-h-[200px] flex flex-col justify-center shadow-inner relative animate-fade-in text-center">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={summaryIndex}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          className="space-y-4 max-w-prose w-full mx-auto px-4 text-center"
+                        >
+                          <h4 className="text-xl font-black uppercase text-primary italic underline decoration-primary/30 underline-offset-8 text-center break-words">
+                            {reasons[summaryIndex].title}
+                          </h4>
+                          <p className="text-lg text-muted-foreground leading-relaxed font-medium break-words whitespace-normal">
+                            {reasons[summaryIndex].text}
+                          </p>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
                   </div>
-                </div>
 
                 <Button
                   size="lg"

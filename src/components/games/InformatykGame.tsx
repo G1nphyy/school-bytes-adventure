@@ -254,10 +254,10 @@ const getAssemblyComponentById = (id: number) => assemblyComponents.find(c => c.
 
 const getCableColor = (color: CableColor) => {
   const colorMap: Record<CableColor, string> = {
-    orange_white: "bg-gray-100 border-2 border-r-4  border-orange-500",
-    green_white: "bg-gray-100 border-2 border-r-4 border-green-500",
-    blue_white: "bg-gray-100 border-2 border-r-4 border-blue-500",
-    brown_white: "bg-gray-100 border-2 border-r-4 border-amber-700",
+    orange_white: "bg-gray-100 border-r-4 border-orange-500",
+    green_white: "bg-gray-100 border-r-4 border-green-500",
+    blue_white: "bg-gray-100 border-r-4 border-blue-500",
+    brown_white: "bg-gray-100 border-r-4 border-amber-700",
     orange: "bg-orange-500",
     green: "bg-green-500",
     blue: "bg-blue-500",
@@ -1140,27 +1140,22 @@ const InformatykGame = () => {
                   Dostępne kable: ({usedCableIds.length}/{correctOrder.length} użyte)
                 </p>
 
-                <motion.div
-                    layout
-                    className="flex flex-wrap gap-4 justify-center"
-                >
+                <motion.div layout className="flex flex-wrap gap-3 justify-center px-1">
                   <AnimatePresence>
                     {shuffledCables.map((cable) => (
-                        <div
-                            key={cable.id}
-                            className="
-                                flex items-center justify-center
-                                overflow-hidden
-                                relative
-                              "
-                        >
-                          <div className="w-full h-full flex items-center justify-center">
-                            <CableSource
-                                cable={cable}
-                                isUsed={usedCableIds.includes(cable.id)}
-                            />
-                          </div>
+                      /* na XS: 2 na wiersz, SM: 3, MD+: ok. 5-6 (dostosuj do preferencji) */
+                      <div
+                        key={cable.id}
+                        className="flex-shrink-0 w-1/2 sm:w-1/3 md:w-28 px-1"
+                        style={{ boxSizing: "border-box" }}
+                      >
+                        <div className="w-full">
+                          <CableSource
+                            cable={cable}
+                            isUsed={usedCableIds.includes(cable.id)}
+                          />
                         </div>
+                      </div>
                     ))}
                   </AnimatePresence>
                 </motion.div>
