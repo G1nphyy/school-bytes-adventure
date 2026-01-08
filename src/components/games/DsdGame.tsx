@@ -76,7 +76,6 @@ export default function DSDGame() {
   const fullQuestions = [
     { question: "Jak wita się nowy praktykant?", correct: "Guten Morgen. Ich bin neu hier.", wrongs: ["Guten Abend. Ich bin neu hier.", "Hallo. Ich bin alt hier.", "Guten Tag. Ich bin nicht neu."] },
     { question: "Co mówi opiekun na powitanie?", correct: "Guten Morgen. Willkommen! Wie heißt du?", wrongs: ["Guten Morgen. Auf Wiedersehen!", "Guten Tag. Wer bist du?", "Hallo. Geh weg!"] },
-    { question: "Jak praktykant podaje swoje imię?", correct: "Ich heiße Tom.", wrongs: ["Ich heiße Anna.", "Mein Name ist Peter.", "Ich bin Tom."] },
     { question: "Co pyta praktykant o obowiązki?", correct: "Was muss ich heute machen?", wrongs: ["Was darf ich heute machen?", "Was kann ich heute machen?", "Was will ich heute machen?"] },
     { question: "Co musi zrobić praktykant najpierw?", correct: "Zuerst musst du mir helfen.", wrongs: ["Zuerst musst du alleine arbeiten.", "Zuerst darfst du Pause machen.", "Zuerst musst du gehen."] },
     { question: "Co praktykant może zrobić później?", correct: "Danach darfst du die Aufgaben alleine machen.", wrongs: ["Danach musst du mir helfen.", "Danach darfst du nichts machen.", "Danach musst du Pause machen."] },
