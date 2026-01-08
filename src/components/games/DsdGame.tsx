@@ -493,7 +493,8 @@ export default function DSDGame() {
             ) : (
               <div className="w-full flex flex-col justify-between select-none relative min-h-full pb-8">
 
-                <div className="absolute top-4 right-4 z-50">
+                {/* PRZYCISK PODPOWIEDZI – na telefonie fixed w prawym dolnym rogu */}
+                <div className={`z-50 ${isMobile ? 'fixed bottom-24 right-6' : 'absolute top-4 right-4'}`}>
                   <Button
                     onClick={handleHint}
                     disabled={hintsLeft === 0 || isAnswerCooldown}
@@ -550,12 +551,13 @@ export default function DSDGame() {
                   ))}
                 </div>
 
+                {/* ANIMACJA PUNKTÓW */}
                 <AnimatePresence>
                   {pointsAnim !== null && (
                     <motion.div
                       initial={{ y: 0, opacity: 1, scale: 1 }}
                       animate={{ y: -120, opacity: 0, scale: 1.8 }}
-                      className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                      className="fixed inset-0 flex items-center justify-center pointer-events-none z-50"
                     >
                       <span className="text-6xl font-extrabold text-green-600 drop-shadow-2xl">
                         +{pointsAnim}
