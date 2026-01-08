@@ -29,7 +29,7 @@ Gracz ma do wyboru siedem kafelków pod którymi znajduje się dwuetapowe gra ed
         * __Technik szerokopasmowej komunikacji elektronicznej:__ gracz musi skalibrować satelitę, aby uzyskań min. 96% sygnału
         * __Technik informatyk:__ Gracz musi złożyć komputer z części za pomocą drag & drop elementów
         * __Technik programista:__ Gracz musi złożyć kod funkcji wyszukującej największy element tablicy z rozsypnaych linii kodu za pomocą drag & drop
-        * __Technik elektroenergetyk transportu szynowego:__ (Borys tekst)
+        * __Technik elektroenergetyk transportu szynowego:__ Gracz musi zdjagnozować obwód - obliczyć wymaganą rezystancję opornika rozruchowego, a następnie przeprowadzić poprawne uruchomienie trakcji
         * __Technik transportu kolejowego:__ Gracz musi przeprowadzić pociąg do celu, zmieniając tory jazdy, odpowiadając przy tym na pytania z quizu
 
 * Gry związane z życiem codziennym w szkole
@@ -58,6 +58,8 @@ Gracz ma do wyboru siedem kafelków pod którymi znajduje się dwuetapowe gra ed
 * React, React DOM
 * React Router DOM
 * React Query
+* react-dnd-touch-backend
+* react-dnd
 
 #### Formularze i walidacja:
 * React Hook Form + Zod
