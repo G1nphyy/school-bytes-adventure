@@ -532,12 +532,13 @@ export default function DSDGame() {
                       className={`
                         ${optionColors[letter as keyof typeof optionColors]}
                         text-black font-bold
-                        p-10 md:p-12 rounded-3xl shadow-2xl
+                        p-10 md:p-12 rounded-3xl
                         flex flex-col items-center justify-center
                         text-center whitespace-normal break-words leading-tight
                         min-h-48 md:min-h-56
                         ${letter === 'D' ? 'mb-12 md:mb-0' : ''}
-                        ${isAnswerCooldown ? 'opacity-50' : 'hover:scale-105 transition-transform'}
+                        ${isAnswerCooldown ? 'opacity-50' : ''}
+                        ${isMobile ? 'hover:scale-105 transition-transform' : 'hover:brightness-110 transition-all'}
                       `}
                       onMouseDown={preventCopy}
                       onContextMenu={preventCopy}
@@ -579,11 +580,9 @@ export default function DSDGame() {
             className="fixed inset-0 z-[100] flex items-center justify-center px-6 pointer-events-none"
           >
             <div className="pointer-events-auto w-full max-w-2xl relative rounded-3xl p-8 shadow-2xl bg-white/90 backdrop-blur-xl border border-white/40">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400" />
               <div className="relative flex gap-6 items-center">
                 <div className="relative flex-shrink-0">
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-300/40 to-purple-300/40 blur-xl" />
                   <img src={teacher} alt="Nauczycielka" className="relative w-28 h-28 object-contain rounded-2xl border-2 border-white/50 shadow-xl" />
                 </div>
                 <div className="text-slate-900 text-2xl leading-relaxed font-bold drop-shadow-sm">
@@ -608,11 +607,9 @@ export default function DSDGame() {
               onClick={handleSkipOrNext}
               className="pointer-events-auto w-full max-w-2xl relative rounded-3xl p-8 shadow-2xl bg-white/90 backdrop-blur-xl border border-white/40 cursor-pointer"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400" />
               <div className="relative flex gap-6 items-center">
                 <div className="relative flex-shrink-0">
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-300/40 to-purple-300/40 blur-xl" />
                   <img src={currentDialogImage} alt="Postać" className="relative w-28 h-28 object-contain rounded-2xl border-2 border-white/50 shadow-xl" />
                 </div>
                 <div className="flex-1 text-slate-900 text-2xl leading-relaxed font-bold drop-shadow-sm">
