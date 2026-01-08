@@ -78,14 +78,23 @@ Gracz ma do wyboru siedem kafelków pod którymi znajduje się dwuetapowe gra ed
 * npm / yarn / pnpm
 * Nowoczesna przeglądarka (Chrome, Edge, Firefox)
 
-## Instrukcja uruchomienia
-Do uruchomienia będzie potrzebna konsola (cmd) oraz adres folderu z projektem
+## Uruchomienie projektu
+
+### Wymagania
+- Node.js (wersja LTS, np. 18 lub nowsza)
+- npm (instalowany razem z Node.js)
+
+### Kroki
+1. Otworzyć terminal (cmd / PowerShell).
+2. Przejść do katalogu głównego projektu.
+3. Wykonać polecenia:
 ```
-cmd
-npm install
-npm run dev
+   npm install
+   npm run dev
 ```
-Gra występuję pod adresem `http://localhost:8080`
+5. Otworzyć adres wyświetlony w terminalu  
+   (domyślnie: http://localhost:8080)
+
 
 __Możliwe że wystąpią błędy z potrzebnymi frameworkami (wtedy wystarczy je pobrać - W błedzie pokaże się którego brakuje)__
 
