@@ -526,28 +526,30 @@ export default function TransportGame() {
                   animate={{ y: 0 }}
                   exit={{ y: 300 }}
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className="fixed inset-x-0 bottom-0 z-[60] px-4 pb-4"
+                  // ZMIANA: inset-x-0 zamienione na right-0 i sm:left-[szerokość_sidebaru]
+                  className="fixed right-0 bottom-0 z-[60] left-0 sm:left-[520px] px-4 pb-4"
                 >
                   <div className="bg-slate-900/95 backdrop-blur-xl border-t-8 border-primary rounded-t-3xl shadow-2xl p-6">
-                    <h3 className="text-center text-2xl sm:text-3xl font-black uppercase text-primary mb-6">
+                    <h3 className="text-center text-xl sm:text-2xl font-black uppercase text-primary mb-6">
                       Wybierz kierunek zwrotnicy
                     </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                    {/* ZMIANA: max-w-full zamiast max-w-2xl, aby lepiej wypełniał dostępną węższą przestrzeń */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
                       <Button
                         onClick={() => startDirectionQuiz("up")}
-                        className="h-20 text-2xl font-black bg-emerald-600 hover:bg-emerald-700 shadow-lg"
+                        className="h-16 sm:h-20 text-xl sm:text-2xl font-black bg-emerald-600 hover:bg-emerald-700 shadow-lg"
                       >
                         ↑ Góra
                       </Button>
                       <Button
                         onClick={() => startDirectionQuiz("straight")}
-                        className="h-20 text-2xl font-black bg-blue-600 hover:bg-blue-700 shadow-lg"
+                        className="h-16 sm:h-20 text-xl sm:text-2xl font-black bg-blue-600 hover:bg-blue-700 shadow-lg"
                       >
                         → Prosto
                       </Button>
                       <Button
                         onClick={() => startDirectionQuiz("down")}
-                        className="h-20 text-2xl font-black bg-red-600 hover:bg-red-700 shadow-lg"
+                        className="h-16 sm:h-20 text-xl sm:text-2xl font-black bg-red-600 hover:bg-red-700 shadow-lg"
                       >
                         ↓ Dół
                       </Button>

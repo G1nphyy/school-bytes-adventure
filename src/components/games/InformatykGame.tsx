@@ -254,10 +254,10 @@ const getAssemblyComponentById = (id: number) => assemblyComponents.find(c => c.
 
 const getCableColor = (color: CableColor) => {
   const colorMap: Record<CableColor, string> = {
-    orange_white: "bg-gray-100 border-r-4 border-orange-500",
-    green_white: "bg-gray-100 border-r-4 border-green-500",
-    blue_white: "bg-gray-100 border-r-4 border-blue-500",
-    brown_white: "bg-gray-100 border-r-4 border-amber-700",
+    orange_white: "bg-gray-100 border-2 border-r-4  border-orange-500",
+    green_white: "bg-gray-100 border-2 border-r-4 border-green-500",
+    blue_white: "bg-gray-100 border-2 border-r-4 border-blue-500",
+    brown_white: "bg-gray-100 border-2 border-r-4 border-amber-700",
     orange: "bg-orange-500",
     green: "bg-green-500",
     blue: "bg-blue-500",
@@ -903,17 +903,21 @@ const InformatykGame = () => {
               <h3 className="text-xs font-bold text-muted-foreground ml-1 mb-2">SZCZEGÓŁY PUNKTACJI</h3>
 
               {/* Quiz Stat */}
-              <div className="flex items-center justify-between p-3 border border-border/50 rounded-lg bg-card hover:bg-accent/5 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-500/10 rounded-md border border-blue-500/20">
+              <div className="flex items-center justify-between p-3 border border-border/50 rounded-lg bg-card hover:bg-accent/5 transition-colors gap-4"> {/* Dodano gap-4 dla bezpiecznego odstępu */}
+                <div className="flex items-center gap-3 min-w-0 flex-1"> {/* Dodano min-w-0 i flex-1 */}
+                  <div className="p-2 bg-blue-500/10 rounded-md border border-blue-500/20 shrink-0"> {/* Dodano shrink-0, żeby ikona się nie gniotła */}
                     <Shield className="w-5 h-5 text-blue-500"/>
                   </div>
-                  <div>
-                    <p className="font-bold text-sm leading-none mb-1">Cyberbezpieczeństwo</p>
-                    <p className="text-[10px] text-muted-foreground">Wiedza teoretyczna</p>
+                  <div className="min-w-0"> {/* Dodano min-w-0, aby obsłużyć długie wyrazy */}
+                    <p className="font-bold text-sm leading-tight mb-1 break-words">
+                      Cyberbezpieczeństwo
+                    </p>
+                    <p className="text-[10px] text-muted-foreground break-words opacity-80">
+                      Wiedza teoretyczna
+                    </p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-right shrink-0"> {/* Dodano shrink-0, żeby wynik zawsze był widoczny */}
                   <span className="font-bold text-foreground">{quizScore}</span>
                   <span className="text-xs text-muted-foreground"> / {maxQuizScore}</span>
                 </div>
@@ -950,11 +954,11 @@ const InformatykGame = () => {
                 <div className="text-right">
                   {rjCorrect ? (
                       <span className="text-green-500 font-bold text-xs flex items-center gap-1 bg-green-500/10 px-2 py-1 rounded-full border border-green-500/20">
-                      <CheckCircle2 className="w-3 h-3"/> ZALICZONE
+                      <CheckCircle2 className="w-3 h-3"/>
                     </span>
                   ) : (
                       <span className="text-destructive font-bold text-xs flex items-center gap-1 bg-destructive/10 px-2 py-1 rounded-full border border-destructive/20">
-                      <XCircle className="w-3 h-3"/> BŁĄD ({rjAttempts} próby)
+                      <XCircle className="w-3 h-3"/>
                     </span>
                   )}
                 </div>
@@ -1000,25 +1004,27 @@ const InformatykGame = () => {
             </div>
 
             <div className="mb-8">
-              <div className="bg-muted border-4 border-border p-6 mx-auto max-w-md">
-                <div className="text-xs text-muted-foreground mb-2 text-center font-bold">
+              <div className="bg-muted border-4 border-border p-3 mx-auto max-w-sm">
+                <div className="text-[10px] text-muted-foreground mb-2 text-center font-bold">
                   PRAWIDŁOWA KOLEJNOŚĆ T568B (1-8)
                 </div>
-                {/* --------------------- ZDJĘCIE --------------------*/}
-                <img src={RJ45_T568B} alt="T568B" className="w-full mb-4"/>
-                {/* --------------- Ustawianie poprawnej kolejności kabli w rjtce ----------------- */}
-                <div className="flex gap-2 justify-center opacity-70 pointer-events-none">
+
+                <img src={RJ45_T568B} alt="T568B" className="w-full mb-4 max-h-32 object-contain"/>
+
+                {/* ZMIANA: gap-1 zamiast gap-2 oraz mniejsze wymiary kabli */}
+                <div className="flex gap-1 justify-center opacity-70 pointer-events-none">
                   {finalSlots.map((cableId, index) => {
                     const cable = getCableById(cableId);
                     if (!cable) return null;
                     return (
                         <div key={index} className="flex flex-col items-center">
-                          <div className={`w-10 h-24 border-2 border-border relative bg-background`}>
-                            <div className={`w-full h-full border border-border ${getCableColor(cable.color)} absolute`}>
+                          {/* ZMIANA: w-10 -> w-8, h-24 -> h-16 */}
+                          <div className={`w-8 h-16 border border-border relative bg-background`}>
+                            <div className={`w-full h-full ${getCableColor(cable.color)} absolute`}>
                               <div className="h-full flex items-center justify-center">
-                                          <span className="text-[8px] text-black font-bold writing-mode-vertical transform">
-                                              {cable.label_short}
-                                          </span>
+                                <span className="text-[7px] text-black font-bold writing-mode-vertical rotate-180">
+                                  {cable.label_short}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -1027,7 +1033,6 @@ const InformatykGame = () => {
                     )
                   })}
                 </div>
-                {/* ------------------------------------------------------------------------------------- */}
               </div>
             </div>
 
@@ -1080,7 +1085,7 @@ const InformatykGame = () => {
                   setShowRjSummary(false);
                   setShowUsefulness(false);
                 }}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12"
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button min-h-12 h-auto py-3 whitespace-normal flex-shrink-0"
             >
               PRZEJDŹ DO EKRANU KOŃCOWEGO
             </Button>
@@ -1140,22 +1145,27 @@ const InformatykGame = () => {
                   Dostępne kable: ({usedCableIds.length}/{correctOrder.length} użyte)
                 </p>
 
-                <motion.div layout className="flex flex-wrap gap-3 justify-center px-1">
+                <motion.div
+                    layout
+                    className="flex flex-wrap gap-4 justify-center"
+                >
                   <AnimatePresence>
                     {shuffledCables.map((cable) => (
-                      /* na XS: 2 na wiersz, SM: 3, MD+: ok. 5-6 (dostosuj do preferencji) */
-                      <div
-                        key={cable.id}
-                        className="flex-shrink-0 w-1/2 sm:w-1/3 md:w-28 px-1"
-                        style={{ boxSizing: "border-box" }}
-                      >
-                        <div className="w-full">
-                          <CableSource
-                            cable={cable}
-                            isUsed={usedCableIds.includes(cable.id)}
-                          />
+                        <div
+                            key={cable.id}
+                            className="
+                                flex items-center justify-center
+                                overflow-hidden
+                                relative
+                              "
+                        >
+                          <div className="w-full h-full flex items-center justify-center">
+                            <CableSource
+                                cable={cable}
+                                isUsed={usedCableIds.includes(cable.id)}
+                            />
+                          </div>
                         </div>
-                      </div>
                     ))}
                   </AnimatePresence>
                 </motion.div>
@@ -1462,7 +1472,7 @@ const InformatykGame = () => {
                 <Button
                     onClick={checkAssembly}
                     disabled={!isAssemblyReady && canAttempt}
-                    className={`w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12`}
+                    className={`block min-w-0 whitespace-normal break-words text-center leading-tight`}
                 >
                   {assemblyScore >= 25 ? "PRZEJDŹ DO PODSUMOWANIA " : (canAttempt ? "ZATWIERDŹ MONTAŻ" : "ZOBACZ PODSUMOWANIE ")}
                 </Button>

@@ -564,7 +564,7 @@ export default function ElektroenergetykGame() {
                   size={64}
                   className="mx-auto text-blue-500 mb-4 animate-bounce drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]"
                 />
-                <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic">
+                <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic break-words">
                   System Zweryfikowany!
                 </h2>
                 <p className="text-muted-foreground uppercase tracking-[0.2em] text-sm font-bold">
