@@ -355,91 +355,147 @@ const AutomatykGame = () => {
 
           {/* --- ETAP 2: WPROWADZENIE DO ZADANIA OTWARTEGO --- */}
           {gameState === 'lore' && (
-              <div className="flex flex-col h-full justify-center text-center animate-in zoom-in-95 px-4 mb-8">
-                <div className="relative mb-8">
-                  <Factory className="w-24 h-24 mx-auto text-primary" />
-                  <div className="absolute top-0 right-1/4 w-4 h-4 bg-destructive rounded-full animate-ping"></div>
-                </div>
-                <h2 className="text-4xl font-black mb-4 tracking-tighter text-foreground uppercase">Fabryka stoi!</h2>
-                <div className="bg-slate-900 text-blue-100 p-8 rounded-3xl text-sm italic mb-10 border-b-8 border-primary shadow-2xl relative">
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-[10px] px-3 py-1 rounded-full font-bold not-italic tracking-widest uppercase">KRYTYCZNE POWIADOMIENIE</div>
-                  "Teoria opanowana, ale linia produkcyjna właśnie przestała odpowiadać. Musisz ręcznie zrekonfigurować 12 węzłów logicznych w sterowniku PLC, aby przywrócić zasilanie i komunikację."
-                </div>
-                <Button onClick={handleStartLogic} className="h-20 bg-primary hover:bg-primary/90 text-2xl font-black arcade-button shadow-xl shadow-primary/30 uppercase tracking-tighter">
-                  Uruchom diagnostykę
-                </Button>
+            <div className="flex flex-col h-full justify-center text-center animate-in zoom-in-95 px-4 sm:px-0 mb-8">
+              <div className="relative mb-8">
+                <Factory className="w-20 h-20 sm:w-24 sm:h-24 mx-auto text-primary" />
+                <div className="absolute top-0 right-1/4 w-3 h-3 sm:w-4 sm:h-4 bg-destructive rounded-full animate-ping"></div>
               </div>
+
+              <h2 className="text-2xl sm:text-4xl font-black mb-4 tracking-tighter text-foreground uppercase">
+                Fabryka stoi!
+              </h2>
+
+              <div className="bg-slate-900 text-blue-100 p-6 sm:p-8 rounded-3xl text-xs sm:text-sm italic mb-10 border-b-4 sm:border-b-8 border-primary shadow-2xl relative break-words whitespace-normal">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-[9px] sm:text-[10px] px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full font-bold not-italic tracking-widest uppercase max-w-[80%] truncate">
+                  KRYTYCZNE POWIADOMIENIE
+                </div>
+
+                <p className="leading-tight sm:leading-relaxed whitespace-normal">
+                  "Teoria opanowana, ale linia produkcyjna właśnie przestała odpowiadać.
+                  Musisz ręcznie zrekonfigurować 12 węzłów logicznych w sterowniku PLC,
+                  aby przywrócić zasilanie i komunikację."
+                </p>
+              </div>
+
+              <Button
+                onClick={handleStartLogic}
+                className="w-full sm:w-auto min-h-16 h-auto py-3 sm:h-20 bg-primary hover:bg-primary/90 text-sm xs:text-base sm:text-2xl font-black arcade-button shadow-xl shadow-primary/30 uppercase tracking-tighter px-6 flex items-center justify-center text-center !whitespace-normal"
+              >
+                <span className="block min-w-0 whitespace-normal break-words leading-tight">
+                  Uruchom diagnostykę
+                </span>
+              </Button>
+            </div>
           )}
 
           {/* --- ETAP 3: ZADANIE OTWARTE - LOGIKA --- */}
           {gameState === 'logic' && (
-              /* Sekcja PLC: Interaktywny pulpit z logiką bramek */
-              <div className="animate-in fade-in slide-in-from-right-4 mb-8 px-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-sm font-black flex items-center gap-2 text-primary uppercase tracking-widest"><Settings2 size={18}/> PLC Logic Core v2.1</h3>
-                  <div className="text-right">
-                    <p className="text-[10px] font-bold text-primary uppercase">Aktualne Punkty</p>
-                    <p className="text-lg font-black text-foreground">{totalScore}</p>
-                  </div>
+            /* Sekcja PLC: Interaktywny pulpit z logiką bramek */
+            <div className="animate-in fade-in slide-in-from-right-4 mb-8 px-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-sm font-black flex items-center gap-2 text-primary uppercase tracking-widest">
+                  <Settings2 size={18} /> PLC Logic Core v2.1
+                </h3>
+                <div className="text-right">
+                  <p className="text-[10px] font-bold text-primary uppercase">Aktualne Punkty</p>
+                  <p className="text-lg font-black text-foreground">{totalScore}</p>
                 </div>
+              </div>
 
-                <div className="bg-slate-950 p-6 rounded-2xl border-l-4 border-primary mb-8 font-mono shadow-2xl overflow-hidden relative">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl pointer-events-none"></div>
-                  <p className="text-primary text-[10px] font-bold mb-4 tracking-widest uppercase flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                    Procedural_Recovery_Sys
-                  </p>
-                  <div className="text-[11px] space-y-2 relative z-10">
-                    {generatedLogic.map((line, idx) => {
-                      const parts = line.text.split(':');
-                      return (
-                          <p key={idx} className="border-b border-white/5 pb-1">
-                            <span className="text-indigo-400 font-bold">{parts[0]}</span>:
-                            <span className="text-cyan-300 italic">{parts[1]}</span>
-                          </p>
-                      )
-                    })}
-                  </div>
-                </div>
+              <div className="bg-slate-950 p-6 rounded-2xl border-l-4 border-primary mb-8 font-mono shadow-2xl relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl pointer-events-none"></div>
 
-                <div className="grid grid-cols-5 gap-3 mb-10">
-                  {LAMPS_CONFIG.map((l) => {
-                    const active = activeLamps.includes(l.id);
+                <p className="text-primary text-[10px] font-bold mb-4 tracking-widest uppercase flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                  Procedural_Recovery_Sys
+                </p>
+
+                <div className="text-[11px] space-y-2 relative z-10">
+                  {generatedLogic.map((line, idx) => {
+                    // zabezpieczenie gdyby występowało więcej niż jedno ":" w linii
+                    const [label, ...rest] = line.text.split(':');
+                    const value = rest.join(':').trim();
+
                     return (
-                        <div key={l.id} className="flex flex-col items-center">
-                          <div className={`w-12 h-12 rounded-2xl border-2 flex items-center justify-center transition-all duration-300 ${active ? `${l.color} border-current shadow-[0_0_15px_rgba(59,130,246,0.5)] bg-slate-900 scale-110` : 'bg-slate-100 text-slate-300 border-slate-200'}`}>
-                            <Lightbulb size={24} fill={active ? "currentColor" : "none"} />
-                          </div>
-                          <span className="text-[7px] font-black mt-2 text-center leading-tight uppercase tracking-tighter">{l.label}</span>
-                        </div>
+                      <div key={idx} className="flex items-start gap-3 border-b border-white/5 pb-1">
+                        <span className="text-indigo-400 font-bold flex-shrink-0 min-w-[6.5rem]">
+                          {label.trim()}:
+                        </span>
+
+                        <span className="text-cyan-300 italic flex-1 min-w-0 whitespace-normal break-words leading-snug">
+                          {value}
+                        </span>
+                      </div>
                     );
                   })}
                 </div>
-
-                {/* Grid przełączników: Każdy przycisk zmienia stan w tablicy switches */}
-                <div className="grid grid-cols-2 gap-3 mb-8">
-                  {switches.map((val, i) => (
-                      <button
-                          key={i}
-                          onClick={() => {const n=[...switches]; n[i]=!n[i]; setSwitches(n);}}
-                          className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all arcade-button shadow-sm ${
-                              val
-                                  ? 'bg-primary text-white border-primary shadow-[0_0_10px_rgba(59,130,246,0.3)]'
-                                  : 'bg-background text-slate-600 border-slate-300 hover:border-primary/50'
-                          }`}
-                      >
-                        <span className="text-sm font-mono font-black tracking-tighter">NODE_P{i+1}</span>
-                        {val ? <ToggleRight size={28} className="text-white" /> : <ToggleLeft size={28} className="text-slate-300" />}
-                      </button>
-                  ))}
-                </div>
-
-                {activeLamps.length === 5 && (
-                    <Button onClick={handleFinishLogic} className="w-full h-16 bg-emerald-500 hover:bg-emerald-600 text-white mt-8 mb-4 font-black animate-bounce shadow-xl shadow-emerald-500/20 text-xl uppercase tracking-widest">
-                      Uruchom System
-                    </Button>
-                )}
               </div>
+
+              <div className="grid grid-cols-5 gap-3 mb-10">
+                {LAMPS_CONFIG.map((l) => {
+                  const active = activeLamps.includes(l.id);
+                  return (
+                    <div key={l.id} className="flex flex-col items-center">
+                      <div
+                        className={`w-12 h-12 rounded-2xl border-2 flex items-center justify-center transition-all duration-300 ${
+                          active
+                            ? `${l.color} border-current shadow-[0_0_15px_rgba(59,130,246,0.5)] bg-slate-900 scale-110`
+                            : 'bg-slate-100 text-slate-300 border-slate-200'
+                        }`}
+                      >
+                        <Lightbulb size={24} fill={active ? 'currentColor' : 'none'} />
+                      </div>
+
+                      {/* etykieta: ograniczona szerokość, zawijanie, normalne tracking/leading */}
+                      <span className="mt-2 text-[10px] sm:text-xs font-black text-center leading-snug tracking-normal uppercase max-w-[3.2rem] whitespace-normal break-words">
+                        {l.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Grid przełączników: Każdy przycisk zmienia stan w tablicy switches */}
+              <div className="grid grid-cols-2 gap-3 mb-8">
+                {switches.map((val, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      const n = [...switches];
+                      n[i] = !n[i];
+                      setSwitches(n);
+                    }}
+                    className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all arcade-button shadow-sm min-w-0 ${
+                      val
+                        ? 'bg-primary text-white border-primary shadow-[0_0_10px_rgba(59,130,246,0.3)]'
+                        : 'bg-background text-slate-600 border-slate-300 hover:border-primary/50'
+                    }`}
+                  >
+                    {/* label może się obcinać zamiast rozpychać układ */}
+                    <span className="text-sm font-mono font-black tracking-normal truncate max-w-[60%]">
+                      NODE_P{i + 1}
+                    </span>
+
+                    <div className="flex-shrink-0">
+                      {val ? (
+                        <ToggleRight size={28} className="text-white" />
+                      ) : (
+                        <ToggleLeft size={28} className="text-slate-300" />
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {activeLamps.length === 5 && (
+                <Button
+                  onClick={handleFinishLogic}
+                  className="w-full h-16 bg-emerald-500 hover:bg-emerald-600 text-white mt-8 mb-4 font-black animate-bounce shadow-xl shadow-emerald-500/20 text-lg sm:text-xl uppercase tracking-widest px-6"
+                >
+                  Uruchom System
+                </Button>
+              )}
+            </div>
           )}
 
           {/* --- ETAP 4: KONIEC + INFO O ZAWODZIE --- */}
@@ -469,8 +525,14 @@ const AutomatykGame = () => {
                       </div>
 
                       <div className="flex flex-col gap-4">
-                        <Button onClick={() => setShowSchoolInfo(true)} className="h-16 bg-primary hover:bg-primary/90 font-bold flex gap-2 shadow-lg shadow-primary/20 arcade-button uppercase">
-                          <Briefcase size={20} /> Dlaczego warto być automatykiem?
+                        <Button
+                          onClick={() => setShowSchoolInfo(true)}
+                          className="h-16 sm:h-20 w-full sm:w-auto px-4 bg-primary hover:bg-primary/90 font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 arcade-button uppercase flex-wrap sm:flex-nowrap !whitespace-normal"
+                        >
+                          <Briefcase size={20} className="shrink-0" />
+                          <span className="block min-w-0 whitespace-normal text-[11px] leading-tight sm:text-base text-center">
+                            Dlaczego warto być automatykiem?
+                          </span>
                         </Button>
                         <Button onClick={() => window.location.reload()} variant="outline" className="h-12 arcade-button text-xs uppercase font-bold border-2">
                           Zagraj ponownie

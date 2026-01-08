@@ -156,8 +156,7 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
     "Do pomiaru rezystancji ustaw Ω – polarność nie ma znaczenia.",
     "Zawsze najpierw ustaw zakres, potem podłącz element.",
   ];
-  // Sprawdza poprawność przeprowadzenia pomiaru
-  // Gracz musi wybrać odpowiedni zakres i podłączyć sondy do komponentu
+
   const handleMeasure = () => {
     setAttempts(a => a + 1);
     if (!blackWire || !redWire || !itemOnDesk || range === "OFF") {
@@ -195,93 +194,95 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
         <p className="text-xs text-muted-foreground">Poprawnie zmierz wszystkie 3 elementy</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
+      {/* mobile-first: jedna kolumna, na md dwie kolumny */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* LEWA: warsztat */}
         <div className="space-y-6">
           {/* MULTIMETR */}
-          <div className="bg-slate-950 rounded-3xl p-8 border-4 border-slate-800 shadow-2xl relative overflow-hidden">
+          <div className="bg-slate-950 rounded-3xl p-6 md:p-8 border-4 border-slate-800 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex flex-col">
+
+            {/* header: na mobilkach kolumnowo i wycentrowane */}
+            <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-3">
+              <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
                 <span className="text-[10px] font-bold text-primary/60 tracking-widest uppercase">Digital Multimeter</span>
                 <span className="text-2xl font-mono font-bold text-primary drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]">
                   {range === "OFF" ? "0.00" : range}
                 </span>
               </div>
-              <div className="bg-black/50 px-4 py-2 rounded border border-primary/20">
+
+              <div className="bg-black/50 px-4 py-2 rounded border border-primary/20 flex items-center justify-center">
                 <span className="text-3xl font-mono font-bold text-primary animate-pulse">
                   {range === "OFF" ? "" : "⎓"}
                 </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 mb-8">
+            {/* ranges: wycentrowane i responsywne */}
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-6 justify-center">
               {RANGES.map((r) => (
-                  <Button
-                      key={r}
-                      onClick={() => setRange(r)}
-                      variant={range === r ? "default" : "outline"}
-                      size="sm"
-                      className={`font-bold transition-all ${range === r ? "scale-105 shadow-[0_0_15px_rgba(var(--primary),0.4)]" : "opacity-70"}`}
-                  >
-                    {r}
-                  </Button>
+                <Button
+                  key={r}
+                  onClick={() => setRange(r)}
+                  variant={range === r ? "default" : "outline"}
+                  size="sm"
+                  className={`font-bold transition-all justify-center ${range === r ? "scale-105 shadow-[0_0_15px_rgba(var(--primary),0.4)]" : "opacity-70"}`}
+                >
+                  {r}
+                </Button>
               ))}
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            {/* ports: na mobile single column, elementy wyśrodkowane i ograniczona szerokość */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
                 { id: "COM", label: "COM", color: "bg-zinc-800", wire: blackWire, expected: "black" },
                 { id: "VΩmA", label: "VΩmA", color: "bg-red-900/20", wire: redWire === "VΩmA" ? "red" : null, expected: "red" },
                 { id: "10A", label: "10A", color: "bg-red-900/20", wire: redWire === "10A" ? "red" : null, expected: "red" }
               ].map((port) => (
-                  <div
-                      key={port.id}
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        const wire = e.dataTransfer.getData("wire");
-                        if (wire === "black" && port.id === "COM") setBlackWire("COM");
-                        if (wire === "red") setRedWire(port.id);
-                      }}
-                      className={`group relative h-20 flex flex-col items-center justify-center rounded-xl border-2 transition-all ${
-                          port.wire
-                              ? "border-primary bg-primary/10 shadow-[0_0_10px_rgba(var(--primary),0.2)]"
-                              : "border-dashed border-slate-700 hover:border-primary/50"
-                      } ${port.color}`}
-                  >
-                    <span className="text-[10px] font-bold mb-1 text-slate-400">{port.label}</span>
-                    <div className={`w-8 h-8 rounded-full border-4 flex items-center justify-center transition-transform ${
-                        port.wire ? "scale-110 border-primary bg-slate-900" : "border-slate-800 bg-black"
-                    }`}>
-                      {port.wire && (
-                          <div className={`w-3 h-3 rounded-full shadow-inner ${port.wire === "black" ? "bg-zinc-400" : "bg-red-500"}`} />
-                      )}
-                    </div>
+                <div
+                  key={port.id}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const wire = e.dataTransfer.getData("wire");
+                    if (wire === "black" && port.id === "COM") setBlackWire("COM");
+                    if (wire === "red") setRedWire(port.id);
+                  }}
+                  className={`group relative h-20 flex flex-col items-center justify-center rounded-xl border-2 transition-all mx-auto w-full max-w-[220px] ${port.wire ? "border-primary bg-primary/10 shadow-[0_0_10px_rgba(var(--primary),0.2)]" : "border-dashed border-slate-700 hover:border-primary/50"} ${port.color}`}
+                >
+                  <span className="text-[10px] font-bold mb-1 text-slate-400">{port.label}</span>
+                  <div className={`w-8 h-8 rounded-full border-4 flex items-center justify-center transition-transform ${port.wire ? "scale-110 border-primary bg-slate-900" : "border-slate-800 bg-black"}`}>
+                    {port.wire && (
+                      <div className={`w-3 h-3 rounded-full shadow-inner ${port.wire === "black" ? "bg-zinc-400" : "bg-red-500"}`} />
+                    )}
                   </div>
+                </div>
               ))}
             </div>
           </div>
 
           {/* PRZEWODY */}
           <div className="bg-muted/30 rounded-2xl p-6 border-2 border-border backdrop-blur-sm">
-            <p className="text-xs font-bold uppercase tracking-wider mb-4 text-muted-foreground flex items-center">
+            <p className="text-xs font-bold uppercase tracking-wider mb-4 text-muted-foreground flex items-center justify-center">
               <Zap className="w-3 h-3 mr-2" /> Wybierz przewody pomiarowe
             </p>
-            <div className="flex gap-4">
+
+            <div className="flex flex-col sm:flex-row gap-4">
               <div
-                  draggable
-                  onDragStart={(e) => e.dataTransfer.setData("wire", "black")}
-                  className="flex-1 cursor-grab active:cursor-grabbing group"
+                draggable
+                onDragStart={(e) => e.dataTransfer.setData("wire", "black")}
+                className="w-full sm:flex-1 cursor-grab active:cursor-grabbing group"
               >
                 <div className="bg-zinc-900 text-white p-3 rounded-xl border-2 border-zinc-700 group-hover:border-zinc-500 transition-all text-center font-bold text-sm shadow-md">
                   Czarny (COM)
                 </div>
               </div>
+
               <div
-                  draggable
-                  onDragStart={(e) => e.dataTransfer.setData("wire", "red")}
-                  className="flex-1 cursor-grab active:cursor-grabbing group"
+                draggable
+                onDragStart={(e) => e.dataTransfer.setData("wire", "red")}
+                className="w-full sm:flex-1 cursor-grab active:cursor-grabbing group"
               >
                 <div className="bg-red-600 text-white p-3 rounded-xl border-2 border-red-500 group-hover:border-red-400 transition-all text-center font-bold text-sm shadow-md">
                   Czerwony (+)
@@ -292,72 +293,66 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
 
           {/* ELEMENTY I STANOWISKO */}
           <div className="bg-muted/30 rounded-2xl p-6 border-2 border-border backdrop-blur-sm">
-            <p className="text-xs font-bold uppercase tracking-wider mb-4 text-muted-foreground flex items-center">
+            <p className="text-xs font-bold uppercase tracking-wider mb-4 text-muted-foreground flex items-center justify-center">
               <Microchip className="w-3 h-3 mr-2" /> Komponenty do przetestowania
             </p>
-            <div className="grid grid-cols-3 gap-3 mb-6">
+
+            {/* komponenty: responsywnie 1/2/3 kolumny i elementy centered */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-6 justify-center">
               {Object.entries(ITEMS).map(([key, val]) => (
-                  <div
-                      key={key}
-                      draggable={!done.includes(key)}
-                      onDragStart={(e) => e.dataTransfer.setData("item", key)}
-                      className={`group cursor-grab p-2 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center min-h-[100px] ${
-                          done.includes(key)
-                              ? "opacity-40 grayscale bg-slate-100 border-slate-200"
-                              : "bg-card border-primary/20 hover:border-primary hover:shadow-lg hover:shadow-primary/10"
-                      }`}
-                  >
-                    <val.icon className={`w-8 h-8 mx-auto mb-1 flex-shrink-0 ${done.includes(key) ? "text-slate-400" : "text-primary"}`} />
-                    <div className="text-[10px] font-bold leading-tight whitespace-normal break-words overflow-hidden">
-                      {val.name}
-                    </div>
+                <div
+                  key={key}
+                  draggable={!done.includes(key)}
+                  onDragStart={(e) => e.dataTransfer.setData("item", key)}
+                  className={`group cursor-grab p-2 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center min-h-[100px] mx-auto w-full max-w-[180px] ${done.includes(key) ? "opacity-40 grayscale bg-slate-100 border-slate-200" : "bg-card border-primary/20 hover:border-primary hover:shadow-lg hover:shadow-primary/10"}`}
+                >
+                  <val.icon className={`w-8 h-8 mx-auto mb-1 flex-shrink-0 ${done.includes(key) ? "text-slate-400" : "text-primary"}`} />
+                  <div className="text-[10px] font-bold leading-snug whitespace-normal break-words overflow-hidden text-center">
+                    {val.name}
                   </div>
+                </div>
               ))}
             </div>
 
             <div
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  const item = e.dataTransfer.getData("item");
-                  if (item && !done.includes(item)) setItemOnDesk(item);
-                }}
-                className={`h-32 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center ${
-                    itemOnDesk
-                        ? "border-primary bg-primary/5 shadow-inner"
-                        : "border-slate-300 bg-slate-50/50 hover:bg-slate-50"
-                }`}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                const item = e.dataTransfer.getData("item");
+                if (item && !done.includes(item)) setItemOnDesk(item);
+              }}
+              className={`h-32 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center ${itemOnDesk ? "border-primary bg-primary/5 shadow-inner" : "border-slate-300 bg-slate-50/50 hover:bg-slate-50"}`}
             >
               {itemOnDesk ? (
-                  <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="flex flex-col items-center">
-                    {React.createElement(ITEMS[itemOnDesk as keyof typeof ITEMS].icon, { className: "w-12 h-12 text-primary mb-2" })}
-                    <span className="text-sm font-bold text-primary">{ITEMS[itemOnDesk as keyof typeof ITEMS].name}</span>
-                  </motion.div>
+                <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="flex flex-col items-center">
+                  {React.createElement(ITEMS[itemOnDesk as keyof typeof ITEMS].icon, { className: "w-12 h-12 text-primary mb-2" })}
+                  <span className="text-sm font-bold text-primary">{ITEMS[itemOnDesk as keyof typeof ITEMS].name}</span>
+                </motion.div>
               ) : (
-                  <div className="text-slate-400 flex flex-col items-center">
-                    <div className="w-10 h-10 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center mb-2">
-                      <span className="text-xl">+</span>
-                    </div>
-                    <span className="text-[10px] font-medium uppercase tracking-tighter">Miejsce na komponent</span>
+                <div className="text-slate-400 flex flex-col items-center">
+                  <div className="w-10 h-10 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center mb-2">
+                    <span className="text-xl">+</span>
                   </div>
+                  <span className="text-[10px] font-medium uppercase tracking-normal">Miejsce na komponent</span>
+                </div>
               )}
             </div>
           </div>
         </div>
 
         {/* PRAWA: wyniki */}
-        <div className="flex flex-col justify-between">
-          <div className="space-y-6">
+        <div className="flex flex-col justify-between items-center md:items-stretch">
+          <div className="space-y-6 w-full max-w-2xl mx-auto">
             <div>
-              <h3 className="text-xl font-bold mb-4">Wynik pomiaru</h3>
+              <h3 className="text-xl font-bold mb-4 text-center md:text-left">Wynik pomiaru</h3>
               <div className="bg-muted rounded-xl p-6 min-h-32 text-lg font-mono text-center">
                 {result || "Gotowy do pomiaru…"}
               </div>
             </div>
 
             <div>
-              <p className="text-sm text-muted-foreground mb-2">Oczekiwane wyniki:</p>
-              <div className="flex flex-wrap gap-3">
+              <p className="text-sm text-muted-foreground mb-2 text-center md:text-left">Oczekiwane wyniki:</p>
+              <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                 {Object.entries(ITEMS).map(([k, v]) => (
                   <div key={k} className={`px-4 py-2 rounded-lg text-sm font-bold border-2 ${done.includes(k) ? "bg-accent/20 border-accent text-accent" : "border-border"}`}>
                     {v.name}
@@ -375,7 +370,7 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
                     addScore(-5);
                   }}
                   variant="outline"
-                  className="w-full border-2 border-secondary h-auto py-3 whitespace-normal"
+                  className="w-full border-2 border-secondary h-auto py-3 whitespace-normal text-center"
                 >
                   💡 PODPOWIEDŹ ({hintsVisible + 1}/{hints.length}) (-5 PKT)
                 </Button>
@@ -383,7 +378,7 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
               {hintsVisible > 0 && (
                 <div className="space-y-2">
                   {hints.slice(0, hintsVisible).map((h, i) => (
-                    <div key={i} className="p-3 bg-secondary/10 border-2 border-secondary rounded text-sm " >
+                    <div key={i} className="p-3 bg-secondary/10 border-2 border-secondary rounded text-sm text-center md:text-left">
                       <span className="font-bold">Podpowiedź {i + 1}:</span> {h}
                     </div>
                   ))}
@@ -392,7 +387,7 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
             </div>
           </div>
 
-          <Button onClick={handleMeasure} size="lg" className="w-full h-14 text-lg font-bold shadow-lg">
+          <Button onClick={handleMeasure} size="lg" className="w-full h-14 text-lg font-bold shadow-lg mt-4">
             ZMIERZ
           </Button>
         </div>
@@ -406,68 +401,63 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
 function WhyWorthPanel({ totalScore, quizScore, workshopScore }: { totalScore: number; quizScore: number; workshopScore: number }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const reasons = [
-    {
-      title: "Gwarancja zatrudnienia",
-      text: "Rynek pracy potrzebuje coraz więcej specjalistów z branży elektronicznej. Prognozy wskazują na stały wzrost zapotrzebowania w przemyśle, automatyce, kolejnictwie i serwisach.",
-      icon: Trophy,
-    },
-    {
-      title: "Praca z nowoczesną technologią",
-      text: "Roboty, drony, IoT, smart home, elektronika samochodowa – codziennie pracujesz z najnowszymi gadżetami i rozwiązujesz realne problemy techniczne.",
-      icon: Zap,
-    },
-    {
-      title: "Wysokie zarobki i rozwój",
-      text: "Technicy elektronicy są cenieni przez pracodawców. Możliwość szybkiego awansu na inżyniera lub specjalistę w firmach produkcyjnych i serwisowych.",
-      icon: Cpu,
-    },
-    {
-      title: "Praktyczne umiejętności",
-      text: "Montujesz, naprawiasz, projektujesz układy – to zawód dla osób lubiących majsterkować i widzieć efekty swojej pracy.",
-      icon: Wrench,
-    },
-    {
-      title: "Kwalifikacje uznawane w całej UE",
-      text: "Dyplom technika elektronika (ELM.02 + ELM.05) otwiera drzwi do pracy nie tylko w Polsce, ale i za granicą.",
-      icon: Battery,
-    },
-  ];
+    const reasons = [
+      {
+        title: "Gwarancja zatrudnienia",
+        text: "Rynek pracy potrzebuje coraz więcej specjalistów z branży elektronicznej. Prognozy wskazują na stały wzrost zapotrzebowania w przemyśle, automatyce, kolejnictwie i serwisach.",
+        icon: Trophy,
+      },
+      {
+        title: "Praca z nowoczesną technologią",
+        text: "Roboty, drony, IoT, smart home, elektronika samochodowa – codziennie pracujesz z najnowszymi gadżetami i rozwiązujesz realne problemy techniczne.",
+        icon: Zap,
+      },
+      {
+        title: "Wysokie zarobki i rozwój",
+        text: "Technicy elektronicy są cenieni przez pracodawców. Możliwość szybkiego awansu na inżyniera lub specjalistę w firmach produkcyjnych i serwisowych.",
+        icon: Cpu,
+      },
+      {
+        title: "Praktyczne umiejętności",
+        text: "Montujesz, naprawiasz, projektujesz układy – to zawód dla osób lubiących majsterkować i widzieć efekty swojej pracy.",
+        icon: Wrench,
+      },
+      {
+        title: "Kwalifikacje uznawane w całej UE",
+        text: "Dyplom technika elektronika (ELM.02 + ELM.05) otwiera drzwi do pracy nie tylko w Polsce, ale i za granicą.",
+        icon: Battery,
+      },
+    ];
 
-  return (
-      <Card className="p-8 max-w-5xl w-full mx-auto border-4 shadow-2xl bg-card text-card-foreground">
+    return (
+      <Card className="p-6 sm:p-8 max-w-5xl w-full mx-auto border-4 shadow-2xl bg-card text-card-foreground">
         <div className="text-center mb-6 mt-4">
           <div className="relative inline-block">
-            <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-2 animate-bounce drop-shadow-md" />
-            {totalScore >= 80 && (
-                <div className="absolute top-8 -right-4 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-1 rounded-full animate-pulse">
-                  TOP EKSPERT!
-                </div>
-            )}
+            <Trophy className="w-14 h-14 text-yellow-500 mx-auto mb-2 animate-bounce drop-shadow-md" />
           </div>
-          <h2 className="text-3xl font-black tracking-tight uppercase">GRATULACJE!</h2>
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight uppercase">GRATULACJE!</h2>
           <p className="text-muted-foreground mt-2 uppercase tracking-widest text-sm">Ukończono ścieżkę Technika Elektronika</p>
         </div>
 
         {/* Baner z wynikiem głównym */}
-        <div className="bg-primary/5 border-2 border-primary/20 rounded-2xl p-6 text-center mb-8 relative overflow-hidden">
-          <div className="absolute inset-0 bg-primary/5 blur-xl" />
+        <div className="bg-primary/5 border-2 border-primary/20 rounded-2xl p-4 sm:p-6 text-center mb-6 relative overflow-hidden">
+          <div className="absolute inset-0 bg-primary/5 blur-xl pointer-events-none" />
           <span className="relative z-10 text-xs text-muted-foreground font-bold uppercase tracking-tighter">Twój Wynik Końcowy</span>
-          <div className="relative z-10 text-5xl font-black text-primary mt-2 drop-shadow-sm">
-            {totalScore} <span className="text-xl font-medium text-foreground/60">PKT</span>
+          <div className="relative z-10 text-4xl sm:text-5xl font-black text-primary mt-2 drop-shadow-sm">
+            {totalScore} <span className="text-lg sm:text-xl font-medium text-foreground/60">PKT</span>
           </div>
         </div>
 
         {/* Szczegółowe statystyki */}
-        <div className="grid md:grid-cols-2 gap-4 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <div className="flex items-center justify-between p-4 border border-border/50 rounded-xl bg-card hover:bg-accent/5 transition-colors">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-500/10 rounded-md border border-blue-500/20">
-                <Cpu className="w-5 h-5 text-blue-500"/>
+                <Cpu className="w-5 h-5 text-blue-500" />
               </div>
               <div>
-                <p className="font-bold text-sm leading-none mb-1 text-left">Quiz Teoretyczny</p>
-                <p className="text-[10px] text-muted-foreground text-left">Podstawy elektroniki</p>
+                <p className="font-bold text-sm leading-none mb-1">Quiz Teoretyczny</p>
+                <p className="text-[10px] text-muted-foreground">Podstawy elektroniki</p>
               </div>
             </div>
             <div className="text-right">
@@ -479,11 +469,11 @@ function WhyWorthPanel({ totalScore, quizScore, workshopScore }: { totalScore: n
           <div className="flex items-center justify-between p-4 border border-border/50 rounded-xl bg-card hover:bg-accent/5 transition-colors">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-orange-500/10 rounded-md border border-orange-500/20">
-                <Wrench className="w-5 h-5 text-orange-500"/>
+                <Wrench className="w-5 h-5 text-orange-500" />
               </div>
               <div>
-                <p className="font-bold text-sm leading-none mb-1 text-left">Warsztat Pomiarowy</p>
-                <p className="text-[10px] text-muted-foreground text-left">Pomiary multimetrem</p>
+                <p className="font-bold text-sm leading-none mb-1">Warsztat Pomiarowy</p>
+                <p className="text-[10px] text-muted-foreground">Pomiary multimetrem</p>
               </div>
             </div>
             <div className="text-right">
@@ -493,74 +483,84 @@ function WhyWorthPanel({ totalScore, quizScore, workshopScore }: { totalScore: n
           </div>
         </div>
 
-        <div className="mt-12 mb-10">
-          <h3 className="text-xl font-bold mb-8 flex items-center justify-center gap-2 text-primary">
-            <CheckCircle2 className="w-6 h-6" /> DLACZEGO ELEKTRONIKA TO STRZAŁ W DZIESIĄTKĘ?
+        <div className="mt-8 mb-6">
+          <h3 className="text-lg sm:text-xl font-bold mb-6 flex items-center justify-center gap-2 text-primary">
+            <CheckCircle2 className="w-5 h-5" /> DLACZEGO ELEKTRONIKA TO STRZAŁ W DZIESIĄTKĘ?
           </h3>
 
-          <div className="grid lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
-            {/* Lewa kolumna: Nawigacja (Ikony) */}
-            <div className="lg:col-span-2 space-y-2">
+          {/* IMPORTANT: mobile-first layout — na mobile ikony będą rządkiem/centrowane, na lg zobaczymy 2/3 kolumnę */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
+            {/* Nawigacja: na małych ekranach układ flex-wrap i wyśrodkowany */}
+            <div className="lg:col-span-2 flex flex-wrap lg:flex-col gap-2 justify-center lg:justify-start">
               {reasons.map((r, i) => (
-                  <button
-                      key={i}
-                      onClick={() => setActiveIndex(i)}
-                      className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
-                          activeIndex === i
-                              ? "border-primary bg-primary/10 shadow-lg shadow-primary/10 scale-[1.02]"
-                              : "border-border/50 bg-card hover:border-primary/30"
-                      }`}
-                  >
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                        activeIndex === i ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                    }`}>
-                      <r.icon className="w-5 h-5" />
-                    </div>
-                    <span className={`text-sm font-bold uppercase tracking-tight ${
-                        activeIndex === i ? "text-primary" : "text-muted-foreground"
-                    }`}>
-                      {r.title}
-                    </span>
-                  </button>
+                <button
+                  key={i}
+                  onClick={() => setActiveIndex(i)}
+                  className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all w-full sm:max-w-[420px] md:max-w-[320px] lg:w-auto ${
+                    activeIndex === i ? "border-primary bg-primary/10 shadow-lg shadow-primary/10 scale-[1.02]" : "border-border/50 bg-card hover:border-primary/30"
+                  }`}
+                >
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors flex-shrink-0 ${
+                    activeIndex === i ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                  }`}>
+                    <r.icon className="w-5 h-5" />
+                  </div>
+
+                  <span className={`text-sm font-bold uppercase tracking-normal text-left ${activeIndex === i ? "text-primary" : "text-muted-foreground"} break-words`}>
+                    {r.title}
+                  </span>
+                </button>
               ))}
             </div>
 
-            {/* Prawa kolumna: Szczegółowy opis z animacją */}
-            <div className="lg:col-span-3 min-h-[250px] bg-primary/5 rounded-2xl border-2 border-primary/20 p-8 flex items-center relative overflow-hidden">
+            {/* Prawa kolumna: opis — ograniczamy maksymalną szerokość tekstu i centrowanie na małych ekranach */}
+            <div className="lg:col-span-3 min-h-[220px] bg-primary/5 rounded-2xl border-2 border-primary/20 p-5 sm:p-8 flex items-center relative overflow-hidden">
               <AnimatePresence mode="wait">
                 <motion.div
-                    key={activeIndex}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2 }}
-                    className="relative z-10 space-y-4"
+                  key={activeIndex}
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -12 }}
+                  transition={{ duration: 0.18 }}
+                  className="relative z-10 w-full"
                 >
-                  <div className="flex items-center gap-3 text-primary">
-                    {React.createElement(reasons[activeIndex].icon, { className: "w-8 h-8" })}
-                    <h4 className="text-2xl font-black uppercase italic">{reasons[activeIndex].title}</h4>
+                  <div className="flex flex-col items-center lg:items-start gap-3">
+                    <div className="flex items-center gap-3 text-primary">
+                      {React.createElement(reasons[activeIndex].icon, { className: "w-8 h-8" })}
+                      <h4 className="text-lg sm:text-2xl font-black uppercase italic text-center lg:text-left">
+                        {reasons[activeIndex].title}
+                      </h4>
+                    </div>
+
+                    <p className="text-base sm:text-lg text-muted-foreground leading-relaxed text-center lg:text-left max-w-prose whitespace-normal break-words">
+                      {reasons[activeIndex].text}
+                    </p>
                   </div>
-                  <p className="text-lg text-muted-foreground leading-relaxed">
-                    {reasons[activeIndex].text}
-                  </p>
                 </motion.div>
               </AnimatePresence>
-              {/* Dekoracyjne tło wewnątrz opisu */}
-              <div className="absolute -bottom-10 -right-10 opacity-5 pointer-events-none">
-                {React.createElement(reasons[activeIndex].icon, { className: "w-48 h-48" })}
+
+              {/* dekoracja: duża ikona, nie wpływa na layout dzięki absolute + pointer-events-none */}
+              <div className="absolute -bottom-8 -right-8 opacity-5 pointer-events-none select-none">
+                {React.createElement(reasons[activeIndex].icon, { className: "w-40 h-40" })}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-10 text-center">
-        <Button size="lg" className="h-14 text-lg font-bold shadow-lg" onClick={() => window.location.assign("/")}>
-          WRÓĆ DO MENU GŁÓWNEGO
-        </Button>
-      </div>
-    </Card>
-  );
-}
+        <div className="mt-8 text-center">
+          <Button
+            size="lg"
+            onClick={() => window.location.assign("/")}
+            className="w-full box-border h-auto min-h-[3rem] py-2 px-4 text-sm sm:text-lg font-bold shadow-lg !whitespace-normal break-words text-center tracking-normal sm:tracking-widest uppercase"
+          >
+            <span className="block min-w-0 whitespace-normal break-words leading-tight">
+              WRÓĆ DO MENU GŁÓWNEGO
+            </span>
+          </Button>
+        </div>
+      </Card>
+    );
+  }
 
 /* ===================== GŁÓWNY KOMPONENT ============================= */
 export default function ElectronicsGame() {

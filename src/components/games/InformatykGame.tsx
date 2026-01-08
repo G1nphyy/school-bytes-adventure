@@ -1097,122 +1097,139 @@ const InformatykGame = () => {
     return (
         <DndProvider backend={HTML5Backend}>
           <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
-            <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
+            <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto overflow-x-hidden animate-fade-in">
               <div className="mb-6 text-center">
                 <Cable className="w-12 h-12 text-primary mx-auto mb-4 animate-pixel-float" />
                 <h2 className="text-lg text-foreground mb-2">ETAP 3: OKABLOWANIE RJ-45</h2>
                 <p className="text-lg font-bold text-primary mb-2">Punkty: {totalScore}</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed px-4">
                   Przeciągnij i upuść 8 kabli w złączu, zgodnie z normą T568B.
                 </p>
               </div>
 
-              <div className="mb-8">
-                <div className="bg-muted border-4 border-border p-6 mx-auto max-w-md">
+              <div className="mb-8 px-4">
+                <div className="bg-muted border-4 border-border p-4 mx-auto max-w-full rounded-lg overflow-auto">
                   <div className="text-xs text-muted-foreground mb-2 text-center">
                     ZŁĄCZE RJ-45 | Pozostałe próby: {attemptsLeft > 0 ? attemptsLeft : 0}
                   </div>
 
-                  <div className="flex gap-2 justify-center">
+                  {/* Container slotów: flex-wrap -> automatyczne zawijanie na mobilkach */}
+                  <div className="w-full flex flex-wrap gap-2 justify-center items-center py-2">
                     {cableSlots.map((cableId, index) => (
-                        <CableSlot
-                            key={index}
+                      <div
+                        key={index}
+                        className="flex-shrink-0 w-12 sm:w-14 md:w-16 flex items-center justify-center"
+                      >
+                        {/* opakowujemy CableSlot, żeby wymusić responsywną szerokość */}
+                        <div className="w-full">
+                          <CableSlot
                             index={index}
                             cableId={cableId}
                             onDrop={handleRjDrop}
                             onRemove={handleRemoveCable}
-                        />
+                          />
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
               </div>
 
-              <div className="mb-6 flex-grow">
+              <div className="mb-6 flex-grow px-4">
                 <p className="text-xs text-muted-foreground mb-3 text-center">
                   Dostępne kable: ({usedCableIds.length}/{correctOrder.length} użyte)
                 </p>
-                <motion.div layout className="flex flex-wrap gap-3 justify-center">
+
+                <motion.div layout className="flex flex-wrap gap-3 justify-center px-1">
                   <AnimatePresence>
                     {shuffledCables.map((cable) => (
-                        <CableSource
-                            key={cable.id}
+                      /* na XS: 2 na wiersz, SM: 3, MD+: ok. 5-6 (dostosuj do preferencji) */
+                      <div
+                        key={cable.id}
+                        className="flex-shrink-0 w-1/2 sm:w-1/3 md:w-28 px-1"
+                        style={{ boxSizing: "border-box" }}
+                      >
+                        <div className="w-full">
+                          <CableSource
                             cable={cable}
                             isUsed={usedCableIds.includes(cable.id)}
-                        />
+                          />
+                        </div>
+                      </div>
                     ))}
                   </AnimatePresence>
                 </motion.div>
               </div>
 
-              <div className="space-y-4 animate-slide-in-up">
+              <div className="space-y-4 animate-slide-in-up px-4">
                 {rjHintLevel < rj45Hints.length && canAttempt && (
-                    <Button
-                        onClick={showRjHint}
-                        variant="outline"
-                        size="sm"
-                        className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal"
-                    >
-                      💡 POKAŻ PODPOWIEDŹ ({rjHintLevel + 1}/{rj45Hints.length}) (KOSZT: 5 PKT)
-                    </Button>
+                  <Button
+                    onClick={showRjHint}
+                    variant="outline"
+                    size="sm"
+                    className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal break-words text-sm"
+                  >
+                    💡 POKAŻ PODPOWIEDŹ ({rjHintLevel + 1}/{rj45Hints.length}) (KOSZT: 5 PKT)
+                  </Button>
                 )}
 
                 {rjHintLevel > 0 && (
-                    <div className="space-y-2">
-                      {rj45Hints.slice(0, rjHintLevel).map((hint, index) => (
-                          <div
-                              key={index}
-                              className="p-3 border-2 border-secondary bg-secondary/20 text-secondary animate-slide-in-up"
-                          >
-                            <p className="text-xs">
-                              <span className="font-bold">Podpowiedź {index + 1}:</span> {hint}
-                            </p>
-                          </div>
-                      ))}
-                    </div>
+                  <div className="space-y-2">
+                    {rj45Hints.slice(0, rjHintLevel).map((hint, index) => (
+                      <div
+                        key={index}
+                        className="p-3 border-2 border-secondary bg-secondary/20 text-secondary animate-slide-in-up"
+                      >
+                        <p className="text-xs">
+                          <span className="font-bold">Podpowiedź {index + 1}:</span> {hint}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 )}
 
                 {showRjResult && (
-                    <div className={`p-4 border-4 mb-4 text-center ${rjCorrect ? "border-accent bg-accent/20" : "border-destructive bg-destructive/20"}`}>
-                      {rjCorrect ? (
-                          <>
-                            <CheckCircle2 className="w-8 h-8 text-accent mx-auto mb-2" />
-                            <h3 className="text-lg text-accent mb-1">PRAWIDŁOWO!</h3>
-                            <p className="text-xs text-accent">Zaraz przejdziesz do podsumowania, aby zobaczyć wyjaśnienia.</p>
-                          </>
-                      ) : (
-                          <>
-                            <XCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
-                            <h3 className="text-lg text-destructive mb-1">BŁĄD W OKABLOWANIU</h3>
-                            {attemptsLeft > 0 ? (
-                                <p className="text-xs text-destructive">Spróbuj ponownie. Próba: {rjAttempts}/{3}</p>
-                            ) : (
-                                <p className="text-xs text-destructive font-bold">WYKORZYSTANO MAKSYMALNĄ LICZBĘ PRÓB (3). Przejdź do podsumowania, aby zobaczyć rozwiązanie.</p>
-                            )}
+                  <div className={`p-4 border-4 mb-4 text-center ${rjCorrect ? "border-accent bg-accent/20" : "border-destructive bg-destructive/20"}`}>
+                    {rjCorrect ? (
+                      <>
+                        <CheckCircle2 className="w-8 h-8 text-accent mx-auto mb-2" />
+                        <h3 className="text-lg text-accent mb-1">PRAWIDŁOWO!</h3>
+                        <p className="text-xs text-accent">Zaraz przejdziesz do podsumowania, aby zobaczyć wyjaśnienia.</p>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
+                        <h3 className="text-lg text-destructive mb-1">BŁĄD W OKABLOWANIU</h3>
+                        {attemptsLeft > 0 ? (
+                          <p className="text-xs text-destructive">Spróbuj ponownie. Próba: {rjAttempts}/{3}</p>
+                        ) : (
+                          <p className="text-xs text-destructive font-bold">WYKORZYSTANO MAKSYMALNĄ LICZBĘ PRÓB (3). Przejdź do podsumowania, aby zobaczyć rozwiązanie.</p>
+                        )}
 
-                            <Button
-                                onClick={handleRjReset}
-                                disabled={!canAttempt}
-                                className="mt-3 w-full bg-destructive/80 text-primary-foreground hover:bg-destructive"
-                            >
-                              {canAttempt ? "WYCZYŚĆ I SPRÓBUJ PONOWNIE" : " Nawet dla mnie to jest trudne... "}
-                            </Button>
-                          </>
-                      )}
-                    </div>
+                        <Button
+                          onClick={handleRjReset}
+                          disabled={!canAttempt}
+                          className="mt-3 w-full bg-destructive/80 text-primary-foreground hover:bg-destructive h-auto py-2 text-sm"
+                        >
+                          {canAttempt ? "WYCZYŚĆ I SPRÓBUJ PONOWNIE" : " Nawet dla mnie to jest trudne... "}
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 )}
 
                 <Button
-                    onClick={handleCheckRjOrder}
-                    disabled={!isRjReady && canAttempt}
-                    className={`w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 ${!isRjReady && canAttempt ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={handleCheckRjOrder}
+                  disabled={!isRjReady && canAttempt}
+                  className={`w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-auto py-3 text-sm ${!isRjReady && canAttempt ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  {rjCorrect ? "PRZEJDŹ DO PODSUMOWANIA " : (canAttempt ? "AKCEPTUJ KOLEJNOŚĆ" : "ZOBACZ PODSUMOWANIE ")}
+                  {rjCorrect ? "PRZEJDŹ DO PODSUMOWANIA" : (canAttempt ? "AKCEPTUJ KOLEJNOŚĆ" : "ZOBACZ PODSUMOWANIE")}
                 </Button>
               </div>
             </Card>
           </div>
         </DndProvider>
-    );
+    )
   }
 
   // 4. EKRAN PODSUMOWANIA MONTAŻU PC
@@ -1286,14 +1303,16 @@ const InformatykGame = () => {
             </div>
 
             <Button
-                onClick={() => {
-                  setAssemblyComplete(true);
-                  setShowAssemblySummary(false);
-                  setShowUsefulness(false);
-                }}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12"
+              onClick={() => {
+                setAssemblyComplete(true);
+                setShowAssemblySummary(false);
+                setShowUsefulness(false);
+              }}
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 px-3 text-sm sm:text-base !whitespace-normal break-words"
             >
-              PRZEJDŹ DO ETAPU RJ-45
+              <span className="block min-w-0 whitespace-normal break-words text-center leading-tight">
+                PRZEJDŹ DO ETAPU RJ-45
+              </span>
             </Button>
           </Card>
         </div>

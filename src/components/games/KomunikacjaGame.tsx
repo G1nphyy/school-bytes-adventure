@@ -272,46 +272,66 @@ export default function KomunikacjaGame() {
         zniknie zanim nowe zacznie się pojawiać.
         Zapobiega to "skakaniu" layoutu podczas zmiany pytań.
       */}
+        {/* AnimatePresence + quiz view (zmodyfikowana sekcja, mobile-first poprawki) */}
         <AnimatePresence mode="wait">
           {view === "quiz" && (
-              <motion.div key="quiz" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, x: -20 }} className="w-full max-w-3xl">
-                <Card className="p-6 md:p-8 border-4 space-y-6 bg-card shadow-2xl">
-                  <div className="text-center mb-4">
-                    <Signal className="w-12 h-12 text-primary mx-auto mb-2 animate-pixel-float" />
-                    <h2 className="text-xl font-bold tracking-tight">ETAP 1: TEST KOMUNIKACJI</h2>
-                    <p className="text-lg font-black text-primary font-mono">PUNKTY: {score}</p>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Pytanie {qIndex + 1} / {quizQuestions.length}</p>
-                  </div>
+            <motion.div
+              key="quiz"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="w-full max-w-md sm:max-w-3xl mx-auto"
+            >
+              <Card className="p-6 md:p-8 border-4 space-y-6 bg-card shadow-2xl overflow-hidden">
+                <div className="text-center mb-4">
+                  <Signal className="w-12 h-12 text-primary mx-auto mb-2 animate-pixel-float" />
+                  <h2 className="text-xl font-bold tracking-tight">ETAP 1: TEST KOMUNIKACJI</h2>
+                  <p className="text-lg font-black text-primary font-mono">PUNKTY: {score}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                    Pytanie {qIndex + 1} / {quizQuestions.length}
+                  </p>
+                </div>
 
-                  <div className="space-y-6">
-                    <h3 className="text-lg md:text-xl font-bold leading-tight pl-4">
-                      {q.questionText}
-                    </h3>
+                <div className="space-y-6">
+                  {/* pytanie - centered on mobile, left on larger */}
+                  <h3 className="text-lg md:text-xl font-bold leading-tight pl-0 text-center md:text-left">
+                    {q.questionText}
+                  </h3>
 
-                    <div className="grid gap-3">
-                      {q.type === "single" && q.answers.map(a => (
-                          <Button
-                              key={a.id}
-                              variant="outline"
-                              disabled={showResult}
-                              onClick={() => handleSingleChoice(a.id)}
-                              className={`h-auto p-4 justify-start text-left arcade-button border-2 transition-all hover:border-primary hover:shadow-md hover:shadow-primary/30 hover:bg-background hover:text-white ${
-                                  showResult && a.correct ? "border-accent bg-accent/20 text-accent font-bold" :
-                                      showResult && answers[q.id] === a.id ? "border-destructive bg-destructive/20 text-destructive" :
-                                          answers[q.id] === a.id ? "border-primary bg-primary/20 text-primary font-bold shadow-md shadow-primary/30" : "bg-background text-foreground"
-                              }`}
-                          >
-                            {a.text}
-                          </Button>
+                  <div className="grid gap-3">
+                    {/* SINGLE */}
+                    {q.type === "single" &&
+                      q.answers.map((a) => (
+                        <Button
+                          key={a.id}
+                          variant="outline"
+                          disabled={showResult}
+                          onClick={() => handleSingleChoice(a.id)}
+                          className={`w-full min-w-0 break-words whitespace-normal text-sm sm:text-base h-auto p-4 justify-start text-left arcade-button border-2 transition-all hover:border-primary hover:shadow-md hover:shadow-primary/30 hover:bg-background hover:text-white ${
+                            showResult && a.correct
+                              ? "border-accent bg-accent/20 text-accent font-bold"
+                              : showResult && answers[q.id] === a.id
+                              ? "border-destructive bg-destructive/20 text-destructive"
+                              : answers[q.id] === a.id
+                              ? "border-primary bg-primary/20 text-primary font-bold shadow-md shadow-primary/30"
+                              : "bg-background text-foreground"
+                          }`}
+                        >
+                          <span className="break-words whitespace-normal">{a.text}</span>
+                        </Button>
                       ))}
 
-                      {q.type === "multiple" && q.answers.map(a => {
+                    {/* MULTIPLE */}
+                    {q.type === "multiple" &&
+                      q.answers.map((a) => {
                         const isSelected = (answers[q.id] || []).includes(a.id);
                         const isCorrect = q.correct.includes(a.id);
                         const showSuccess = showResult && isCorrect;
                         const showDanger = showResult && isSelected && !isCorrect;
 
-                        let stateClasses = isSelected ? "border-primary bg-primary/20 shadow-md shadow-primary/30" : "border-border bg-background";
+                        let stateClasses = isSelected
+                          ? "border-primary bg-primary/20 shadow-md shadow-primary/30"
+                          : "border-border bg-background";
 
                         if (showResult) {
                           if (showSuccess) stateClasses = "border-accent bg-accent/20 text-accent font-black";
@@ -320,178 +340,203 @@ export default function KomunikacjaGame() {
                         }
 
                         return (
-                            <div
-                                key={a.id}
-                                onClick={() => {
-                                  if (showResult) return;
-                                  const prev = answers[q.id] || [];
-                                  setAnswers({ ...answers, [q.id]: prev.includes(a.id) ? prev.filter((x: any) => x !== a.id) : [...prev, a.id] });
-                                }}
-                                className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer arcade-button transition-all hover:border-primary ${stateClasses} ${showResult ? "pointer-events-none" : ""}`}
-                            >
-                              <Checkbox
-                                  checked={isSelected}
-                                  onCheckedChange={() => {}}
-                                  className={`border-primary ${showSuccess ? "border-accent data-[state=checked]:bg-accent" : ""}`}
-                              />
-                              <span className="text-sm font-medium flex-grow">{a.text}</span>
-                              {showSuccess && <CheckCircle2 className="w-4 h-4 shrink-0" />}
-                              {showDanger && <XCircle className="w-4 h-4 shrink-0" />}
-                            </div>
+                          <div
+                            key={a.id}
+                            onClick={() => {
+                              if (showResult) return;
+                              const prev = answers[q.id] || [];
+                              setAnswers({
+                                ...answers,
+                                [q.id]: prev.includes(a.id) ? prev.filter((x: any) => x !== a.id) : [...prev, a.id],
+                              });
+                            }}
+                            className={`w-full min-w-0 flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer arcade-button transition-all hover:border-primary ${stateClasses} ${
+                              showResult ? "pointer-events-none" : ""
+                            }`}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={() => {}}
+                              className={`border-primary ${showSuccess ? "border-accent data-[state=checked]:bg-accent" : ""}`}
+                            />
+                            <span className="text-sm font-medium flex-grow break-words whitespace-normal">{a.text}</span>
+                            {showSuccess && <CheckCircle2 className="w-4 h-4 shrink-0" />}
+                            {showDanger && <XCircle className="w-4 h-4 shrink-0" />}
+                          </div>
                         );
                       })}
 
-                      {q.type === "short" && (
-                          <div className="space-y-3">
-                            <Input
-                                placeholder="Wpisz odpowiedź..."
-                                disabled={showResult}
-                                className={`h-14 text-lg font-bold border-2 text-center uppercase focus-visible:ring-0 transition-all ${
-                                    showResult
-                                        ? feedback?.ok ? "border-accent bg-accent/10 text-accent" : "border-destructive bg-destructive/10 text-destructive"
-                                        : "border-primary/50 focus-visible:border-primary"
-                                }`}
-                                value={answers[q.id] || ""}
-                                onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                            />
-                            {showResult && !feedback?.ok && (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    className="p-3 bg-accent/10 border-2 border-accent rounded-xl text-accent text-center font-black text-sm"
-                                >
-                                  POPRAWNY SYMBOL: {q.correctText}
-                                </motion.div>
-                            )}
-                          </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-3">
-                      {hintLevel < q.hints.length && !showResult && (
-                          <Button
-                              variant="outline" size="sm"
-                              onClick={() => { setHintLevel(h => h + 1); setScore(s => s - 2); }}
-                              className="w-full border-2 border-secondary text-secondary hover:bg-secondary/10 arcade-button py-4"
+                    {/* SHORT */}
+                    {q.type === "short" && (
+                      <div className="space-y-3">
+                        <Input
+                          placeholder="Wpisz odpowiedź..."
+                          disabled={showResult}
+                          className={`w-full max-w-full h-14 text-lg font-bold border-2 text-center uppercase focus-visible:ring-0 transition-all ${
+                            showResult ? (feedback?.ok ? "border-accent bg-accent/10 text-accent" : "border-destructive bg-destructive/10 text-destructive") : "border-primary/50 focus-visible:border-primary"
+                          }`}
+                          value={answers[q.id] || ""}
+                          onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                        />
+                        {showResult && !feedback?.ok && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="p-3 bg-accent/10 border-2 border-accent rounded-xl text-accent text-center font-black text-sm break-words"
                           >
-                            💡 PODPOWIEDŹ ({hintLevel + 1}/{q.hints.length}) (KOSZT: 2 PKT)
-                          </Button>
-                      )}
-                      {hintLevel > 0 && !showResult && (
-                          <div className="p-3 border-2 border-secondary bg-secondary/10 text-secondary text-xs rounded-lg animate-slide-in-up">
-                            {q.hints.slice(0, hintLevel).map((h, i) => <p key={i}>• {h}</p>)}
-                          </div>
-                      )}
-                    </div>
+                            POPRAWNY SYMBOL: {q.correctText}
+                          </motion.div>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
-                    {showResult && feedback && (
-                        <div className="space-y-4 animate-slide-in-up">
-                          <div className={`p-4 border-4 text-center rounded-xl ${feedback.ok ? "border-accent bg-accent/20 text-accent" : "border-destructive bg-destructive/20 text-destructive"}`}>
-                            <div className="flex items-center justify-center gap-2 font-black">
-                              {feedback.ok ? <CheckCircle2 /> : <XCircle />}
-                              {feedback.msg}
-                            </div>
-                          </div>
-                          <Button
-                              variant="outline" className="w-full border-2 hover:bg-primary/10"
-                              onClick={() => setShowUsefulness(!showUsefulness)}
-                          >
-                            <Lightbulb className="w-4 h-4 mr-2" /> DO CZEGO MI SIĘ TO PRZYDA?
-                          </Button>
-                          {showUsefulness && (
-                              <div className="p-4 border-2 border-primary/30 bg-primary/5 rounded-xl text-xs italic animate-fade-in">
-                                {q.usefulness}
-                              </div>
-                          )}
+                  {/* HINTS */}
+                  <div className="space-y-3">
+                    {hintLevel < q.hints.length && !showResult && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setHintLevel((h) => h + 1);
+                          setScore((s) => s - 2);
+                        }}
+                        className="w-full border-2 border-secondary text-secondary hover:bg-secondary/10 arcade-button py-4 !whitespace-normal break-words"
+                      >
+                        💡 PODPOWIEDŹ ({hintLevel + 1}/{q.hints.length}) (KOSZT: 2 PKT)
+                      </Button>
+                    )}
+                    {hintLevel > 0 && !showResult && (
+                      <div className="p-3 border-2 border-secondary bg-secondary/10 text-secondary text-xs rounded-lg animate-slide-in-up break-words">
+                        {q.hints.slice(0, hintLevel).map((h, i) => (
+                          <p key={i}>• {h}</p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* RESULT / USEFULNESS */}
+                  {showResult && feedback && (
+                    <div className="space-y-4 animate-slide-in-up">
+                      <div className={`p-4 border-4 text-center rounded-xl ${feedback.ok ? "border-accent bg-accent/20 text-accent" : "border-destructive bg-destructive/20 text-destructive"}`}>
+                        <div className="flex items-center justify-center gap-2 font-black">
+                          {feedback.ok ? <CheckCircle2 /> : <XCircle />} {feedback.msg}
                         </div>
+                      </div>
+
+                      <Button variant="outline" className="w-full border-2 hover:bg-primary/10 !whitespace-normal break-words" onClick={() => setShowUsefulness(!showUsefulness)}>
+                        <Lightbulb className="w-4 h-4 mr-2" /> DO CZEGO MI SIĘ TO PRZYDA?
+                      </Button>
+
+                      {showUsefulness && (
+                        <div className="p-4 border-2 border-primary/30 bg-primary/5 rounded-xl text-xs italic animate-fade-in break-words">
+                          {q.usefulness as any}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ACTION BUTTONS */}
+                  <div className="pt-2">
+                    {!showResult && q.type !== "single" && (
+                      <Button
+                        className="w-full h-auto min-h-[3rem] arcade-button bg-primary text-primary-foreground font-bold !whitespace-normal break-words"
+                        onClick={checkMultipleOrShort}
+                      >
+                        SPRAWDŹ ODPOWIEDŹ
+                      </Button>
                     )}
 
-                    <div className="pt-2">
-                      {!showResult && q.type !== "single" && (
-                          <Button className="w-full h-12 arcade-button bg-primary text-primary-foreground font-bold" onClick={checkMultipleOrShort}>
-                            SPRAWDŹ ODPOWIEDŹ
-                          </Button>
-                      )}
-                      {showResult && (
-                          <Button className="w-full h-12 arcade-button bg-primary text-primary-foreground font-bold shadow-lg" onClick={handleNext}>
-                            {qIndex < quizQuestions.length - 1 ? "NASTĘPNE PYTANIE" : "PRZEJDŹ DO ETAPU 2"}
-                          </Button>
-                      )}
-                    </div>
+                    {showResult && (
+                      <Button
+                        className="w-full h-auto min-h-[3rem] arcade-button bg-primary text-primary-foreground font-bold shadow-lg !whitespace-normal break-words"
+                        onClick={handleNext}
+                      >
+                        {qIndex < quizQuestions.length - 1 ? "NASTĘPNE PYTANIE" : "PRZEJDŹ DO ETAPU 2"}
+                      </Button>
+                    )}
                   </div>
-                </Card>
-              </motion.div>
+                </div>
+              </Card>
+            </motion.div>
           )}
 
           {view === "workshop" && <SatelliteWorkshop onFinish={() => setView("finished")} addScore={(p) => setScore(s => s + p)} />}
 
           {view === "finished" && (
-              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-5xl mx-auto">
-                <Card className="p-6 md:p-10 border-4 shadow-2xl bg-card space-y-8 relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-2 bg-primary animate-pulse" />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="w-full max-w-5xl mx-auto px-4"
+            >
+              <Card className="p-6 md:p-10 border-4 shadow-2xl bg-card space-y-8 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-2 bg-primary animate-pulse" />
 
-                  <div className="text-center">
-                    <Trophy size={64} className="mx-auto text-yellow-500 mb-4 animate-bounce drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]" />
-                    <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic">Misja Ukończona!</h2>
-                    <p className="text-muted-foreground uppercase tracking-[0.2em] text-sm font-bold">Technik Komunikacji Elektronicznej</p>
+                <div className="text-center">
+                  <Trophy size={64} className="mx-auto text-yellow-500 mb-4 animate-bounce drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]" />
+                  <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic">Misja Ukończona!</h2>
+                  <p className="text-muted-foreground uppercase tracking-[0.2em] text-sm font-bold">Technik Komunikacji Elektronicznej</p>
+                </div>
+
+                <div className="bg-primary/10 border-2 border-primary/30 rounded-3xl p-8 text-center max-w-md mx-auto relative group">
+                  <div className="absolute inset-0 bg-primary/5 blur-xl group-hover:bg-primary/10 transition-colors rounded-full" />
+                  <p className="relative z-10 text-xs font-bold text-muted-foreground uppercase mb-2">Twój Wynik Końcowy</p>
+                  <div className="relative z-10 text-7xl font-black text-primary drop-shadow-sm">
+                    {score} <span className="text-2xl font-medium text-foreground/60">PKT</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start pt-4">
+                  <div className="space-y-3 flex flex-col items-center lg:items-stretch">
+                    <h4 className="text-[10px] font-black uppercase text-muted-foreground mb-4 tracking-[0.2em] border-b border-border pb-2 flex items-center gap-2 justify-center lg:justify-start">
+                      <Info size={14} /> Dlaczego warto wybrać ten zawód?
+                    </h4>
+
+                    {reasons.map((r, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setSummaryIndex(i)}
+                        className={`w-full max-w-[420px] lg:max-w-none mx-auto flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left arcade-button ${
+                          summaryIndex === i
+                            ? "border-primary bg-primary/10 shadow-md shadow-primary/20"
+                            : "border-border hover:border-primary/50 hover:bg-muted/50"
+                        }`}
+                      >
+                        <r.icon className={`w-6 h-6 ${summaryIndex === i ? "text-primary" : "text-muted-foreground"}`} />
+                        <span className="text-sm font-bold uppercase tracking-tight break-words">{r.title}</span>
+                      </button>
+                    ))}
                   </div>
 
-                  <div className="bg-primary/10 border-2 border-primary/30 rounded-3xl p-8 text-center max-w-md mx-auto relative group">
-                    <div className="absolute inset-0 bg-primary/5 blur-xl group-hover:bg-primary/10 transition-colors rounded-full" />
-                    <p className="relative z-10 text-xs font-bold text-muted-foreground uppercase mb-2">Twój Wynik Końcowy</p>
-                    <div className="relative z-10 text-7xl font-black text-primary drop-shadow-sm">{score} <span className="text-2xl font-medium text-foreground/60">PKT</span></div>
+                  <div className="bg-background/50 rounded-2xl border-2 border-border p-6 md:p-8 min-h-[200px] flex flex-col justify-center shadow-inner relative animate-fade-in text-center lg:text-left">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={summaryIndex}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className="space-y-4 max-w-prose mx-auto lg:mx-0"
+                      >
+                        <h4 className="text-xl font-black uppercase text-primary italic underline decoration-primary/30 underline-offset-8">
+                          {reasons[summaryIndex].title}
+                        </h4>
+                        <p className="text-lg text-muted-foreground leading-relaxed font-medium break-words">
+                          {reasons[summaryIndex].text}
+                        </p>
+                      </motion.div>
+                    </AnimatePresence>
                   </div>
+                </div>
 
-                  <div className="grid lg:grid-cols-2 gap-8 items-start pt-4">
-                    <div className="space-y-3">
-                      <h4 className="text-[10px] font-black uppercase text-muted-foreground mb-4 tracking-[0.2em] border-b border-border pb-2 flex items-center gap-2">
-                        <Info size={14} /> Dlaczego warto wybrać ten zawód?
-                      </h4>
-                      {reasons.map((r, i) => (
-                          <button
-                              key={i}
-                              onClick={() => setSummaryIndex(i)}
-                              className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left arcade-button ${
-                                  summaryIndex === i
-                                      ? "border-primary bg-primary/10 shadow-md shadow-primary/20"
-                                      : "border-border hover:border-primary/50 hover:bg-muted/50"
-                              }`}
-                          >
-                            <r.icon className={`w-6 h-6 ${summaryIndex === i ? "text-primary" : "text-muted-foreground"}`} />
-                            <span className="text-xs font-bold uppercase tracking-tight">{r.title}</span>
-                          </button>
-                      ))}
-                    </div>
-
-                    <div className="bg-background/50 rounded-2xl border-2 border-border p-8 min-h-[250px] flex flex-col justify-center shadow-inner relative animate-fade-in">
-                      <AnimatePresence mode="wait">
-                        <motion.div
-                            key={summaryIndex}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            className="space-y-4"
-                        >
-                          <h4 className="text-xl font-black uppercase text-primary italic underline decoration-primary/30 underline-offset-8">
-                            {reasons[summaryIndex].title}
-                          </h4>
-                          <p className="text-lg text-muted-foreground leading-relaxed font-medium">
-                            {reasons[summaryIndex].text}
-                          </p>
-                        </motion.div>
-                      </AnimatePresence>
-                    </div>
-                  </div>
-
-                  <Button
-                      size="lg"
-                      className="w-full h-16 text-xl font-black arcade-button bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
-                      onClick={() => window.location.assign("/")}
-                  >
-                    WRÓĆ DO MENU GŁÓWNEGO
-                  </Button>
-                </Card>
-              </motion.div>
+                <Button
+                  size="lg"
+                  className="w-full max-w-md mx-auto h-auto py-3 text-base sm:text-xl font-black arcade-button bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 !whitespace-normal break-words"
+                  onClick={() => window.location.assign("/")}
+                >
+                  WRÓĆ DO MENU GŁÓWNEGO
+                </Button>
+              </Card>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
