@@ -958,12 +958,26 @@ export default function ProgrammerGame() {
               <Button
                 onClick={() => setShowUsefulness(!showUsefulness)}
                 variant="outline"
-                size="sm"
-                className={`w-full border-2 ${showUsefulness ? "border-primary/50 bg-primary/20" : "border-border hover:border-primary/50"} text-foreground arcade-button hover:bg-primary/10 relative break-words whitespace-normal`}
+                className={`
+                  w-full
+                  h-auto
+                  min-h-[3.5rem]
+                  px-5 py-4
+                  border-2
+                  ${showUsefulness ? "border-primary/50 bg-primary/20" : "border-border hover:border-primary/50"}
+                  text-foreground
+                  arcade-button
+                  hover:bg-primary/10
+                  text-sm sm:text-base
+                  leading-relaxed
+                  whitespace-normal break-words
+                  flex items-center
+                `}
               >
-                <Lightbulb className="w-4 min-h-4 h-auto mr-2" />
+                <Lightbulb className="w-4 h-4 mr-2 shrink-0" />
                 DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
               </Button>
+
 
               {showUsefulness && (
                 <div className="p-4 border-2 border-primary/50 bg-primary/10 text-primary-foreground animate-slide-in-up rounded">
@@ -981,15 +995,52 @@ export default function ProgrammerGame() {
           <div className="pt-2">
             {/* Przycisk SPRAWDŹ pokazujemy tylko dla typów innych niż 'single', bo 'single' sprawdza się samo */}
             {!showResult && q.type !== "single" && (
-              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 text-md tracking-wider font-bold shadow-lg shadow-primary/20" onClick={check}>
+              <Button
+                onClick={check}
+                className="
+                  w-full
+                  h-auto
+                  min-h-[3.5rem]
+                  px-6 py-4
+                  bg-primary text-primary-foreground
+                  hover:bg-primary/90
+                  arcade-button
+                  text-sm sm:text-base
+                  tracking-wider
+                  font-bold
+                  leading-relaxed
+                  shadow-lg shadow-primary/20
+                  whitespace-normal break-words
+                "
+              >
                 SPRAWDŹ ODPOWIEDŹ
               </Button>
             )}
 
             {showResult && (
-              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 text-md tracking-wider font-bold shadow-lg shadow-primary/20" onClick={handleNextQuestion}>
-                {qIndex < quizQuestions.length - 1 ? "NASTĘPNE PYTANIE" : "PRZEJDŹ DO ETAPU 2"}
+              <Button
+                onClick={handleNextQuestion}
+                className="
+                  w-full
+                  h-auto
+                  min-h-[3.5rem]
+                  px-6 py-4
+                  bg-primary text-primary-foreground
+                  hover:bg-primary/90
+                  arcade-button
+                  text-sm sm:text-base
+                  tracking-wider
+                  font-bold
+                  leading-relaxed
+                  shadow-lg shadow-primary/20
+                  whitespace-normal break-words
+                "
+              >
+                {qIndex < quizQuestions.length - 1
+                  ? "NASTĘPNE PYTANIE"
+                  : "PRZEJDŹ DO ETAPU 2"}
               </Button>
+
             )}
           </div>
         </Card>

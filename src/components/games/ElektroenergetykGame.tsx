@@ -149,9 +149,24 @@ function DiagnosticMathGame({ onFinish, addScore }: { onFinish: () => void; addS
           onChange={(e) => setUserInput(e.target.value)}
           className="h-16 text-center text-2xl font-black border-4 border-blue-500/50"
         />
-        <Button onClick={handleVerify} disabled={status !== "idle"} className="w-full h-14 arcade-button bg-blue-600 text-white font-black uppercase">
+        <Button
+          onClick={handleVerify}
+          disabled={status !== "idle"}
+          className="
+            w-full
+            h-auto
+            min-h-[3.5rem]
+            px-6 py-4
+            arcade-button
+            bg-blue-600 text-white
+            font-black uppercase
+            leading-relaxed
+            whitespace-normal break-words
+          "
+        >
           Zatwierdź obliczenia
         </Button>
+
       </div>
 
       <div className="mt-4 flex justify-between items-center text-[10px] font-bold uppercase text-muted-foreground">
@@ -315,7 +330,6 @@ export default function ElektroenergetykGame() {
     else setView("diagnostic");
   };
 
-  // responsive tweak: make spacing friendlier on mobile
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 768);
@@ -420,12 +434,26 @@ export default function ElektroenergetykGame() {
                 <div className="space-y-3">
                   {hintLevel < (q.hints || []).length && !showResult && (
                     <Button
-                      variant="outline" size="sm"
+                      variant="outline"
                       onClick={() => { setHintLevel((h) => h + 1); setScore((s) => s - 2); }}
-                      className="w-full border-2 border-secondary text-secondary hover:bg-secondary/10 arcade-button py-4 font-black text-xs"
+                      className="
+                        w-full
+                        h-auto
+                        min-h-[3.5rem]
+                        px-5 py-4
+                        border-2 border-secondary
+                        text-secondary
+                        hover:bg-secondary/10
+                        arcade-button
+                        font-black
+                        text-sm sm:text-base
+                        leading-relaxed
+                        whitespace-normal break-words
+                      "
                     >
                       💡 ANALIZA TECHNICZNA ({hintLevel + 1}/{(q.hints || []).length}) (KOSZT: 2 PKT)
                     </Button>
+
                   )}
                   {hintLevel > 0 && !showResult && (
                     <div className="p-4 border-2 border-secondary bg-secondary/10 text-secondary text-xs rounded-xl animate-slide-in-up font-medium italic">
@@ -454,11 +482,28 @@ export default function ElektroenergetykGame() {
                     )}
 
                     <Button
-                      variant="outline" className="w-full border-2 hover:bg-blue-500/10 arcade-button"
+                      variant="outline"
                       onClick={() => setShowUsefulness(!showUsefulness)}
+                      className="
+                        w-full
+                        h-auto
+                        min-h-[3.5rem]
+                        px-5 py-4
+                        border-2
+                        border-border
+                        hover:border-blue-500/50
+                        hover:bg-blue-500/10
+                        arcade-button
+                        text-foreground
+                        flex items-center
+                        leading-relaxed
+                        whitespace-normal break-words
+                      "
                     >
-                      <Lightbulb className="w-4 h-4 mr-2" /> DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
+                      <Lightbulb className="w-4 h-4 mr-2 shrink-0" />
+                      DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
                     </Button>
+
                     {showUsefulness && (
                       <div className="p-4 border-2 border-blue-500/30 bg-blue-500/5 rounded-xl text-xs italic font-medium animate-fade-in text-muted-foreground">
                         {q.usefulness}
@@ -474,9 +519,25 @@ export default function ElektroenergetykGame() {
                     </Button>
                   )}
                   {showResult && (
-                    <Button className="w-full h-14 arcade-button bg-blue-600 text-white font-black text-lg shadow-lg shadow-blue-600/20" onClick={handleNext}>
+                    <Button
+                      onClick={handleNext}
+                      className="
+                        w-full
+                        h-auto
+                        min-h-[3.5rem]
+                        px-6 py-4
+                        arcade-button
+                        bg-blue-600 text-white
+                        font-black
+                        text-lg
+                        shadow-lg shadow-blue-600/20
+                        leading-relaxed
+                        whitespace-normal break-words
+                      "
+                    >
                       {qIndex < quizQuestions.length - 1 ? "NASTĘPNA INSTRUKCJA" : "PRZEJDŹ DO ETAPU 2"}
                     </Button>
+
                   )}
                 </div>
               </div>
@@ -489,51 +550,85 @@ export default function ElektroenergetykGame() {
         {view === "trakcja" && <ShuffledTrakcjaGame onFinish={() => setView("finished")} addScore={(p) => setScore((s) => s + p)} />}
 
         {view === "finished" && (
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-5xl mx-auto">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="w-full max-w-5xl mx-auto px-4 md:px-0"
+          >
             <Card className="p-6 md:p-10 border-4 shadow-2xl bg-card space-y-10 relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-2 bg-blue-500 animate-pulse" />
 
+              {/* Nagłówek */}
               <div className="text-center">
-                <Trophy size={64} className="mx-auto text-blue-500 mb-4 animate-bounce drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
-                <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic">System Zweryfikowany!</h2>
-                <p className="text-muted-foreground uppercase tracking-[0.2em] text-sm font-bold">Technik Elektroenergetyk Transportu Szynowego</p>
+                <Trophy
+                  size={64}
+                  className="mx-auto text-blue-500 mb-4 animate-bounce drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]"
+                />
+                <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter italic">
+                  System Zweryfikowany!
+                </h2>
+                <p className="text-muted-foreground uppercase tracking-[0.2em] text-sm font-bold">
+                  Technik Elektroenergetyk Transportu Szynowego
+                </p>
               </div>
 
+              {/* Wynik operacyjny */}
               <div className="bg-blue-500/10 border-2 border-blue-500/30 rounded-3xl p-8 text-center max-w-md mx-auto relative group">
-                <p className="text-xs font-bold text-muted-foreground uppercase mb-2 italic">Twój Wynik Operacyjny</p>
-                <div className="text-7xl font-black text-blue-600 drop-shadow-sm">{score} <span className="text-2xl font-medium text-foreground/60">PKT</span></div>
+                <p className="text-xs font-bold text-muted-foreground uppercase mb-2 italic">
+                  Twój Wynik Operacyjny
+                </p>
+                <div className="flex justify-center items-baseline gap-2 flex-wrap max-w-full">
+                  <span className="text-5xl md:text-6xl font-black text-blue-600 drop-shadow-sm truncate">
+                    {score}
+                  </span>
+                  <span className="text-xl md:text-2xl font-medium text-foreground/60 flex-shrink-0">
+                    PKT
+                  </span>
+                </div>
+
               </div>
 
               <div className="grid lg:grid-cols-2 gap-8 items-start pt-4">
-                <div className="space-y-3">
-                  <h4 className="text-[10px] font-black uppercase text-muted-foreground mb-4 tracking-[0.2em] border-b border-border pb-2 flex items-center gap-2">
+
+                <div className="space-y-3 max-w-full">
+                  <h4 className="text-[10px] font-black uppercase text-muted-foreground mb-4 tracking-[0.2em] border-b border-border pb-2 flex items-center gap-2 break-words">
                     <Info size={14} /> Perspektywy zawodowe:
                   </h4>
                   {reasons.map((r, i) => (
                     <button
                       key={i}
                       onClick={() => setSummaryIndex(i)}
-                      className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left arcade-button ${summaryIndex === i ? "border-blue-500 bg-blue-500/10 shadow-md shadow-blue-500/20" : "border-border hover:border-blue-500/50 hover:bg-muted/50"}`}
+                      className={`w-full flex items-start gap-4 p-3 rounded-xl border-2 transition-all text-left arcade-button break-words whitespace-normal overflow-hidden ${
+                        summaryIndex === i
+                          ? "border-blue-500 bg-blue-500/10 shadow-md shadow-blue-500/20"
+                          : "border-border hover:border-blue-500/50 hover:bg-muted/50"
+                      }`}
                     >
-                      <r.icon className={`w-6 h-6 ${summaryIndex === i ? "text-blue-600" : "text-muted-foreground"}`} />
-                      <span className="text-[10px] font-black uppercase tracking-tight leading-none">{r.title}</span>
+                      <r.icon
+                        className={`w-6 h-6 flex-shrink-0 ${
+                          summaryIndex === i ? "text-blue-600" : "text-muted-foreground"
+                        }`}
+                      />
+                      <span className="text-[10px] font-black uppercase tracking-tight leading-snug break-words whitespace-normal">
+                        {r.title}
+                      </span>
                     </button>
                   ))}
                 </div>
 
-                <div className="bg-background/50 rounded-2xl border-2 border-border p-8 min-h-[250px] flex flex-col justify-center shadow-inner relative animate-fade-in">
+                <div className="bg-background/50 rounded-2xl border-2 border-border p-6 md:p-8 min-h-[250px] flex flex-col justify-center shadow-inner relative animate-fade-in break-words whitespace-normal overflow-hidden">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={summaryIndex}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="space-y-4"
+                      className="space-y-4 break-words"
                     >
-                      <h4 className="text-xl font-black uppercase text-blue-600 italic underline decoration-blue-500/30 underline-offset-8">
+                      <h4 className="text-xl font-black uppercase text-blue-600 italic underline decoration-blue-500/30 underline-offset-8 break-words whitespace-normal">
                         {reasons[summaryIndex].title}
                       </h4>
-                      <p className="text-lg text-muted-foreground leading-relaxed font-bold italic">
+                      <p className="text-lg text-muted-foreground leading-relaxed font-bold italic break-words whitespace-normal">
                         {reasons[summaryIndex].text}
                       </p>
                     </motion.div>
@@ -541,15 +636,17 @@ export default function ElektroenergetykGame() {
                 </div>
               </div>
 
+              {/* Button powrotu */}
               <Button
-                size="lg"
-                className="relative break-words whitespace-normal w-full min-h-16 h-auto text-xl font-black arcade-button bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20"
                 onClick={() => window.location.assign("/")}
+                className="relative break-words whitespace-normal w-full min-h-[3.5rem] h-auto text-xl font-black arcade-button bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20 px-6 py-4"
               >
                 POWRÓT DO CENTRUM DOWODZENIA
               </Button>
             </Card>
           </motion.div>
+
+
         )}
       </AnimatePresence>
     </div>
