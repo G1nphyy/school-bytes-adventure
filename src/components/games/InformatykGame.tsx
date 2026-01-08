@@ -1612,20 +1612,36 @@ const InformatykGame = () => {
 
             {showResult && (
                 <Button
-                    onClick={() => {
-                      if (currentQuestion < securityQuestions.length - 1) {
-                        handleNext();
-                      } else {
-                        setQuizComplete(true);
-                        setSelectedAnswer(null);
-                        setShowResult(false);
-                        setShowUsefulness(false);
-                        setHintLevel(0);
-                      }
-                    }}
-                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 text-md tracking-wider font-bold shadow-lg shadow-primary/20"
+                  onClick={() => {
+                    if (currentQuestion < securityQuestions.length - 1) {
+                      handleNext();
+                    } else {
+                      setQuizComplete(true);
+                      setSelectedAnswer(null);
+                      setShowResult(false);
+                      setShowUsefulness(false);
+                      setHintLevel(0);
+                    }
+                  }}
+                  className="
+                    w-full
+                    h-auto
+                    min-h-[3.5rem]
+                    px-6 py-4
+                    bg-primary text-primary-foreground
+                    hover:bg-primary/90
+                    arcade-button
+                    text-sm sm:text-base
+                    tracking-wider
+                    font-bold
+                    leading-relaxed
+                    shadow-lg shadow-primary/20
+                    !whitespace-normal break-words
+                  "
                 >
-                  {currentQuestion < securityQuestions.length - 1 ? "NASTĘPNE PYTANIE " : "ZACZNIJ MONTAŻ PC "}
+                  {currentQuestion < securityQuestions.length - 1
+                    ? "NASTĘPNE PYTANIE"
+                    : "ZACZNIJ MONTAŻ PC"}
                 </Button>
             )}
           </div>

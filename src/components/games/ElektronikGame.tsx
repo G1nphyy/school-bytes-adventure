@@ -856,8 +856,26 @@ export default function ElectronicsGame() {
             )}
 
             {showResult && (
-              <Button className="w-full bg-primary h-12 font-bold shadow-lg" onClick={handleNextQuestion}>
-                {qIndex < quizQuestions.length - 1 ? "NASTĘPNE PYTANIE" : "PRZEJDŹ DO WARSZTATU"}
+              <Button
+                onClick={handleNextQuestion}
+                className="
+                  w-full
+                  h-auto
+                  min-h-12
+                  py-3
+                  bg-primary
+                  font-bold
+                  shadow-lg
+                  text-center
+                  !whitespace-normal
+                  break-words
+                "
+              >
+                <span className="block leading-tight whitespace-normal">
+                  {qIndex < quizQuestions.length - 1
+                    ? "NASTĘPNE PYTANIE"
+                    : "PRZEJDŹ DO WARSZTATU"}
+                </span>
               </Button>
             )}
           </div>

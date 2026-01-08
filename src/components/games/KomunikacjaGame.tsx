@@ -396,15 +396,26 @@ export default function KomunikacjaGame() {
                     {hintLevel < q.hints.length && !showResult && (
                       <Button
                         variant="outline"
-                        size="sm"
                         onClick={() => {
                           setHintLevel((h) => h + 1);
                           setScore((s) => s - 2);
                         }}
-                        className="w-full border-2 border-secondary text-secondary hover:bg-secondary/10 arcade-button py-4 !whitespace-normal break-words"
+                        className="
+                          w-full
+                          h-auto
+                          border-2 border-secondary text-secondary
+                          hover:bg-secondary/10
+                          arcade-button
+                          px-5 py-5
+                          min-h-[3.5rem]
+                          text-sm sm:text-base
+                          leading-relaxed
+                          !whitespace-normal break-words
+                        "
                       >
                         💡 PODPOWIEDŹ ({hintLevel + 1}/{q.hints.length}) (KOSZT: 2 PKT)
                       </Button>
+
                     )}
                     {hintLevel > 0 && !showResult && (
                       <div className="p-3 border-2 border-secondary bg-secondary/10 text-secondary text-xs rounded-lg animate-slide-in-up break-words">
@@ -424,7 +435,17 @@ export default function KomunikacjaGame() {
                         </div>
                       </div>
 
-                      <Button variant="outline" className="w-full border-2 hover:bg-primary/10 !whitespace-normal break-words" onClick={() => setShowUsefulness(!showUsefulness)}>
+                      <Button variant="outline" className="
+                                                  w-full
+                                                  border-2
+                                                  hover:bg-primary/10
+                                                  px-5 py-5
+                                                  min-h-[3.5rem]
+                                                  text-sm sm:text-base
+                                                  leading-relaxed
+                                                  !whitespace-normal break-words
+                                                "
+                        onClick={() => setShowUsefulness(!showUsefulness)}>
                         <Lightbulb className="w-4 h-4 mr-2" /> DO CZEGO MI SIĘ TO PRZYDA?
                       </Button>
 

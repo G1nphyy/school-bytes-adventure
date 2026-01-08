@@ -344,8 +344,31 @@ const AutomatykGame = () => {
                             </div>
                         )}
 
-                        <Button onClick={nextStep} className="w-full h-12 bg-primary text-white font-bold arcade-button shadow-lg shadow-primary/20 uppercase tracking-wider">
-                          {currentQuestion + 1 < quizQuestions.length ? "Następne pytanie" : "Przejdź do linii produkcyjnej"}
+                        <Button
+                          onClick={nextStep}
+                          className="
+                            w-full
+                            h-auto
+                            py-3
+                            bg-primary
+                            text-white
+                            font-bold
+                            arcade-button
+                            shadow-lg
+                            uppercase
+                            tracking-wide
+                            flex
+                            items-center
+                            justify-center
+                            text-center
+                            !whitespace-normal
+                          "
+                        >
+                          <span className="block leading-tight whitespace-normal break-words">
+                            {currentQuestion + 1 < quizQuestions.length
+                              ? "Następne pytanie"
+                              : "Przejdź do linii produkcyjnej"}
+                          </span>
                         </Button>
                       </div>
                   )}
