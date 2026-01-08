@@ -33,13 +33,13 @@ Gracz ma do wyboru siedem kafelków pod którymi znajduje się dwuetapowe gra ed
         * __Technik transportu kolejowego:__ Gracz musi przeprowadzić pociąg do celu, zmieniając tory jazdy, odpowiadając przy tym na pytania z quizu
 
 * Gry związane z życiem codziennym w szkole
-    *Gra _Schody_
+    * Gra _Schody_
 
   Gracz wciela się w ucznia, który podczas przerwy musi przedostać się z szatni aż na 5. piętro. Korytarze i klatki schodowe są zatłoczone, dlatego zadaniem gracza jest unikanie kolizji z innymi uczniami oraz sprawne    manewrowanie w tłumie.
    Sterowanie na komputerze odbywa się spacją i shiftem, a na telefon są specjalne przyciski. Shift pełni funkcję sprintu i pozwala szybciej omijać uczniów bez konsekwencji kolizjii.
    Celem gry jest dotarcie na 5. piętro w wyznaczonym czasie, co umiętnego korzystania z przycisku sprintu.
 
-   *Gra DSD
+   * Gra DSD
 
    Gra DSD to dynamiczny quiz językowy oparty na pytaniach wielokrotnego wyboru (A, B, C, D) w języku niemieckim. Gracz musi jak najszybciej udzielać poprawnych odpowiedzi. Im szybsza i trafniejsza reakcja, tym więcej punktów zdobywa.
    Rozgrywka ma formę wyścigu z innymi uczniami: celem jest uzyskanie jak największej liczby punktów i zajęcie pierwszego miejsca.
