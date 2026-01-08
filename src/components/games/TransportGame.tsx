@@ -153,8 +153,8 @@ export default function TransportGame() {
   const [y, setY] = useState(levels[0].start.y * cell);
   const [rotation, setRotation] = useState(0);
   const [direction, setDirection] = useState([cell, 0]);
-  const [switchDirs, setSwitchDirs] = useState({});
-  const [activeSwitch, setActiveSwitch] = useState(null);
+  const [switchDirs, setSwitchDirs] = useState<any>({});
+  const [activeSwitch, setActiveSwitch] = useState<any>(null);
   const [transitioning, setTransitioning] = useState(false);
   const [targetDir, setTargetDir] = useState([0, 0]);
   const [gameOver, setGameOver] = useState(false);
@@ -164,9 +164,9 @@ export default function TransportGame() {
   const [showIntroPopup, setShowIntroPopup] = useState(true);
 
   const [isQuizActive, setIsQuizActive] = useState(false);
-  const [quizQuestion, setQuizQuestion] = useState(null);
-  const [quizFeedback, setQuizFeedback] = useState(null);
-  const [pendingDirection, setPendingDirection] = useState(null);
+  const [quizQuestion, setQuizQuestion] = useState<any>(null);
+  const [quizFeedback, setQuizFeedback] = useState<any>(null);
+  const [pendingDirection, setPendingDirection] = useState<any>(null);
   const [showHint, setShowHint] = useState(false);
   const [showUsefulness, setShowUsefulness] = useState(false);
 
@@ -187,11 +187,11 @@ export default function TransportGame() {
     }
   }, [levelIndex]);
 
-  const chooseDirection = (rx, ry) => {
+  const chooseDirection = (rx: number, ry: number) => {
     setActiveSwitch({ rx, ry });
   };
 
-  const startDirectionQuiz = (dir) => {
+  const startDirectionQuiz = (dir: string) => {
     setPendingDirection(dir);
     const rawQuestion = railwayQuestions[Math.floor(Math.random() * railwayQuestions.length)];
     const correctText = rawQuestion.options[rawQuestion.correct];
@@ -205,28 +205,28 @@ export default function TransportGame() {
     setIsQuizActive(true);
   };
 
-  const handleQuizAnswer = (optionIndex) => {
+  const handleQuizAnswer = (optionIndex: number) => {
     if (optionIndex === quizQuestion.correct) {
       setQuizFeedback({ ok: true, msg: "Poprawnie! Kierunek ustawiony." });
       const key = `${activeSwitch.rx}-${activeSwitch.ry}`;
-      setSwitchDirs(prev => ({ ...prev, [key]: pendingDirection }));
+      setSwitchDirs((prev: any) => ({ ...prev, [key]: pendingDirection }));
       setTimeout(() => {
         setIsQuizActive(false);
         setActiveSwitch(null);
-      }, 1000);
+      }, 800);
     } else {
       setQuizFeedback({ ok: false, msg: "Błąd! Procedura bezpieczeństwa zablokowała zwrotnicę." });
-      setScore(prev => Math.max(0, prev - 1));
+      setScore((prev) => Math.max(0, prev - 1));
       setTimeout(() => {
         setIsQuizActive(false);
         setActiveSwitch(null);
-      }, 1500);
+      }, 1200);
     }
   };
 
   const applyHint = () => {
     if (!showHint && score >= 2) {
-      setScore(prev => prev - 2);
+      setScore((prev) => prev - 2);
       setShowHint(true);
     }
   };
@@ -329,6 +329,7 @@ export default function TransportGame() {
     };
     frameId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frameId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [x, y, direction, switchDirs, transitioning, targetDir, gameOver, gameWon, levelIndex, isQuizActive, isGameStarted]);
 
   return (
@@ -584,7 +585,7 @@ export default function TransportGame() {
             </p>
 
             <div className="grid gap-3 mb-8 px-2">
-              {quizQuestion?.options.map((opt, i) => (
+              {quizQuestion?.options.map((opt: string, i: number) => (
                 <Button
                   key={i}
                   variant="outline"
