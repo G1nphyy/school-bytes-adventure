@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Code, CheckCircle2, XCircle, Lightbulb, Trophy, Terminal } from "lucide-react";
+import { Code, CheckCircle2, XCircle, Lightbulb, Trophy, Terminal, Rocket, Users, BookOpen, Briefcase } from "lucide-react";
 
 /* ----------------- dane quizowe (7 pytań) ----------------- */
 let quizQuestions = [
@@ -156,13 +156,13 @@ const shuffle_questions = <T,>(arr: readonly T[]) => {
 };
 
 quizQuestions = quizQuestions.map((q) =>
-  "answers" in q ? { ...q, answers: shuffle_questions(q.answers) } : q
+    "answers" in q ? { ...q, answers: shuffle_questions(q.answers) } : q
 );
 
 /* ----------------- mini-gra (edytor: rozsypany kod) ----------------- */
 const editorTask = {
   lore:
-    "Podczas rozmowy kwalifikacyjnej na kierunek Technik Programista rekruter poprosi Cię o krótką próbkę umiejętności. Klocki kodu zostały rozsypane — ułóż je tak, aby funkcja poprawnie zwracała największy element tablicy.",
+      "Podczas rozmowy kwalifikacyjnej na kierunek Technik Programista rekruter poprosi Cię o krótką próbkę umiejętności. Klocki kodu zostały rozsypane — ułóż je tak, aby funkcja poprawnie działała.",
   question: "Ułóż funkcję zwracającą największą liczbę z tablicy:",
   pool: [
     "return max;",
@@ -216,17 +216,17 @@ function CodeBlock({ text, origin, index, dragId, isGhost }: any) {
   });
 
   return (
-    <motion.div
-      ref={drag}
-      layout
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -6 }}
-      className={`px-3 py-2 m-1 border rounded cursor-move bg-white shadow text-black text-sm font-mono ${isGhost ? "opacity-60" : ""}`}
-      style={{ opacity: isDragging ? 0.4 : 1, minWidth: 160 }}
-    >
-      <code>{text}</code>
-    </motion.div>
+      <motion.div
+          ref={drag}
+          layout
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          className={`px-3 py-2 m-1 border rounded cursor-move bg-white shadow text-black text-sm font-mono ${isGhost ? "opacity-60" : ""}`}
+          style={{ opacity: isDragging ? 0.4 : 1, minWidth: 160 }}
+      >
+        <code>{text}</code>
+      </motion.div>
   );
 }
 
@@ -241,37 +241,37 @@ function RowSlot({ rowIndex, value, onDropToRow, onSwapRows, highlight }: any) {
   });
 
   return (
-    <motion.div
-      ref={drop}
-      layout
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      whileHover={{ scale: 1.01 }}
-      className={`flex items-start gap-3 px-2 py-1 rounded ${isOver ? "ring-2 ring-offset-1 ring-primary/50" : ""}`}
-    >
-      <div className="w-10 text-right pr-2 text-gray-400 select-none">{rowIndex + 1}</div>
-      <div
-        className={`flex-1 rounded-md border px-3 py-2 bg-[linear-gradient(180deg,#0f172a, #020617)] text-white shadow-sm min-h-[40px] font-mono text-sm relative overflow-hidden`}
-        style={{ boxShadow: highlight ? "0 8px 30px rgba(37,99,235,0.12)" : undefined }}
+      <motion.div
+          ref={drop}
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          whileHover={{ scale: 1.01 }}
+          className={`flex items-start gap-3 px-2 py-1 rounded ${isOver ? "ring-2 ring-offset-1 ring-primary/50" : ""}`}
       >
-        <AnimatePresence>
-          {value ? (
-            <motion.div
-              key={value}
-              initial={{ opacity: 0, y: 6, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.98 }}
-            >
-              <CodeBlock text={value} origin={"row"} index={rowIndex} dragId={`row-${rowIndex}`} />
-            </motion.div>
-          ) : (
-            <motion.div key={"empty-" + rowIndex} initial={{ opacity: 0.4 }} animate={{ opacity: 0.7 }} className="text-gray-300 italic text-xs">
-              Przeciągnij tutaj fragment kodu...
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.div>
+        <div className="w-10 text-right pr-2 text-gray-400 select-none">{rowIndex + 1}</div>
+        <div
+            className={`flex-1 rounded-md border px-3 py-2 bg-[linear-gradient(180deg,#0f172a, #020617)] text-white shadow-sm min-h-[40px] font-mono text-sm relative overflow-hidden`}
+            style={{ boxShadow: highlight ? "0 8px 30px rgba(37,99,235,0.12)" : undefined }}
+        >
+          <AnimatePresence>
+            {value ? (
+                <motion.div
+                    key={value}
+                    initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                >
+                  <CodeBlock text={value} origin={"row"} index={rowIndex} dragId={`row-${rowIndex}`} />
+                </motion.div>
+            ) : (
+                <motion.div key={"empty-" + rowIndex} initial={{ opacity: 0.4 }} animate={{ opacity: 0.7 }} className="text-gray-300 italic text-xs">
+                  Przeciągnij tutaj fragment kodu...
+                </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
   );
 }
 
@@ -285,9 +285,9 @@ function MiniGame({ onFinish, addScore }: { onFinish: () => void; addScore: (poi
   }, []);
 
   return (
-    <DndProvider backend={isTouch ? (TouchBackend as any) : HTML5Backend} options={isTouch ? { enableMouseEvents: true } : undefined}>
-      <MiniGameInner onFinish={onFinish} addScore={addScore} />
-    </DndProvider>
+      <DndProvider backend={isTouch ? (TouchBackend as any) : HTML5Backend} options={isTouch ? { enableMouseEvents: true } : undefined}>
+        <MiniGameInner onFinish={onFinish} addScore={addScore} />
+      </DndProvider>
   );
 }
 
@@ -311,50 +311,50 @@ function MiniGameInner({ onFinish, addScore }: { onFinish: () => void; addScore:
   }, []);
 
   const dropFromPoolToRow = useCallback(
-    (poolIndex: number, rowIndex: number) => {
-      if (completed) return;
-      setPool((prevPool) => {
-        const copy = [...prevPool];
-        const [item] = copy.splice(poolIndex, 1);
-        setRows((r) => {
-          const nr = [...r];
-          if (nr[rowIndex]) copy.push(nr[rowIndex]);
-          nr[rowIndex] = item;
-          return nr;
+      (poolIndex: number, rowIndex: number) => {
+        if (completed) return;
+        setPool((prevPool) => {
+          const copy = [...prevPool];
+          const [item] = copy.splice(poolIndex, 1);
+          setRows((r) => {
+            const nr = [...r];
+            if (nr[rowIndex]) copy.push(nr[rowIndex]);
+            nr[rowIndex] = item;
+            return nr;
+          });
+          return copy;
         });
-        return copy;
-      });
-      setSelectedFromPool(null); // Odznacz po umieszczeniu
-    },
-    [completed]
+        setSelectedFromPool(null); // Odznacz po umieszczeniu
+      },
+      [completed]
   );
 
   const moveRowToRow = useCallback(
-    (fromRow: number, toRow: number) => {
-      if (completed) return;
-      setRows((prev) => {
-        const copy = [...prev];
-        const tmp = copy[fromRow];
-        copy[fromRow] = copy[toRow];
-        copy[toRow] = tmp;
-        return copy;
-      });
-    },
-    [completed]
+      (fromRow: number, toRow: number) => {
+        if (completed) return;
+        setRows((prev) => {
+          const copy = [...prev];
+          const tmp = copy[fromRow];
+          copy[fromRow] = copy[toRow];
+          copy[toRow] = tmp;
+          return copy;
+        });
+      },
+      [completed]
   );
 
   const moveRowToPool = useCallback(
-    (rowIndex: number) => {
-      if (completed) return;
-      setRows((prev) => {
-        const copy = [...prev];
-        const item = copy[rowIndex];
-        copy[rowIndex] = null;
-        if (item) setPool((p) => [...p, item]);
-        return copy;
-      });
-    },
-    [completed]
+      (rowIndex: number) => {
+        if (completed) return;
+        setRows((prev) => {
+          const copy = [...prev];
+          const item = copy[rowIndex];
+          copy[rowIndex] = null;
+          if (item) setPool((p) => [...p, item]);
+          return copy;
+        });
+      },
+      [completed]
   );
 
   const handleSlotClick = (idx: number) => {
@@ -367,12 +367,12 @@ function MiniGameInner({ onFinish, addScore }: { onFinish: () => void; addScore:
   };
 
   const handleDropToRow = useCallback(
-    (item: any, targetRowIndex: number) => {
-      const { origin, index } = item;
-      if (origin === "pool") dropFromPoolToRow(index, targetRowIndex);
-      else if (origin === "row") moveRowToRow(index, targetRowIndex);
-    },
-    [dropFromPoolToRow, moveRowToRow]
+      (item: any, targetRowIndex: number) => {
+        const { origin, index } = item;
+        if (origin === "pool") dropFromPoolToRow(index, targetRowIndex);
+        else if (origin === "row") moveRowToRow(index, targetRowIndex);
+      },
+      [dropFromPoolToRow, moveRowToRow]
   );
 
   const [, dropToPool] = useDrop({
@@ -429,11 +429,11 @@ function MiniGameInner({ onFinish, addScore }: { onFinish: () => void; addScore:
   }, [lastDroppedRow]);
 
   const onDropToRowWithHighlight = useCallback(
-    (item: any, targetRow: number) => {
-      handleDropToRow(item, targetRow);
-      setLastDroppedRow(targetRow);
-    },
-    [handleDropToRow]
+      (item: any, targetRow: number) => {
+        handleDropToRow(item, targetRow);
+        setLastDroppedRow(targetRow);
+      },
+      [handleDropToRow]
   );
 
   function PoolBlock({ text, idx }: { text: string; idx: number }) {
@@ -444,129 +444,129 @@ function MiniGameInner({ onFinish, addScore }: { onFinish: () => void; addScore:
       collect: (m) => ({ isDragging: !!m.isDragging() }),
     });
     return (
-      <motion.div
-        ref={drag}
-        layout
-        initial={{ opacity: 0, y: 6 }}
-        animate={{
-          opacity: isDragging ? 0.5 : 1,
-          y: 0,
-          scale: isSelected ? 1.05 : 1,
-        }}
-        onClick={() => setSelectedFromPool(isSelected ? null : idx)}
-        className={`px-3 py-2 m-1 border-2 rounded cursor-pointer bg-white shadow text-black text-sm font-mono transition-all ${
-          isSelected ? "border-primary ring-2 ring-primary/20 shadow-lg" : "border-transparent"
-        }`}
-        style={{ minWidth: 140 }}
-      >
-        <code>{text}</code>
-      </motion.div>
+        <motion.div
+            ref={drag}
+            layout
+            initial={{ opacity: 0, y: 6 }}
+            animate={{
+              opacity: isDragging ? 0.5 : 1,
+              y: 0,
+              scale: isSelected ? 1.05 : 1,
+            }}
+            onClick={() => setSelectedFromPool(isSelected ? null : idx)}
+            className={`px-3 py-2 m-1 border-2 rounded cursor-pointer bg-white shadow text-black text-sm font-mono transition-all ${
+                isSelected ? "border-primary ring-2 ring-primary/20 shadow-lg" : "border-transparent"
+            }`}
+            style={{ minWidth: 140 }}
+        >
+          <code>{text}</code>
+        </motion.div>
     );
   }
 
   return (
-    <Card className="p-4 md:p-6 border-4 space-y-4 max-w-4xl w-full mx-auto bg-card text-card-foreground">
-      <div className="text-center mb-4">
-        <Terminal className="w-10 h-10 text-primary mx-auto mb-2 animate-pixel-float" />
-        <h2 className="text-lg font-bold">ETAP 2: MINI-GRA KODOWA</h2>
-        <p className="text-xs text-muted-foreground">Ułóż rozsypany algorytm w poprawnej kolejności.</p>
-      </div>
-
-      <p className="text-sm italic text-center bg-muted/50 p-2 rounded">{editorTask.lore}</p>
-      <p className="font-bold text-center">{editorTask.question}</p>
-
-      {/* IDE-like editor */}
-      <div className="mt-3">
-        <div className="bg-slate-900 rounded-md p-2 md:p-4 border-2 border-slate-700">
-          {rows.map((val, idx) => (
-            <div key={idx} className="mb-2" onClick={() => handleSlotClick(idx)}>
-              <RowSlot
-                rowIndex={idx}
-                value={val}
-                onDropToRow={onDropToRowWithHighlight}
-                onSwapRows={moveRowToRow}
-                highlight={lastDroppedRow === idx || (selectedFromPool !== null && val === null)}
-              />
-            </div>
-          ))}
+      <Card className="p-4 md:p-6 border-4 space-y-4 max-w-4xl w-full mx-auto bg-card text-card-foreground">
+        <div className="text-center mb-4">
+          <Terminal className="w-10 h-10 text-primary mx-auto mb-2 animate-pixel-float" />
+          <h2 className="text-lg font-bold">ETAP 2: MINI-GRA KODOWA</h2>
+          <p className="text-xs text-muted-foreground">Ułóż rozsypany algorytm w poprawnej kolejności.</p>
         </div>
-      </div>
 
-      {/* Pool */}
-      <div className="mt-2">
-        <h3 className="font-semibold text-sm mb-1 text-center md:text-left">
-          {selectedFromPool !== null ? "Wybierz miejsce w edytorze ↑" : "Dostępne fragmenty kodu (kliknij lub przeciągnij)"}
-        </h3>
-        <div ref={dropToPool} className="min-h-[100px] p-2 border-2 border-dashed border-primary/30 rounded bg-accent/5 flex flex-wrap gap-2 justify-center">
-          {pool.length === 0 ? (
-            <div className="text-xs italic text-muted-foreground self-center">Wszystkie fragmenty użyte</div>
-          ) : (
-            pool.map((t, i) => <PoolBlock key={i} text={t} idx={i} />)
-          )}
-        </div>
-      </div>
+        <p className="text-sm italic text-center bg-muted/50 p-2 rounded">{editorTask.lore}</p>
+        <p className="font-bold text-center">{editorTask.question}</p>
 
-      {/* Podpowiedzi */}
-      <div className="space-y-3 pt-2">
-        {hintsVisible < editorTask.hints.length && !completed && (
-          <Button
-            onClick={() => {
-              setHintsVisible((prev) => prev + 1);
-              addScore(-5);
-            }}
-            variant="outline"
-            size="sm"
-            className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal"
-          >
-            💡 POKAŻ PODPOWIEDŹ ({hintsVisible + 1}/{editorTask.hints.length}) (KOSZT: 5 PKT)
-          </Button>
-        )}
-
-        {hintsVisible > 0 && (
-          <div className="space-y-2">
-            {editorTask.hints.slice(0, hintsVisible).map((h, i) => (
-              <div key={i} className="text-xs p-3 bg-secondary/10 border-2 border-secondary text-secondary rounded animate-slide-in-up">
-                <span className="font-bold">Podpowiedź {i + 1}:</span> {h}
-              </div>
+        {/* IDE-like editor */}
+        <div className="mt-3">
+          <div className="bg-slate-900 rounded-md p-2 md:p-4 border-2 border-slate-700">
+            {rows.map((val, idx) => (
+                <div key={idx} className="mb-2" onClick={() => handleSlotClick(idx)}>
+                  <RowSlot
+                      rowIndex={idx}
+                      value={val}
+                      onDropToRow={onDropToRowWithHighlight}
+                      onSwapRows={moveRowToRow}
+                      highlight={lastDroppedRow === idx || (selectedFromPool !== null && val === null)}
+                  />
+                </div>
             ))}
           </div>
-        )}
-      </div>
-
-      {/* Feedback & Result */}
-      {feedback && (
-        <div className={`p-4 border-4 text-center animate-fade-in ${feedback.ok ? "border-accent bg-accent/20 text-accent" : "border-destructive bg-destructive/20 text-destructive"}`}>
-          {feedback.ok ? <CheckCircle2 className="w-8 h-8 mx-auto mb-2" /> : <XCircle className="w-8 h-8 mx-auto mb-2" />}
-          <p className="font-bold">{feedback.msg}</p>
         </div>
-      )}
 
-      {/* Controls */}
-      <div className="space-y-3 mt-4">
-        {!completed && (
-          <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 text-md" onClick={validate} disabled={successPending}>
-            SPRAWDŹ ROZWIĄZANIE
-          </Button>
+        {/* Pool */}
+        <div className="mt-2">
+          <h3 className="font-semibold text-sm mb-1 text-center md:text-left">
+            {selectedFromPool !== null ? "Wybierz miejsce w edytorze ↑" : "Dostępne fragmenty kodu (kliknij lub przeciągnij)"}
+          </h3>
+          <div ref={dropToPool} className="min-h-[100px] p-2 border-2 border-dashed border-primary/30 rounded bg-accent/5 flex flex-wrap gap-2 justify-center">
+            {pool.length === 0 ? (
+                <div className="text-xs italic text-muted-foreground self-center">Wszystkie fragmenty użyte</div>
+            ) : (
+                pool.map((t, i) => <PoolBlock key={i} text={t} idx={i} />)
+            )}
+          </div>
+        </div>
+
+        {/* Podpowiedzi */}
+        <div className="space-y-3 pt-2">
+          {hintsVisible < editorTask.hints.length && !completed && (
+              <Button
+                  onClick={() => {
+                    setHintsVisible((prev) => prev + 1);
+                    addScore(-5);
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal"
+              >
+                💡 POKAŻ PODPOWIEDŹ ({hintsVisible + 1}/{editorTask.hints.length}) (KOSZT: 5 PKT)
+              </Button>
+          )}
+
+          {hintsVisible > 0 && (
+              <div className="space-y-2">
+                {editorTask.hints.slice(0, hintsVisible).map((h, i) => (
+                    <div key={i} className="text-xs p-3 bg-secondary/10 border-2 border-secondary text-secondary rounded animate-slide-in-up">
+                      <span className="font-bold">Podpowiedź {i + 1}:</span> {h}
+                    </div>
+                ))}
+              </div>
+          )}
+        </div>
+
+        {/* Feedback & Result */}
+        {feedback && (
+            <div className={`p-4 border-4 text-center animate-fade-in ${feedback.ok ? "border-accent bg-accent/20 text-accent" : "border-destructive bg-destructive/20 text-destructive"}`}>
+              {feedback.ok ? <CheckCircle2 className="w-8 h-8 mx-auto mb-2" /> : <XCircle className="w-8 h-8 mx-auto mb-2" />}
+              <p className="font-bold">{feedback.msg}</p>
+            </div>
         )}
 
-        {!completed && (
-          <Button
-            className="w-full"
-            variant="ghost"
-            onClick={() => {
-              setPool(shuffle(editorTask.pool));
-              setRows(Array(editorTask.correct.length).fill(null));
-              setFeedback(null);
-              setHintsVisible(0);
-              setAttempts(0);
-              setSelectedFromPool(null);
-            }}
-          >
-            Resetuj planszę
-          </Button>
-        )}
-      </div>
-    </Card>
+        {/* Controls */}
+        <div className="space-y-3 mt-4">
+          {!completed && (
+              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 arcade-button h-12 text-md" onClick={validate} disabled={successPending}>
+                SPRAWDŹ ROZWIĄZANIE
+              </Button>
+          )}
+
+          {!completed && (
+              <Button
+                  className="w-full"
+                  variant="ghost"
+                  onClick={() => {
+                    setPool(shuffle(editorTask.pool));
+                    setRows(Array(editorTask.correct.length).fill(null));
+                    setFeedback(null);
+                    setHintsVisible(0);
+                    setAttempts(0);
+                    setSelectedFromPool(null);
+                  }}
+              >
+                Resetuj planszę
+              </Button>
+          )}
+        </div>
+      </Card>
   );
 }
 
@@ -586,6 +586,31 @@ export default function ProgrammerGame() {
   // Podpowiedzi
   const [hintLevel, setHintLevel] = useState(0);
   const [showUsefulness, setShowUsefulness] = useState(false);
+
+  // Podsumowanie / dlaczego warto być programistą
+  const [summaryIndex, setSummaryIndex] = useState(0);
+  const reasons = [
+    {
+      title: "Twórz rzeczy, które działają",
+      text: "Programista potrafi zamienić pomysł w działający produkt — aplikację, stronę czy skrypt automatyzujący nudne zadania.",
+      icon: Rocket,
+    },
+    {
+      title: "Rozwiązywanie problemów",
+      text: "Kodowanie to ciągłe myślenie i szukanie rozwiązań — to doskonałe ćwiczenie logicznego myślenia i kreatywności.",
+      icon: BookOpen,
+    },
+    {
+      title: "Elastyczność i praca zdalna",
+      text: "Wiele zadań można wykonywać z dowolnego miejsca — praca zdalna i elastyczne godziny to duży atut tej ścieżki.",
+      icon: Users,
+    },
+    {
+      title: "Dobre perspektywy zawodowe",
+      text: "Branża IT rośnie — znajomość programowania otwiera drogę do ciekawych projektów, staży i dobrze płatnych stanowisk.",
+      icon: Briefcase,
+    },
+  ];
 
   const q = quizQuestions[qIndex];
 
@@ -679,206 +704,206 @@ export default function ProgrammerGame() {
 
     if (q.type === "single") {
       return (
-        <div className="space-y-3">
-          {q.answers.map((a) => {
-            const isCorrectAnswer = a.correct;
-            const isSelected = val === a.id;
-            const showCorrect = showResult && isCorrectAnswer;
-            const showWrong = showResult && isSelected && !isCorrectAnswer;
+          <div className="space-y-3">
+            {q.answers.map((a) => {
+              const isCorrectAnswer = a.correct;
+              const isSelected = val === a.id;
+              const showCorrect = showResult && isCorrectAnswer;
+              const showWrong = showResult && isSelected && !isCorrectAnswer;
 
-            const baseClasses = "w-full justify-start text-left arcade-button transition-all duration-200 cursor-pointer p-4 text-sm border h-auto border-2 rounded-xl whitespace-normal";
-            let stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30";
+              const baseClasses = "w-full justify-start text-left arcade-button transition-all duration-200 cursor-pointer p-4 text-sm border h-auto border-2 rounded-xl whitespace-normal";
+              let stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30";
 
-            if (showResult) {
-              if (showCorrect) {
-                stateClasses = "border-accent bg-accent/20 text-accent font-bold cursor-not-allowed";
-              } else if (showWrong) {
-                stateClasses = "border-destructive bg-destructive/20 text-destructive font-bold cursor-not-allowed";
-              } else if (isCorrectAnswer) {
-                // pokaż poprawną, jeśli użytkownik wybrał źle
-                stateClasses = "border-accent bg-accent/10 text-accent cursor-not-allowed";
+              if (showResult) {
+                if (showCorrect) {
+                  stateClasses = "border-accent bg-accent/20 text-accent font-bold cursor-not-allowed";
+                } else if (showWrong) {
+                  stateClasses = "border-destructive bg-destructive/20 text-destructive font-bold cursor-not-allowed";
+                } else if (isCorrectAnswer) {
+                  // pokaż poprawną, jeśli użytkownik wybrał źle
+                  stateClasses = "border-accent bg-accent/10 text-accent cursor-not-allowed";
+                } else {
+                  stateClasses = "border-border bg-background/50 text-muted-foreground opacity-60 cursor-not-allowed";
+                }
+              } else if (isSelected) {
+                stateClasses = "border-primary bg-primary/20 text-primary font-bold";
               } else {
-                stateClasses = "border-border bg-background/50 text-muted-foreground opacity-60 cursor-not-allowed";
+                stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30 hover:bg-background/5 hover:text-foreground";
               }
-            } else if (isSelected) {
-              stateClasses = "border-primary bg-primary/20 text-primary font-bold";
-            } else {
-              stateClasses = "border-border bg-background text-foreground hover:border-primary hover:shadow-md hover:shadow-primary/30 hover:bg-background/5 hover:text-foreground";
-            }
 
-            return (
-              <Button
-                key={a.id}
-                onClick={() => handleSingleChoice(a.id)}
-                variant="outline"
-                disabled={showResult}
-                className={`${baseClasses} ${stateClasses}`}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span className="flex-grow">{a.text}</span>
-                  {showCorrect && <CheckCircle2 className="w-5 h-5 ml-2" />}
-                  {showWrong && <XCircle className="w-5 h-5 ml-2" />}
-                </div>
-              </Button>
-            );
-          })}
-        </div>
+              return (
+                  <Button
+                      key={a.id}
+                      onClick={() => handleSingleChoice(a.id)}
+                      variant="outline"
+                      disabled={showResult}
+                      className={`${baseClasses} ${stateClasses}`}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span className="flex-grow">{a.text}</span>
+                      {showCorrect && <CheckCircle2 className="w-5 h-5 ml-2" />}
+                      {showWrong && <XCircle className="w-5 h-5 ml-2" />}
+                    </div>
+                  </Button>
+              );
+            })}
+          </div>
       );
     }
 
     if (q.type === "multiple") {
       return (
-        <div className="space-y-3">
-          {q.answers.map((a) => {
-            const isSelected = (val || []).includes(a.id);
-            const isCorrectOption = (q.correct || []).includes(a.id);
+          <div className="space-y-3">
+            {q.answers.map((a) => {
+              const isSelected = (val || []).includes(a.id);
+              const isCorrectOption = (q.correct || []).includes(a.id);
 
-            // Stylizacja checkboxa i kontenera z uwzględnieniem pokazywania poprawnej odpowiedzi
-            let containerClass = isSelected ? "border-primary bg-primary/10" : "border-border hover:border-primary/50 bg-background hover:shadow-md hover:shadow-primary/30";
+              // Stylizacja checkboxa i kontenera z uwzględnieniem pokazywania poprawnej odpowiedzi
+              let containerClass = isSelected ? "border-primary bg-primary/10" : "border-border hover:border-primary/50 bg-background hover:shadow-md hover:shadow-primary/30";
 
-            // Jeśli wynik jest pokazany — pokaż poprawne/niepoprawne
-            if (showResult) {
-              if (isCorrectOption) {
-                containerClass = "border-accent bg-accent/10 text-accent font-semibold";
-              } else if (isSelected && !isCorrectOption) {
-                containerClass = "border-destructive bg-destructive/10 text-destructive font-semibold";
-              } else {
-                containerClass = "border-border bg-background/50 text-muted-foreground opacity-70";
+              // Jeśli wynik jest pokazany — pokaż poprawne/niepoprawne
+              if (showResult) {
+                if (isCorrectOption) {
+                  containerClass = "border-accent bg-accent/10 text-accent font-semibold";
+                } else if (isSelected && !isCorrectOption) {
+                  containerClass = "border-destructive bg-destructive/10 text-destructive font-semibold";
+                } else {
+                  containerClass = "border-border bg-background/50 text-muted-foreground opacity-70";
+                }
               }
-            }
 
-            return (
-              <div
-                key={a.id}
-                className={`flex items-center gap-3 p-4 border-2 rounded-xl arcade-button transition-all cursor-pointer h-auto whitespace-normal ${showResult ? "pointer-events-none" : ""} ${containerClass}`}
-                onClick={() => {
-                  if (showResult) return;
-                  const arr = val || [];
-                  updateAnswer(isSelected ? arr.filter((x: string) => x !== a.id) : [...arr, a.id]);
-                }}
-              >
-                <Checkbox
-                  checked={isSelected}
-                  onCheckedChange={() => {}}
-                  className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground border-primary"
-                />
-                <span className="text-xs">{a.text}</span>
+              return (
+                  <div
+                      key={a.id}
+                      className={`flex items-center gap-3 p-4 border-2 rounded-xl arcade-button transition-all cursor-pointer h-auto whitespace-normal ${showResult ? "pointer-events-none" : ""} ${containerClass}`}
+                      onClick={() => {
+                        if (showResult) return;
+                        const arr = val || [];
+                        updateAnswer(isSelected ? arr.filter((x: string) => x !== a.id) : [...arr, a.id]);
+                      }}
+                  >
+                    <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => {}}
+                        className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground border-primary"
+                    />
+                    <span className="text-xs">{a.text}</span>
 
-                {/* Ikony: pokaż check dla poprawnych i X dla błędnych wybranych */}
-                {showResult && isCorrectOption && <CheckCircle2 className="w-5 h-5 ml-auto text-accent" />}
-                {showResult && isSelected && !isCorrectOption && <XCircle className="w-5 h-5 ml-auto text-destructive" />}
-              </div>
-            );
-          })}
+                    {/* Ikony: pokaż check dla poprawnych i X dla błędnych wybranych */}
+                    {showResult && isCorrectOption && <CheckCircle2 className="w-5 h-5 ml-auto text-accent" />}
+                    {showResult && isSelected && !isCorrectOption && <XCircle className="w-5 h-5 ml-auto text-destructive" />}
+                  </div>
+              );
+            })}
 
-          {/* Jeśli odpowiedź niepoprawna, wyświetl krótki podpowiedź-show poprawne elementy (tekstowe) */}
-          {showResult && feedback && !feedback.ok && (
-            <div className="p-3 mt-2 border-2 border-secondary/40 bg-secondary/10 rounded text-xs">
-              <strong>Poprawne odpowiedzi:</strong>
-              <div className="mt-1 ml-3">
-                {(q.correct || []).map((id: string) => {
-                  const ans = q.answers.find((x: any) => x.id === id);
-                  return (
-                    <div key={id}>• {ans?.text}</div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
+            {/* Jeśli odpowiedź niepoprawna, wyświetl krótki podpowiedź-show poprawne elementy (tekstowe) */}
+            {showResult && feedback && !feedback.ok && (
+                <div className="p-3 mt-2 border-2 border-secondary/40 bg-secondary/10 rounded text-xs">
+                  <strong>Poprawne odpowiedzi:</strong>
+                  <div className="mt-1 ml-3">
+                    {(q.correct || []).map((id: string) => {
+                      const ans = q.answers.find((x: any) => x.id === id);
+                      return (
+                          <div key={id}>• {ans?.text}</div>
+                      );
+                    })}
+                  </div>
+                </div>
+            )}
+          </div>
       );
     }
 
     if (q.type === "short") {
       return (
-        <div className="space-y-2">
-          <Input
-            placeholder="Wpisz odpowiedź..."
-            value={val || ""}
-            onChange={(e) => updateAnswer(e.target.value)}
-            disabled={showResult}
-            className="border-2 border-primary/50 focus-visible:ring-0 focus-visible:border-primary text-lg p-6 rounded-xl"
-          />
+          <div className="space-y-2">
+            <Input
+                placeholder="Wpisz odpowiedź..."
+                value={val || ""}
+                onChange={(e) => updateAnswer(e.target.value)}
+                disabled={showResult}
+                className="border-2 border-primary/50 focus-visible:ring-0 focus-visible:border-primary text-lg p-6 rounded-xl"
+            />
 
-          {/* Po pokazaniu wyniku i gdy odpowiedź była niepoprawna, pokaż poprawną odpowiedź (lub kilka wariantów) */}
-          {showResult && feedback && !feedback.ok && (
-            <div className="p-3 mt-2 border-2 border-secondary/40 bg-secondary/10 rounded text-xs">
-              <div className="font-bold mb-1">Poprawna odpowiedź:</div>
-              <div className="ml-2">
-                <div>{(q as any).correctText}</div>
-                {((q as any).acceptable || []).length > 0 && (
-                  <div className="text-muted-foreground text-[13px] mt-1">Akceptowane alternatywy: {((q as any).acceptable || []).join(", ")}</div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+            {/* Po pokazaniu wyniku i gdy odpowiedź była niepoprawna, pokaż poprawną odpowiedź (lub kilka wariantów) */}
+            {showResult && feedback && !feedback.ok && (
+                <div className="p-3 mt-2 border-2 border-secondary/40 bg-secondary/10 rounded text-xs">
+                  <div className="font-bold mb-1">Poprawna odpowiedź:</div>
+                  <div className="ml-2">
+                    <div>{(q as any).correctText}</div>
+                    {((q as any).acceptable || []).length > 0 && (
+                        <div className="text-muted-foreground text-[13px] mt-1">Akceptowane alternatywy: {((q as any).acceptable || []).join(", ")}</div>
+                    )}
+                  </div>
+                </div>
+            )}
+          </div>
       );
     }
 
     if (q.type === "combo") {
       return (
-        <div className="space-y-4">
-          {/* Input – osobny stan */}
-          <div className="space-y-1">
-            <label className="text-xs text-muted-foreground font-bold uppercase">Wartość zwrotna:</label>
-            <Input
-              placeholder="Wpisz wynik (np. 10)..."
-              value={answers[q.id + "_text"] || ""}
-              onChange={(e) => setAnswers((a) => ({ ...a, [q.id + "_text"]: e.target.value }))}
-              disabled={showResult}
-              className="border-2 border-primary/50 p-6 rounded-xl whitespace-normal"
-            />
-          </div>
-          {/* Przyciski – osobny stan */}
-          <div className="space-y-1">
-            <label className="text-xs text-muted-foreground font-bold uppercase">Opis działania:</label>
-            <div className="grid grid-cols-1 gap-2">
-              {q.answers.map((a) => {
-                const isChosen = answers[q.id] === a.id;
-                const isCorrect = !!a.correct;
-
-                let btnClass = "p-4 border rounded-xl h-auto whitespace-normal text-left text-sm transition-all arcade-button hover:shadow-md hover:shadow-primary/30";
-                if (showResult) {
-                  if (isCorrect) btnClass += " bg-accent/10 border-accent text-accent font-semibold";
-                  else if (isChosen && !isCorrect) btnClass += " bg-destructive/10 border-destructive text-destructive font-semibold";
-                  else btnClass += " bg-background/50 text-muted-foreground";
-                } else {
-                  btnClass += isChosen ? " bg-primary/20 border-primary text-primary font-bold" : " bg-background border-border hover:border-primary";
-                }
-
-                return (
-                  <button
-                    key={a.id}
-                    onClick={() => updateAnswer(a.id)}
-                    disabled={showResult}
-                    className={btnClass}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>{a.text}</span>
-                      {showResult && isCorrect && <CheckCircle2 className="w-5 h-5 ml-2 text-accent" />}
-                      {showResult && isChosen && !isCorrect && <XCircle className="w-5 h-5 ml-2 text-destructive" />}
-                    </div>
-                  </button>
-                );
-              })}
+          <div className="space-y-4">
+            {/* Input – osobny stan */}
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground font-bold uppercase">Wartość zwrotna:</label>
+              <Input
+                  placeholder="Wpisz wynik (np. 10)..."
+                  value={answers[q.id + "_text"] || ""}
+                  onChange={(e) => setAnswers((a) => ({ ...a, [q.id + "_text"]: e.target.value }))}
+                  disabled={showResult}
+                  className="border-2 border-primary/50 p-6 rounded-xl whitespace-normal"
+              />
             </div>
-          </div>
+            {/* Przyciski – osobny stan */}
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground font-bold uppercase">Opis działania:</label>
+              <div className="grid grid-cols-1 gap-2">
+                {q.answers.map((a) => {
+                  const isChosen = answers[q.id] === a.id;
+                  const isCorrect = !!a.correct;
 
-          {/* Jeśli niepoprawne, pokaż co było oczekiwane */}
-          {showResult && feedback && !feedback.ok && (
-            <div className="p-3 mt-2 border-2 border-secondary/40 bg-secondary/10 rounded text-xs">
-              <div className="font-bold mb-1">Poprawne rozwiązanie:</div>
-              <div className="ml-2">
-                <div>Wartość zwrotna: <strong>{(q as any).correctText}</strong></div>
-                <div className="mt-1">Opis działania: <strong>{q.answers.find((a: any) => a.correct)?.text}</strong></div>
-                {((q as any).acceptable || []).length > 0 && (
-                  <div className="text-muted-foreground text-[13px] mt-1">Akceptowane alternatywy wartości: {((q as any).acceptable || []).join(", ")}</div>
-                )}
+                  let btnClass = "p-4 border rounded-xl h-auto whitespace-normal text-left text-sm transition-all arcade-button hover:shadow-md hover:shadow-primary/30";
+                  if (showResult) {
+                    if (isCorrect) btnClass += " bg-accent/10 border-accent text-accent font-semibold";
+                    else if (isChosen && !isCorrect) btnClass += " bg-destructive/10 border-destructive text-destructive font-semibold";
+                    else btnClass += " bg-background/50 text-muted-foreground";
+                  } else {
+                    btnClass += isChosen ? " bg-primary/20 border-primary text-primary font-bold" : " bg-background border-border hover:border-primary";
+                  }
+
+                  return (
+                      <button
+                          key={a.id}
+                          onClick={() => updateAnswer(a.id)}
+                          disabled={showResult}
+                          className={btnClass}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span>{a.text}</span>
+                          {showResult && isCorrect && <CheckCircle2 className="w-5 h-5 ml-2 text-accent" />}
+                          {showResult && isChosen && !isCorrect && <XCircle className="w-5 h-5 ml-2 text-destructive" />}
+                        </div>
+                      </button>
+                  );
+                })}
               </div>
             </div>
-          )}
-        </div>
+
+            {/* Jeśli niepoprawne, pokaż co było oczekiwane */}
+            {showResult && feedback && !feedback.ok && (
+                <div className="p-3 mt-2 border-2 border-secondary/40 bg-secondary/10 rounded text-xs">
+                  <div className="font-bold mb-1">Poprawne rozwiązanie:</div>
+                  <div className="ml-2">
+                    <div>Wartość zwrotna: <strong>{(q as any).correctText}</strong></div>
+                    <div className="mt-1">Opis działania: <strong>{q.answers.find((a: any) => a.correct)?.text}</strong></div>
+                    {((q as any).acceptable || []).length > 0 && (
+                        <div className="text-muted-foreground text-[13px] mt-1">Akceptowane alternatywy wartości: {((q as any).acceptable || []).join(", ")}</div>
+                    )}
+                  </div>
+                </div>
+            )}
+          </div>
       );
     }
 
@@ -886,79 +911,79 @@ export default function ProgrammerGame() {
   }
 
   return (
-    <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
-      {view === "quiz" && (
-        <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground">
-          <div className="text-center mb-6">
-            <Code className="w-12 h-12 text-primary mx-auto mb-2 animate-pixel-float" />
-            <h2 className="text-xl font-bold tracking-tight">ETAP 1: QUIZ PROGRAMISTYCZNY</h2>
-            <p className="text-lg font-bold text-primary">Punkty: {totalScore}</p>
-            <p className="text-xs text-muted-foreground">Pytanie {qIndex + 1}/{quizQuestions.length}. Poprawna odpowiedź: 10 PKT.</p>
-          </div>
-
-          <div className="space-y-4">
-            {q.code && (
-              <div className="bg-slate-950 text-slate-100 p-4 rounded-md border-2 border-slate-800 overflow-x-auto text-sm font-mono shadow-inner">
-                <pre>{q.code}</pre>
+      <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
+        {view === "quiz" && (
+            <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground">
+              <div className="text-center mb-6">
+                <Code className="w-12 h-12 text-primary mx-auto mb-2 animate-pixel-float" />
+                <h2 className="text-xl font-bold tracking-tight">ETAP 1: QUIZ PROGRAMISTYCZNY</h2>
+                <p className="text-lg font-bold text-primary">Punkty: {totalScore}</p>
+                <p className="text-xs text-muted-foreground">Pytanie {qIndex + 1}/{quizQuestions.length}. Poprawna odpowiedź: 10 PKT.</p>
               </div>
-            )}
 
-            <p className="font-semibold text-lg">{q.questionText}</p>
+              <div className="space-y-4">
+                {q.code && (
+                    <div className="bg-slate-950 text-slate-100 p-4 rounded-md border-2 border-slate-800 overflow-x-auto text-sm font-mono shadow-inner">
+                      <pre>{q.code}</pre>
+                    </div>
+                )}
 
-            {renderQuestionInputs()}
-          </div>
+                <p className="font-semibold text-lg">{q.questionText}</p>
 
-          {/* Sekcja Podpowiedzi */}
-          <div className="space-y-3 pt-4 border-t border-border/50">
-            {hintLevel < (q.hints || []).length && !showResult && (
-              <Button
-                onClick={() => {
-                  setHintLevel((h) => h + 1);
-                  setTotalScore((s) => s - 2); // Koszt podpowiedzi
-                }}
-                variant="outline"
-                size="sm"
-                className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal"
-              >
-                💡 POKAŻ PODPOWIEDŹ ({hintLevel + 1}/{(q.hints || []).length}) (KOSZT: 2 PKT)
-              </Button>
-            )}
-
-            {hintLevel > 0 && !showResult && (
-              <div className="space-y-2 animate-slide-in-up">
-                {(q.hints || []).slice(0, hintLevel).map((h, i) => (
-                  <div key={i} className="p-3 border-2 border-secondary bg-secondary/10 text-secondary text-xs rounded">
-                    <span className="font-bold">Podpowiedź {i + 1}:</span> {h}
-                  </div>
-                ))}
+                {renderQuestionInputs()}
               </div>
-            )}
-          </div>
 
-          {/* Result Block */}
-          {showResult && feedback && (
-            <div className="space-y-4 animate-slide-in-up">
-              <div
-                className={`p-4 border-4 text-center ${feedback.ok ? "border-accent bg-accent/20 text-accent" : "border-destructive bg-destructive/20 text-destructive"}`}
-              >
-                {feedback.ok ? (
-                  <>
-                    <CheckCircle2 className="w-8 h-8 mx-auto mb-2" />
-                    <h3 className="text-lg font-bold">{feedback.msg}</h3>
-                  </>
-                ) : (
-                  <>
-                    <XCircle className="w-8 h-8 mx-auto mb-2" />
-                    <h3 className="text-lg font-bold">{feedback.msg}</h3>
-                    {feedback.explanation && <p className="text-xs mt-1">{feedback.explanation}</p>}
-                  </>
+              {/* Sekcja Podpowiedzi */}
+              <div className="space-y-3 pt-4 border-t border-border/50">
+                {hintLevel < (q.hints || []).length && !showResult && (
+                    <Button
+                        onClick={() => {
+                          setHintLevel((h) => h + 1);
+                          setTotalScore((s) => s - 2); // Koszt podpowiedzi
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-2 border-secondary text-secondary hover:bg-secondary/20 hover:text-white arcade-button h-auto py-3 whitespace-normal"
+                    >
+                      💡 POKAŻ PODPOWIEDŹ ({hintLevel + 1}/{(q.hints || []).length}) (KOSZT: 2 PKT)
+                    </Button>
+                )}
+
+                {hintLevel > 0 && !showResult && (
+                    <div className="space-y-2 animate-slide-in-up">
+                      {(q.hints || []).slice(0, hintLevel).map((h, i) => (
+                          <div key={i} className="p-3 border-2 border-secondary bg-secondary/10 text-secondary text-xs rounded">
+                            <span className="font-bold">Podpowiedź {i + 1}:</span> {h}
+                          </div>
+                      ))}
+                    </div>
                 )}
               </div>
 
-              <Button
-                onClick={() => setShowUsefulness(!showUsefulness)}
-                variant="outline"
-                className={`
+              {/* Result Block */}
+              {showResult && feedback && (
+                  <div className="space-y-4 animate-slide-in-up">
+                    <div
+                        className={`p-4 border-4 text-center ${feedback.ok ? "border-accent bg-accent/20 text-accent" : "border-destructive bg-destructive/20 text-destructive"}`}
+                    >
+                      {feedback.ok ? (
+                          <>
+                            <CheckCircle2 className="w-8 h-8 mx-auto mb-2" />
+                            <h3 className="text-lg font-bold">{feedback.msg}</h3>
+                          </>
+                      ) : (
+                          <>
+                            <XCircle className="w-8 h-8 mx-auto mb-2" />
+                            <h3 className="text-lg font-bold">{feedback.msg}</h3>
+                            {feedback.explanation && <p className="text-xs mt-1">{feedback.explanation}</p>}
+                          </>
+                      )}
+                    </div>
+
+                    <Button
+                        onClick={() => setShowUsefulness(!showUsefulness)}
+                        variant="outline"
+                        className={`
                   w-full
                   h-auto
                   min-h-[3.5rem]
@@ -973,118 +998,161 @@ export default function ProgrammerGame() {
                   whitespace-normal break-words
                   flex items-center
                 `}
-              >
-                <Lightbulb className="w-4 h-4 mr-2 shrink-0" />
-                DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
-              </Button>
+                    >
+                      <Lightbulb className="w-4 h-4 mr-2 shrink-0" />
+                      DO CZEGO PRZYDA MI SIĘ TA WIEDZA?
+                    </Button>
 
 
-              {showUsefulness && (
-                <div className="p-4 border-2 border-primary/50 bg-primary/10 text-primary-foreground animate-slide-in-up rounded">
-                  <ul className="text-xs list-disc ml-5 space-y-1">
-                    {q.usefulness?.map((u, i) => (
-                      <li key={i}>{u}</li>
-                    ))}
-                  </ul>
-                </div>
+                    {showUsefulness && (
+                        <div className="p-4 border-2 border-primary/50 bg-primary/10 text-primary-foreground animate-slide-in-up rounded">
+                          <ul className="text-xs list-disc ml-5 space-y-1">
+                            {q.usefulness?.map((u, i) => (
+                                <li key={i}>{u}</li>
+                            ))}
+                          </ul>
+                        </div>
+                    )}
+                  </div>
               )}
+
+              {/* Action Buttons */}
+              <div className="pt-2">
+                {/* Przycisk SPRAWDŹ pokazujemy tylko dla typów innych niż 'single', bo 'single' sprawdza się samo */}
+                {!showResult && q.type !== "single" && (
+                    <Button
+                        onClick={check}
+                        className="
+                  w-full
+                  h-auto
+                  min-h-[3.5rem]
+                  px-6 py-4
+                  bg-primary text-primary-foreground
+                  hover:bg-primary/90
+                  arcade-button
+                  text-sm sm:text-base
+                  tracking-wider
+                  font-bold
+                  leading-relaxed
+                  shadow-lg shadow-primary/20
+                  whitespace-normal break-words
+                "
+                    >
+                      SPRAWDŹ ODPOWIEDŹ
+                    </Button>
+                )}
+
+                {showResult && (
+                    <Button
+                        onClick={handleNextQuestion}
+                        className="
+                  w-full
+                  h-auto
+                  min-h-[3.5rem]
+                  px-6 py-4
+                  bg-primary text-primary-foreground
+                  hover:bg-primary/90
+                  arcade-button
+                  text-sm sm:text-base
+                  tracking-wider
+                  font-bold
+                  leading-relaxed
+                  shadow-lg shadow-primary/20
+                  whitespace-normal break-words
+                "
+                    >
+                      {qIndex < quizQuestions.length - 1
+                          ? "NASTĘPNE PYTANIE"
+                          : "PRZEJDŹ DO ETAPU 2"}
+                    </Button>
+
+                )}
+              </div>
+            </Card>
+        )}
+
+        {view === "minigame" && (
+            <div className="flex flex-col items-center w-full">
+              <div className="mb-4 text-center bg-card p-4 rounded border-2 border-border shadow-md w-full max-w-4xl">
+                <p className="text-lg font-bold text-primary">Twój Wynik: {totalScore} PKT</p>
+              </div>
+              <MiniGame onFinish={() => setView("finished")} addScore={(points) => setTotalScore((s) => s + points)} />
             </div>
-          )}
+        )}
 
-          {/* Action Buttons */}
-          <div className="pt-2">
-            {/* Przycisk SPRAWDŹ pokazujemy tylko dla typów innych niż 'single', bo 'single' sprawdza się samo */}
-            {!showResult && q.type !== "single" && (
+        {view === "finished" && (
+            <Card className="p-8 max-w-5xl w-full text-center space-y-6 border-4 shadow-2xl animate-fade-in bg-card text-card-foreground mx-auto">
+              <div className="relative inline-block">
+                <Trophy className="w-20 h-20 text-yellow-500 mx-auto mb-4 animate-bounce drop-shadow-md" />
+              </div>
+
+              <div className="space-y-2">
+                <h1 className="text-3xl font-black text-foreground tracking-tight uppercase">Świetna robota!</h1>
+                <p className="text-muted-foreground uppercase tracking-widest text-sm">Ukończono ścieżkę Programisty</p>
+              </div>
+
+              <div className="bg-primary/10 border-2 border-primary/30 rounded-xl p-6 relative overflow-hidden">
+                <span className="relative z-10 text-xs text-muted-foreground font-bold uppercase">Twój Wynik Końcowy</span>
+                <div className="relative z-10 text-6xl font-black text-primary mt-2 drop-shadow-sm">{totalScore} <span className="text-2xl font-medium text-foreground/60">PKT</span></div>
+              </div>
+
+              <div className="bg-muted/50 p-4 rounded-lg text-sm border border-border/50 italic text-muted-foreground">
+                {totalScore > (quizQuestions.length * 10 + 20)
+                    ? "Masz zadatki na seniora! Kod i logika nie mają przed Tobą tajemnic."
+                    : "Dobre podstawy! Programowanie wymaga praktyki, więc nie poddawaj się."}
+              </div>
+
+              {/* Nowy blok: Dlaczego warto być programistą */}
+              <div className="grid grid-cols-1 gap-6 w-full">
+                <div className="text-left">
+                  <h4 className="text-[11px] font-black uppercase text-muted-foreground mb-2 tracking-[0.15em]">Dlaczego warto zostać programistą?</h4>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+                  <div className="space-y-3">
+                    {reasons.map((r, i) => (
+                        <button
+                            key={i}
+                            onClick={() => setSummaryIndex(i)}
+                            className={`w-full flex items-center gap-4 p-3 rounded-xl border-2 transition-all text-left arcade-button ${
+                                summaryIndex === i ? "border-primary bg-primary/10 shadow-md shadow-primary/20" : "border-border hover:border-primary/50 hover:bg-muted/50"
+                            }`}
+                        >
+                          <r.icon className={`w-6 h-6 ${summaryIndex === i ? "text-primary" : "text-muted-foreground"}`} />
+                          <span className="text-sm font-bold uppercase tracking-tight break-words">{r.title}</span>
+                        </button>
+                    ))}
+                  </div>
+
+                  <div className="bg-background/50 rounded-2xl border-2 border-border p-6 md:p-8 min-h-[160px] flex flex-col justify-center shadow-inner relative animate-fade-in text-center">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                          key={summaryIndex}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          className="space-y-4 max-w-prose w-full mx-auto px-2 text-center"
+                      >
+                        <h4 className="text-xl font-black uppercase text-primary italic underline decoration-primary/30 underline-offset-8 text-center break-words">
+                          {reasons[summaryIndex].title}
+                        </h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed font-medium break-words">
+                          {reasons[summaryIndex].text}
+                        </p>
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </div>
+
               <Button
-                onClick={check}
-                className="
-                  w-full
-                  h-auto
-                  min-h-[3.5rem]
-                  px-6 py-4
-                  bg-primary text-primary-foreground
-                  hover:bg-primary/90
-                  arcade-button
-                  text-sm sm:text-base
-                  tracking-wider
-                  font-bold
-                  leading-relaxed
-                  shadow-lg shadow-primary/20
-                  whitespace-normal break-words
-                "
+                  className="w-full h-12 text-lg font-bold arcade-button"
+                  onClick={() => window.location.assign("/")}
               >
-                SPRAWDŹ ODPOWIEDŹ
+                WRÓĆ DO MENU
               </Button>
-            )}
-
-            {showResult && (
-              <Button
-                onClick={handleNextQuestion}
-                className="
-                  w-full
-                  h-auto
-                  min-h-[3.5rem]
-                  px-6 py-4
-                  bg-primary text-primary-foreground
-                  hover:bg-primary/90
-                  arcade-button
-                  text-sm sm:text-base
-                  tracking-wider
-                  font-bold
-                  leading-relaxed
-                  shadow-lg shadow-primary/20
-                  whitespace-normal break-words
-                "
-              >
-                {qIndex < quizQuestions.length - 1
-                  ? "NASTĘPNE PYTANIE"
-                  : "PRZEJDŹ DO ETAPU 2"}
-              </Button>
-
-            )}
-          </div>
-        </Card>
-      )}
-
-      {view === "minigame" && (
-        <div className="flex flex-col items-center w-full">
-          <div className="mb-4 text-center bg-card p-4 rounded border-2 border-border shadow-md w-full max-w-4xl">
-            <p className="text-lg font-bold text-primary">Twój Wynik: {totalScore} PKT</p>
-          </div>
-          <MiniGame onFinish={() => setView("finished")} addScore={(points) => setTotalScore((s) => s + points)} />
-        </div>
-      )}
-
-      {view === "finished" && (
-        <Card className="p-8 max-w-xl w-full text-center space-y-6 border-4 shadow-2xl animate-fade-in bg-card text-card-foreground mx-auto">
-          <div className="relative inline-block">
-            <Trophy className="w-20 h-20 text-yellow-500 mx-auto mb-4 animate-bounce drop-shadow-md" />
-          </div>
-
-          <div className="space-y-2">
-            <h1 className="text-3xl font-black text-foreground tracking-tight uppercase">Świetna robota!</h1>
-            <p className="text-muted-foreground uppercase tracking-widest text-sm">Ukończono ścieżkę Programisty</p>
-          </div>
-
-          <div className="bg-primary/10 border-2 border-primary/30 rounded-xl p-6 relative overflow-hidden">
-            <span className="relative z-10 text-xs text-muted-foreground font-bold uppercase">Twój Wynik Końcowy</span>
-            <div className="relative z-10 text-6xl font-black text-primary mt-2 drop-shadow-sm">{totalScore} <span className="text-2xl font-medium text-foreground/60">PKT</span></div>
-          </div>
-
-          <div className="bg-muted/50 p-4 rounded-lg text-sm border border-border/50 italic text-muted-foreground">
-            {totalScore > (quizQuestions.length * 10 + 20)
-              ? "Masz zadatki na seniora! Kod i logika nie mają przed Tobą tajemnic."
-              : "Dobre podstawy! Programowanie wymaga praktyki, więc nie poddawaj się."}
-          </div>
-
-          <Button
-            className="w-full h-12 text-lg font-bold arcade-button"
-            onClick={() => window.location.assign("/")}
-          >
-            WRÓĆ DO MENU
-          </Button>
-        </Card>
-      )}
-    </div>
+            </Card>
+        )}
+      </div>
   );
 }

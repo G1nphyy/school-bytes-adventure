@@ -8,6 +8,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Cpu, CheckCircle2, XCircle, Lightbulb, Trophy, Battery, Zap, Microchip, Wrench } from "lucide-react";
 
+
+import { DndProvider, useDrag, useDrop } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { TouchBackend } from "react-dnd-touch-backend";
+import { MultiBackend, MouseTransition, TouchTransition } from "react-dnd-multi-backend";
+
+
 /* ----------------- dane quizowe (7 pytań) ----------------- */
 // Obsługuje trzy typy zadań:
 // - 'single': wybór jednej poprawnej odpowiedzi
@@ -141,6 +148,110 @@ const ITEMS = {
 };
 const RANGES = ["OFF", "V DC", "Ω", "A DC"];
 
+
+const DnDItemTypes = {
+  WIRE: "wire",
+  ITEM: "item",
+} as const;
+
+// ---------- DRAGGABLE: PRZEWÓD ----------
+function WireDraggable({
+                         color, // 'black' | 'red'
+                         children,
+                       }: { color: 'black' | 'red'; children: React.ReactNode }) {
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: DnDItemTypes.WIRE,
+    item: { color },
+    collect: (monitor) => ({ isDragging: monitor.isDragging() }),
+  }), [color]);
+
+  return (
+      <div ref={drag} style={{ opacity: isDragging ? 0.5 : 1 }} className="select-none">
+        {children}
+      </div>
+  );
+}
+
+// ---------- DROP: PORT MIERNIKA ----------
+function PortDrop({
+                    portId,               // 'COM' | 'VΩmA' | '10A'
+                    hasWire,              // string | null
+                    colorClass,           // np. "bg-zinc-800"
+                    onDropWire,
+                    children,
+                  }: {
+  portId: 'COM' | 'VΩmA' | '10A';
+  hasWire: string | null;
+  colorClass: string;
+  onDropWire: (wireColor: 'black' | 'red', portId: string) => void;
+  children: React.ReactNode;
+}) {
+  const [{ isOver }, drop] = useDrop(() => ({
+    accept: DnDItemTypes.WIRE,
+    drop: (item: { color: 'black' | 'red' }) => onDropWire(item.color, portId),
+    collect: (monitor) => ({ isOver: monitor.isOver() }),
+  }), [portId, onDropWire]);
+
+  return (
+      <div
+          ref={drop}
+          className={`group relative h-20 flex flex-col items-center justify-center rounded-xl border-2 transition-all mx-auto w-full max-w-[220px] ${hasWire ? "border-primary bg-primary/10 shadow-[0_0_10px_rgba(var(--primary),0.2)]" : "border-dashed border-slate-700 hover:border-primary/50"} ${colorClass} ${isOver ? "ring-2 ring-primary/50" : ""}`}
+      >
+        {children}
+      </div>
+  );
+}
+
+// ---------- DRAGGABLE: ELEMENT (bateria/rezystor/stabilizator) ----------
+function ItemDraggable({
+                         itemKey, disabled, children,
+                       }: {
+  itemKey: keyof typeof ITEMS;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) {
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: DnDItemTypes.ITEM,
+    canDrag: !disabled,
+    item: { itemKey },
+    collect: (monitor) => ({ isDragging: monitor.isDragging() }),
+  }), [itemKey, disabled]);
+
+  return (
+      <div ref={drag} style={{ opacity: isDragging ? 0.6 : 1 }} className="select-none">
+        {children}
+      </div>
+  );
+}
+
+// ---------- DROP: „Miejsce na komponent” ----------
+function DeskDrop({
+                    onPlaceItem,
+                    itemOnDesk,
+                    children,
+                  }: {
+  onPlaceItem: (key: keyof typeof ITEMS) => void;
+  itemOnDesk: string | null;
+  children: React.ReactNode;
+}) {
+  const [{ isOver }, drop] = useDrop(() => ({
+    accept: DnDItemTypes.ITEM,
+    drop: (item: { itemKey: keyof typeof ITEMS }) => onPlaceItem(item.itemKey),
+    collect: (monitor) => ({ isOver: monitor.isOver() }),
+  }), [onPlaceItem]);
+
+  return (
+      <div
+          ref={drop}
+          className={`h-32 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center ${itemOnDesk ? "border-primary bg-primary/5 shadow-inner" : "border-slate-300 bg-slate-50/50 hover:bg-slate-50"} ${isOver ? "ring-2 ring-primary/50" : ""}`}
+      >
+        {children}
+      </div>
+  );
+}
+
+
+
 function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addScore: (points: number) => void }) {
   const [blackWire, setBlackWire] = useState<string | null>(null);
   const [redWire, setRedWire] = useState<string | null>(null);
@@ -185,6 +296,17 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
       setTimeout(() => onFinish(), 2500);
     }
   };
+
+  // DND FUNCTIONS
+  const placeItemOnDesk = (key: keyof typeof ITEMS) => {
+    if (key && !done.includes(key)) setItemOnDesk(key);
+  };
+
+  const handleWireDrop = (wire: 'black' | 'red', portId: string) => {
+    if (wire === 'black' && portId === 'COM') setBlackWire('COM');
+    if (wire === 'red') setRedWire(portId);
+  };
+
 
   return (
     <Card className="p-6 border-4 space-y-6 max-w-5xl w-full mx-auto bg-card text-card-foreground">
@@ -240,24 +362,21 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
                 { id: "VΩmA", label: "VΩmA", color: "bg-red-900/20", wire: redWire === "VΩmA" ? "red" : null, expected: "red" },
                 { id: "10A", label: "10A", color: "bg-red-900/20", wire: redWire === "10A" ? "red" : null, expected: "red" }
               ].map((port) => (
-                <div
-                  key={port.id}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    const wire = e.dataTransfer.getData("wire");
-                    if (wire === "black" && port.id === "COM") setBlackWire("COM");
-                    if (wire === "red") setRedWire(port.id);
-                  }}
-                  className={`group relative h-20 flex flex-col items-center justify-center rounded-xl border-2 transition-all mx-auto w-full max-w-[220px] ${port.wire ? "border-primary bg-primary/10 shadow-[0_0_10px_rgba(var(--primary),0.2)]" : "border-dashed border-slate-700 hover:border-primary/50"} ${port.color}`}
-                >
-                  <span className="text-[10px] font-bold mb-1 text-slate-400">{port.label}</span>
-                  <div className={`w-8 h-8 rounded-full border-4 flex items-center justify-center transition-transform ${port.wire ? "scale-110 border-primary bg-slate-900" : "border-slate-800 bg-black"}`}>
-                    {port.wire && (
-                      <div className={`w-3 h-3 rounded-full shadow-inner ${port.wire === "black" ? "bg-zinc-400" : "bg-red-500"}`} />
-                    )}
-                  </div>
-                </div>
+
+                  <PortDrop
+                      key={port.id}
+                      portId={port.id as 'COM'|'VΩmA'|'10A'}
+                      hasWire={port.wire as any}
+                      colorClass={port.color}
+                      onDropWire={handleWireDrop}
+                  >
+                    <span className="text-[10px] font-bold mb-1 text-slate-400">{port.label}</span>
+                    <div className={`w-8 h-8 rounded-full border-4 flex items-center justify-center transition-transform ${port.wire ? "scale-110 border-primary bg-slate-900" : "border-slate-800 bg-black"}`}>
+                      {port.wire && (
+                          <div className={`w-3 h-3 rounded-full shadow-inner ${port.wire === "black" ? "bg-zinc-400" : "bg-red-500"}`} />
+                      )}
+                    </div>
+                  </PortDrop>
               ))}
             </div>
           </div>
@@ -269,25 +388,24 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <div
-                draggable
-                onDragStart={(e) => e.dataTransfer.setData("wire", "black")}
-                className="w-full sm:flex-1 cursor-grab active:cursor-grabbing group"
-              >
-                <div className="bg-zinc-900 text-white p-3 rounded-xl border-2 border-zinc-700 group-hover:border-zinc-500 transition-all text-center font-bold text-sm shadow-md">
-                  Czarny (COM)
-                </div>
-              </div>
 
-              <div
-                draggable
-                onDragStart={(e) => e.dataTransfer.setData("wire", "red")}
-                className="w-full sm:flex-1 cursor-grab active:cursor-grabbing group"
-              >
-                <div className="bg-red-600 text-white p-3 rounded-xl border-2 border-red-500 group-hover:border-red-400 transition-all text-center font-bold text-sm shadow-md">
-                  Czerwony (+)
+              <WireDraggable color="black">
+                <div className="w-full sm:flex-1 cursor-grab active:cursor-grabbing group">
+                  <div className="bg-zinc-900 text-white p-3 rounded-xl border-2 border-zinc-700 group-hover:border-zinc-500 transition-all text-center font-bold text-sm shadow-md">
+                    Czarny (COM)
+                  </div>
                 </div>
-              </div>
+              </WireDraggable>
+
+
+
+              <WireDraggable color="red">
+                <div className="w-full sm:flex-1 cursor-grab active:cursor-grabbing group">
+                  <div className="bg-red-600 text-white p-3 rounded-xl border-2 border-red-500 group-hover:border-red-400 transition-all text-center font-bold text-sm shadow-md">
+                    Czerwony (+)
+                  </div>
+                </div>
+              </WireDraggable>
             </div>
           </div>
 
@@ -300,43 +418,39 @@ function MultimeterWorkshop({ onFinish, addScore }: { onFinish: () => void; addS
             {/* komponenty: responsywnie 1/2/3 kolumny i elementy centered */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-6 justify-center">
               {Object.entries(ITEMS).map(([key, val]) => (
-                <div
-                  key={key}
-                  draggable={!done.includes(key)}
-                  onDragStart={(e) => e.dataTransfer.setData("item", key)}
-                  className={`group cursor-grab p-2 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center min-h-[100px] mx-auto w-full max-w-[180px] ${done.includes(key) ? "opacity-40 grayscale bg-slate-100 border-slate-200" : "bg-card border-primary/20 hover:border-primary hover:shadow-lg hover:shadow-primary/10"}`}
-                >
-                  <val.icon className={`w-8 h-8 mx-auto mb-1 flex-shrink-0 ${done.includes(key) ? "text-slate-400" : "text-primary"}`} />
-                  <div className="text-[10px] font-bold leading-snug whitespace-normal break-words overflow-hidden text-center">
-                    {val.name}
-                  </div>
-                </div>
+
+                  <ItemDraggable itemKey={key as keyof typeof ITEMS} disabled={done.includes(key)}>
+                    <div
+                        key={key}
+                        className={`group cursor-grab p-2 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center min-h-[100px] mx-auto w-full max-w-[180px] ${
+                            done.includes(key) ? "opacity-40 grayscale bg-slate-100 border-slate-200" : "bg-card border-primary/20 hover:border-primary hover:shadow-lg hover:shadow-primary/10"
+                        }`}
+                    >
+                      <val.icon className={`w-8 h-8 mx-auto mb-1 flex-shrink-0 ${done.includes(key) ? "text-slate-400" : "text-primary"}`} />
+                      <div className="text-[10px] font-bold leading-snug whitespace-normal break-words overflow-hidden text-center">
+                        {val.name}
+                      </div>
+                    </div>
+                  </ItemDraggable>
               ))}
             </div>
 
-            <div
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault();
-                const item = e.dataTransfer.getData("item");
-                if (item && !done.includes(item)) setItemOnDesk(item);
-              }}
-              className={`h-32 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center ${itemOnDesk ? "border-primary bg-primary/5 shadow-inner" : "border-slate-300 bg-slate-50/50 hover:bg-slate-50"}`}
-            >
+
+            <DeskDrop onPlaceItem={placeItemOnDesk} itemOnDesk={itemOnDesk}>
               {itemOnDesk ? (
-                <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="flex flex-col items-center">
-                  {React.createElement(ITEMS[itemOnDesk as keyof typeof ITEMS].icon, { className: "w-12 h-12 text-primary mb-2" })}
-                  <span className="text-sm font-bold text-primary">{ITEMS[itemOnDesk as keyof typeof ITEMS].name}</span>
-                </motion.div>
+                  <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="flex flex-col items-center">
+                    {React.createElement(ITEMS[itemOnDesk as keyof typeof ITEMS].icon, { className: "w-12 h-12 text-primary mb-2" })}
+                    <span className="text-sm font-bold text-primary">{ITEMS[itemOnDesk as keyof typeof ITEMS].name}</span>
+                  </motion.div>
               ) : (
-                <div className="text-slate-400 flex flex-col items-center">
-                  <div className="w-10 h-10 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center mb-2">
-                    <span className="text-xl">+</span>
+                  <div className="text-slate-400 flex flex-col items-center">
+                    <div className="w-10 h-10 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center mb-2">
+                      <span className="text-xl">+</span>
+                    </div>
+                    <span className="text-[10px] font-medium uppercase tracking-normal">Miejsce na komponent</span>
                   </div>
-                  <span className="text-[10px] font-medium uppercase tracking-normal">Miejsce na komponent</span>
-                </div>
               )}
-            </div>
+            </DeskDrop>
           </div>
         </div>
 
@@ -887,7 +1001,23 @@ export default function ElectronicsGame() {
             <div className="text-center mb-6 bg-card p-4 rounded border-2 shadow-md mx-auto max-w-md">
               <p className="text-lg font-bold text-primary">Wynik z quizu: {quizScore} PKT</p>
             </div>
-            <MultimeterWorkshop onFinish={() => setView("whyWorth")} addScore={(p) => setWorkshopScore(s => s + p)} />
+
+            <DndProvider
+                backend={MultiBackend}
+                options={{
+                  backends: [
+                    { backend: HTML5Backend, preview: true, transition: MouseTransition },
+                    {
+                      backend: TouchBackend,
+                      options: { enableMouseEvents: true, delayTouchStart: 120 }, // lepszy scroll + press-drag
+                      preview: true,
+                      transition: TouchTransition,
+                    },
+                  ],
+                }}
+            >
+              <MultimeterWorkshop onFinish={() => setView("whyWorth")} addScore={(p) => setWorkshopScore(s => s + p)} />
+            </DndProvider>
           </div>
       )}
 

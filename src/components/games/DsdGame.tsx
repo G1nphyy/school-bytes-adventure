@@ -423,7 +423,7 @@ export default function DSDGame() {
     .sort(sortParticipants);
 
   return (
-    <div className="relative w-full min-h-screen bg-slate-950 font-sans text-slate-50">
+    <div className="relative w-full min-h-[80vh] bg-slate-950 font-sans text-slate-50">
 
       {/* TABLICA */}
       <div className="fixed inset-0 bg-gradient-to-b from-gray-200 to-gray-300 p-4 md:p-8 flex flex-col">

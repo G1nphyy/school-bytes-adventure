@@ -16,6 +16,10 @@ import COOLER_IMG from '@/assets/graphics/computer/cooling.png';
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { motion, AnimatePresence } from "framer-motion";
+import { TouchBackend } from 'react-dnd-touch-backend';
+import { MultiBackend, MouseTransition, TouchTransition } from 'react-dnd-multi-backend';
+
+
 
 // -------------------------- TYPY DND I DANE ---------------------------------
 
@@ -450,7 +454,7 @@ const DraggableComponent: React.FC<DraggableComponentProps> = ({ component, curr
                 onRemove(component.id, currentSlot);
               }
             }}
-            className={`absolute inset-0 z-30 cursor-grab active:cursor-grabbing rounded-lg ${
+            className={`absolute inset-0 z-30 cursor-grab active:cursor-grabbing rounded-lg sm:p-0 p-1 ${
                 !currentSlot ? 'hover:border-primary border-2 border-transparent' : ''
             }`}
         />
@@ -1100,7 +1104,24 @@ const InformatykGame = () => {
     const canAttempt = rjAttempts < 3;
 
     return (
-        <DndProvider backend={HTML5Backend}>
+        <DndProvider
+            backend={MultiBackend}
+            options={{
+              backends: [
+                {
+                  backend: HTML5Backend,
+                  preview: true,
+                  transition: MouseTransition,
+                },
+                {
+                  backend: TouchBackend,
+                  options: { enableMouseEvents: true, delayTouchStart: 120 },
+                  transition: TouchTransition,
+                  preview: true,
+                },
+              ],
+            }}
+        >
           <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
             <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto overflow-x-hidden animate-fade-in">
               <div className="mb-6 text-center">
@@ -1339,7 +1360,25 @@ const InformatykGame = () => {
     const availableComponents = assemblyComponents.filter(c => !Object.values(componentSlots).includes(c.id));
 
     return (
-        <DndProvider backend={HTML5Backend}>
+        <DndProvider
+            backend={MultiBackend}
+            options={{
+              backends: [
+                {
+                  backend: HTML5Backend,
+                  preview: true,
+                  transition: MouseTransition,
+                },
+                {
+                  backend: TouchBackend,
+                  // ważne: opóźnienie startu przeciągania (w ms) – pozwala przewijać ekran
+                  options: { enableMouseEvents: true, delayTouchStart: 120 },
+                  transition: TouchTransition,
+                  preview: true,
+                },
+              ],
+            }}
+        >
           <div className="p-6 min-h-[80vh] flex items-center justify-center bg-background/95">
             <Card className="p-6 border-4 space-y-4 max-w-4xl w-full mx-auto shadow-2xl bg-card text-card-foreground overflow-y-auto animate-fade-in">
               <div className="mb-6 text-center">
